@@ -1,0 +1,208 @@
+{
+  "org.springframework.cache.interceptor.CacheAspectSupport#findInCaches(context,cache,key)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "context",
+      "cache",
+      "key"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1046
+    },
+    "return": "Object",
+    "signature": "public Object findInCaches(CacheOperationContext context, Cache cache, Object key)",
+    "source_code": "\t\tpublic Object findInCaches(CacheOperationContext context, Cache cache, Object key) {\n\t\t\tReactiveAdapter adapter = this.registry.getAdapter(context.getMethod().getReturnType());\n\t\t\tif (adapter != null) {\n\t\t\t\tCompletableFuture<?> cachedFuture = cache.retrieve(key);\n\t\t\t\tif (cachedFuture == null) {\n\t\t\t\t\treturn null;\n\t\t\t\t}\n\t\t\t\tif (adapter.isMultiValue()) {\n\t\t\t\t\treturn adapter.fromPublisher(Flux.from(Mono.fromFuture(cachedFuture))\n\t\t\t\t\t\t\t.flatMap(v -> (v instanceof Iterable<?> iv ? Flux.fromIterable(iv) : Flux.just(v))));\n\t\t\t\t}\n\t\t\t\telse {\n\t\t\t\t\treturn adapter.fromPublisher(Mono.fromFuture(cachedFuture));\n\t\t\t\t}\n\t\t\t}\n\t\t\treturn NOT_HANDLED;\n\t\t}"
+  },
+  "org.springframework.cache.interceptor.CacheAspectSupport#findInCaches(context,cache,key,invoker,method,contexts)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "context",
+      "cache",
+      "key",
+      "invoker",
+      "method",
+      "contexts"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1059
+    },
+    "return": "Object",
+    "signature": "public Object findInCaches(CacheOperationContext context, Cache cache, Object key,\n\t\t\t\tCacheOperationInvoker invoker, Method method, CacheOperationContexts contexts)",
+    "source_code": "\t\tpublic Object findInCaches(CacheOperationContext context, Cache cache, Object key,"
+  },
+  "org.springframework.cache.interceptor.CacheAspectSupport#performCachePut(value)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 968
+    },
+    "return": "void",
+    "signature": "public void performCachePut(@Nullable Object value)",
+    "source_code": "\t\tpublic void performCachePut(@Nullable Object value) {\n\t\t\tif (this.context.canPutToCache(value)) {\n\t\t\t\tObject key = generateKey(this.context, value);\n\t\t\t\tif (logger.isTraceEnabled()) {\n\t\t\t\t\tlogger.trace(\"Creating cache entry for key '\" + key + \"' in cache(s) \" +\n\t\t\t\t\t\t\tthis.context.getCacheNames());\n\t\t\t\t}\n\t\t\t\tfor (Cache cache : this.context.getCaches()) {\n\t\t\t\t\tdoPut(cache, key, value);\n\t\t\t\t}\n\t\t\t}\n\t\t}"
+  },
+  "org.springframework.cache.support.SimpleValueWrapper": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "/**\n * Straightforward implementation of {@link org.springframework.cache.Cache.ValueWrapper},\n * simply holding the value as given at construction and returning it from {@link #get()}.\n *\n * @author Costin Leau\n * @since 3.1\n */",
+    "kind": "class",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 31
+    },
+    "signature": "public class SimpleValueWrapper",
+    "source_code": "public class SimpleValueWrapper implements ValueWrapper {\n\n\t@Nullable\n\tprivate final Object value;\n\n\n\t/**\n\t * Create a new SimpleValueWrapper instance for exposing the given value.\n\t * @param value the value to expose (may be {@code null})\n\t */\n\tpublic SimpleValueWrapper(@Nullable Object value) {\n\t\tthis.value = value;\n\t}\n\n\n\t/**\n\t * Simply returns the value as given at construction time.\n\t */\n\t@Override\n\t@Nullable\n\tpublic Object get() {\n\t\treturn this.value;\n\t}\n\n\t@Override\n\tpublic boolean equals(@Nullable Object other) {\n\t\treturn (this == other || (other instanceof ValueWrapper wrapper && Objects.equals(get(), wrapper.get())));\n\t}\n\n\t@Override\n\tpublic int hashCode() {\n\t\treturn Objects.hashCode(this.value);\n\t}\n\n\t@Override\n\tpublic String toString() {\n\t\treturn \"ValueWrapper for [\" + this.value + \"]\";\n\t}\n\n}"
+  },
+  "org.springframework.cache.support.SimpleValueWrapper#equals(other)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "other"
+    ],
+    "position": {
+      "column": 1,
+      "line": 56
+    },
+    "return": "boolean",
+    "signature": "public boolean equals(@Nullable Object other)",
+    "source_code": "\tpublic boolean equals(@Nullable Object other) {\n\t\treturn (this == other || (other instanceof ValueWrapper wrapper && Objects.equals(get(), wrapper.get())));\n\t}"
+  },
+  "org.springframework.cache.support.SimpleValueWrapper#get()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Simply returns the value as given at construction time.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 51
+    },
+    "return": "Object",
+    "signature": "public Object get()",
+    "source_code": "\tpublic Object get() {\n\t\treturn this.value;\n\t}"
+  },
+  "org.springframework.cache.support.SimpleValueWrapper#hashCode()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 61
+    },
+    "return": "int",
+    "signature": "public int hashCode()",
+    "source_code": "\tpublic int hashCode() {\n\t\treturn Objects.hashCode(this.value);\n\t}"
+  },
+  "org.springframework.cache.support.SimpleValueWrapper#toString()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 66
+    },
+    "return": "String",
+    "signature": "public String toString()",
+    "source_code": "\tpublic String toString() {\n\t\treturn \"ValueWrapper for [\" + this.value + \"]\";\n\t}"
+  },
+  "org.springframework.web.client.<unknown>#attribute(name,value)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "name",
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 355
+    },
+    "return": "RequestBodySpec",
+    "signature": "public RequestBodySpec attribute(String name, Object value)",
+    "source_code": "\t\tpublic RequestBodySpec attribute(String name, Object value) {\n\t\t\tthis.attributes.put(name, value);\n\t\t\treturn this;\n\t\t}"
+  },
+  "org.springframework.web.client.<unknown>#attributes(Consumer<Map<String,attributesConsumer)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "Consumer<Map<String",
+      "attributesConsumer"
+    ],
+    "position": {
+      "column": 1,
+      "line": 361
+    },
+    "return": "RequestBodySpec",
+    "signature": "public RequestBodySpec attributes(Consumer<Map<String, Object>> attributesConsumer)",
+    "source_code": "\t\tpublic RequestBodySpec attributes(Consumer<Map<String, Object>> attributesConsumer) {\n\t\t\tattributesConsumer.accept(this.attributes);\n\t\t\treturn this;\n\t\t}"
+  },
+  "org.springframework.web.socket.config.WebSocketMessageBrokerStats#afterSingletonsInstantiated()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 128
+    },
+    "return": "void",
+    "signature": "public void afterSingletonsInstantiated()",
+    "source_code": "\tpublic void afterSingletonsInstantiated() {\n\t\tthis.stompSubProtocolHandler = initStompSubProtocolHandler();\n\t\tthis.loggingTask = initLoggingTask(TimeUnit.MINUTES.toMillis(1));\n\t}"
+  }
+}

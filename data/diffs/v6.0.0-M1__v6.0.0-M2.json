@@ -1,0 +1,309 @@
+{
+  "org.springframework.context.index.processor.<unknown>#readMetadata()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 45
+    },
+    "return": "CandidateComponentsMetadata",
+    "signature": "public CandidateComponentsMetadata readMetadata()",
+    "source_code": "\tpublic CandidateComponentsMetadata readMetadata() {\n\t\ttry {\n\t\t\treturn readMetadata(getMetadataResource().openInputStream());\n\t\t}\n\t\tcatch (IOException ex) {\n\t\t\t// Failed to read metadata -> ignore.\n\t\t\treturn null;\n\t\t}\n\t}"
+  },
+  "org.springframework.context.index.processor.<unknown>#writeMetadata(metadata)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "metadata"
+    ],
+    "position": {
+      "column": 1,
+      "line": 55
+    },
+    "return": "void",
+    "signature": "public void writeMetadata(CandidateComponentsMetadata metadata)",
+    "source_code": "\tpublic void writeMetadata(CandidateComponentsMetadata metadata) throws IOException {\n\t\tif (!metadata.getItems().isEmpty()) {\n\t\t\ttry (OutputStream outputStream = createMetadataResource().openOutputStream()) {\n\t\t\t\tPropertiesMarshaller.write(metadata, outputStream);\n\t\t\t}\n\t\t}\n\t}"
+  },
+  "org.springframework.core.Conventions": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "/**\n * Provides methods to support various naming and other conventions used\n * throughout the framework. Mainly for internal use within the framework.\n *\n * @author Rob Harrop\n * @author Juergen Hoeller\n * @author Rossen Stoyanchev\n * @since 2.0\n */",
+    "kind": "class",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 37
+    },
+    "signature": "public class Conventions",
+    "source_code": "public final class Conventions {\n\n\t/**\n\t * Suffix added to names when using arrays.\n\t */\n\tprivate static final String PLURAL_SUFFIX = \"List\";\n\n\n\tprivate Conventions() {\n\t}\n\n\n\t/**\n\t * Determine the conventional variable name for the supplied {@code Object}\n\t * based on its concrete type. The convention used is to return the\n\t * un-capitalized short name of the {@code Class}, according to JavaBeans\n\t * property naming rules.\n\t * <p>For example:<br>\n\t * {@code com.myapp.Product} becomes {@code \"product\"}<br>\n\t * {@code com.myapp.MyProduct} becomes {@code \"myProduct\"}<br>\n\t * {@code com.myapp.UKProduct} becomes {@code \"UKProduct\"}<br>\n\t * <p>For arrays the pluralized version of the array component type is used.\n\t * For {@code Collection}s an attempt is made to 'peek ahead' to determine\n\t * the component type and return its pluralized version.\n\t * @param value the value to generate a variable name for\n\t * @return the generated variable name\n\t */\n\tpublic static String getVariableName(Object value) {\n\t\tAssert.notNull(value, \"Value must not be null\");\n\t\tClass<?> valueClass;\n\t\tboolean pluralize = false;\n\n\t\tif (value.getClass().isArray()) {\n\t\t\tvalueClass = value.getClass().getComponentType();\n\t\t\tpluralize = true;\n\t\t}\n\t\telse if (value instanceof Collection<?> collection) {\n\t\t\tif (collection.isEmpty()) {\n\t\t\t\tthrow new IllegalArgumentException(\n\t\t\t\t\t\t\"Cannot generate variable name for an empty Collection\");\n\t\t\t}\n\t\t\tObject valueToCheck = peekAhead(collection);\n\t\t\tvalueClass = getClassForValue(valueToCheck);\n\t\t\tpluralize = true;\n\t\t}\n\t\telse {\n\t\t\tvalueClass = getClassForValue(value);\n\t\t}\n\n\t\tString name = ClassUtils.getShortNameAsProperty(valueClass);\n\t\treturn (pluralize ? pluralize(name) : name);\n\t}\n\n\t/**\n\t * Determine the conventional variable name for the given parameter taking\n\t * the generic collection type, if any, into account.\n\t * <p>As of 5.0 this method supports reactive types:<br>\n\t * {@code Mono<com.myapp.Product>} becomes {@code \"productMono\"}<br>\n\t * {@code Flux<com.myapp.MyProduct>} becomes {@code \"myProductFlux\"}<br>\n\t * {@code Observable<com.myapp.MyProduct>} becomes {@code \"myProductObservable\"}<br>\n\t * @param parameter the method or constructor parameter\n\t * @return the generated variable name\n\t */\n\tpublic static String getVariableNameForParameter(MethodParameter parameter) {\n\t\tAssert.notNull(parameter, \"MethodParameter must not be null\");\n\t\tClass<?> valueClass;\n\t\tboolean pluralize = false;\n\t\tString reactiveSuffix = \"\";\n\n\t\tif (parameter.getParameterType().isArray()) {\n\t\t\tvalueClass = parameter.getParameterType().getComponentType();\n\t\t\tpluralize = true;\n\t\t}\n\t\telse if (Collection.class.isAssignableFrom(parameter.getParameterType())) {\n\t\t\tvalueClass = ResolvableType.forMethodParameter(parameter).asCollection().resolveGeneric();\n\t\t\tif (valueClass == null) {\n\t\t\t\tthrow new IllegalArgumentException(\n\t\t\t\t\t\t\"Cannot generate variable name for non-typed Collection parameter type\");\n\t\t\t}\n\t\t\tpluralize = true;\n\t\t}\n\t\telse {\n\t\t\tvalueClass = parameter.getParameterType();\n\t\t\tReactiveAdapter adapter = ReactiveAdapterRegistry.getSharedInstance().getAdapter(valueClass);\n\t\t\tif (adapter != null && !adapter.getDescriptor().isNoValue()) {\n\t\t\t\treactiveSuffix = ClassUtils.getShortName(valueClass);\n\t\t\t\tvalueClass = parameter.nested().getNestedParameterType();\n\t\t\t}\n\t\t}\n\n\t\tString name = ClassUtils.getShortNameAsProperty(valueClass);\n\t\treturn (pluralize ? pluralize(name) : name + reactiveSuffix);\n\t}\n\n\t/**\n\t * Determine the conventional variable name for the return type of the\n\t * given method, taking the generic collection type, if any, into account.\n\t * @param method the method to generate a variable name for\n\t * @return the generated variable name\n\t */\n\tpublic static String getVariableNameForReturnType(Method method) {\n\t\treturn getVariableNameForReturnType(method, method.getReturnType(), null);\n\t}\n\n\t/**\n\t * Determine the conventional variable name for the return type of the given\n\t * method, taking the generic collection type, if any, into account, falling\n\t * back on the given actual return value if the method declaration is not\n\t * specific enough, e.g. {@code Object} return type or untyped collection.\n\t * @param method the method to generate a variable name for\n\t * @param value the return value (may be {@code null} if not available)\n\t * @return the generated variable name\n\t */\n\tpublic static String getVariableNameForReturnType(Method method, @Nullable Object value) {\n\t\treturn getVariableNameForReturnType(method, method.getReturnType(), value);\n\t}\n\n\t/**\n\t * Determine the conventional variable name for the return type of the given\n\t * method, taking the generic collection type, if any, into account, falling\n\t * back on the given return value if the method declaration is not specific\n\t * enough, e.g. {@code Object} return type or untyped collection.\n\t * <p>As of 5.0 this method supports reactive types:<br>\n\t * {@code Mono<com.myapp.Product>} becomes {@code \"productMono\"}<br>\n\t * {@code Flux<com.myapp.MyProduct>} becomes {@code \"myProductFlux\"}<br>\n\t * {@code Observable<com.myapp.MyProduct>} becomes {@code \"myProductObservable\"}<br>\n\t * @param method the method to generate a variable name for\n\t * @param resolvedType the resolved return type of the method\n\t * @param value the return value (may be {@code null} if not available)\n\t * @return the generated variable name\n\t */\n\tpublic static String getVariableNameForReturnType(Method method, Class<?> resolvedType, @Nullable Object value) {\n\t\tAssert.notNull(method, \"Method must not be null\");\n\n\t\tif (Object.class == resolvedType) {\n\t\t\tif (value == null) {\n\t\t\t\tthrow new IllegalArgumentException(\n\t\t\t\t\t\t\"Cannot generate variable name for an Object return type with null value\");\n\t\t\t}\n\t\t\treturn getVariableName(value);\n\t\t}\n\n\t\tClass<?> valueClass;\n\t\tboolean pluralize = false;\n\t\tString reactiveSuffix = \"\";\n\n\t\tif (resolvedType.isArray()) {\n\t\t\tvalueClass = resolvedType.getComponentType();\n\t\t\tpluralize = true;\n\t\t}\n\t\telse if (Collection.class.isAssignableFrom(resolvedType)) {\n\t\t\tvalueClass = ResolvableType.forMethodReturnType(method).asCollection().resolveGeneric();\n\t\t\tif (valueClass == null) {\n\t\t\t\tif (!(value instanceof Collection<?> collection)) {\n\t\t\t\t\tthrow new IllegalArgumentException(\"Cannot generate variable name \" +\n\t\t\t\t\t\t\t\"for non-typed Collection return type and a non-Collection value\");\n\t\t\t\t}\n\t\t\t\tif (collection.isEmpty()) {\n\t\t\t\t\tthrow new IllegalArgumentException(\"Cannot generate variable name \" +\n\t\t\t\t\t\t\t\"for non-typed Collection return type and an empty Collection value\");\n\t\t\t\t}\n\t\t\t\tObject valueToCheck = peekAhead(collection);\n\t\t\t\tvalueClass = getClassForValue(valueToCheck);\n\t\t\t}\n\t\t\tpluralize = true;\n\t\t}\n\t\telse {\n\t\t\tvalueClass = resolvedType;\n\t\t\tReactiveAdapter adapter = ReactiveAdapterRegistry.getSharedInstance().getAdapter(valueClass);\n\t\t\tif (adapter != null && !adapter.getDescriptor().isNoValue()) {\n\t\t\t\treactiveSuffix = ClassUtils.getShortName(valueClass);\n\t\t\t\tvalueClass = ResolvableType.forMethodReturnType(method).getGeneric().toClass();\n\t\t\t}\n\t\t}\n\n\t\tString name = ClassUtils.getShortNameAsProperty(valueClass);\n\t\treturn (pluralize ? pluralize(name) : name + reactiveSuffix);\n\t}\n\n\t/**\n\t * Convert {@code String}s in attribute name format (e.g. lowercase, hyphens\n\t * separating words) into property name format (camel-case). For example\n\t * {@code transaction-manager} becomes {@code \"transactionManager\"}.\n\t */\n\tpublic static String attributeNameToPropertyName(String attributeName) {\n\t\tAssert.notNull(attributeName, \"'attributeName' must not be null\");\n\t\tif (!attributeName.contains(\"-\")) {\n\t\t\treturn attributeName;\n\t\t}\n\t\tchar[] result = new char[attributeName.length() -1]; // not completely accurate but good guess\n\t\tint currPos = 0;\n\t\tboolean upperCaseNext = false;\n\t\tfor (int i = 0; i < attributeName.length(); i++ ) {\n\t\t\tchar c = attributeName.charAt(i);\n\t\t\tif (c == '-') {\n\t\t\t\tupperCaseNext = true;\n\t\t\t}\n\t\t\telse if (upperCaseNext) {\n\t\t\t\tresult[currPos++] = Character.toUpperCase(c);\n\t\t\t\tupperCaseNext = false;\n\t\t\t}\n\t\t\telse {\n\t\t\t\tresult[currPos++] = c;\n\t\t\t}\n\t\t}\n\t\treturn new String(result, 0, currPos);\n\t}\n\n\t/**\n\t * Return an attribute name qualified by the given enclosing {@link Class}.\n\t * For example the attribute name '{@code foo}' qualified by {@link Class}\n\t * '{@code com.myapp.SomeClass}' would be '{@code com.myapp.SomeClass.foo}'\n\t */\n\tpublic static String getQualifiedAttributeName(Class<?> enclosingClass, String attributeName) {\n\t\tAssert.notNull(enclosingClass, \"'enclosingClass' must not be null\");\n\t\tAssert.notNull(attributeName, \"'attributeName' must not be null\");\n\t\treturn enclosingClass.getName() + '.' + attributeName;\n\t}\n\n\n\t/**\n\t * Determine the class to use for naming a variable containing the given value.\n\t * <p>Will return the class of the given value, except when encountering a\n\t * JDK proxy, in which case it will determine the 'primary' interface\n\t * implemented by that proxy.\n\t * @param value the value to check\n\t * @return the class to use for naming a variable\n\t */\n\tprivate static Class<?> getClassForValue(Object value) {\n\t\tClass<?> valueClass = value.getClass();\n\t\tif (Proxy.isProxyClass(valueClass)) {\n\t\t\tClass<?>[] ifcs = valueClass.getInterfaces();\n\t\t\tfor (Class<?> ifc : ifcs) {\n\t\t\t\tif (!ClassUtils.isJavaLanguageInterface(ifc)) {\n\t\t\t\t\treturn ifc;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\telse if (valueClass.getName().lastIndexOf('$') != -1 && valueClass.getDeclaringClass() == null) {\n\t\t\t// '$' in the class name but no inner class -\n\t\t\t// assuming it's a special subclass (e.g. by OpenJPA)\n\t\t\tvalueClass = valueClass.getSuperclass();\n\t\t}\n\t\treturn valueClass;\n\t}\n\n\t/**\n\t * Pluralize the given name.\n\t */\n\tprivate static String pluralize(String name) {\n\t\treturn name + PLURAL_SUFFIX;\n\t}\n\n\t/**\n\t * Retrieve the {@code Class} of an element in the {@code Collection}.\n\t * The exact element for which the {@code Class} is retrieved will depend\n\t * on the concrete {@code Collection} implementation.\n\t */\n\tprivate static <E> E peekAhead(Collection<E> collection) {\n\t\tIterator<E> it = collection.iterator();\n\t\tif (!it.hasNext()) {\n\t\t\tthrow new IllegalStateException(\n\t\t\t\t\t\"Unable to peek ahead in non-empty collection - no element found\");\n\t\t}\n\t\tE value = it.next();\n\t\tif (value == null) {\n\t\t\tthrow new IllegalStateException(\n\t\t\t\t\t\"Unable to peek ahead in non-empty collection - only null element found\");\n\t\t}\n\t\treturn value;\n\t}\n\n}"
+  },
+  "org.springframework.core.Conventions#attributeNameToPropertyName(attributeName)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Convert {@code String}s in attribute name format (e.g. lowercase, hyphens\n\t * separating words) into property name format (camel-case). For example\n\t * {@code transaction-manager} becomes {@code \"transactionManager\"}.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "attributeName"
+    ],
+    "position": {
+      "column": 1,
+      "line": 221
+    },
+    "return": "String",
+    "signature": "public String attributeNameToPropertyName(String attributeName)",
+    "source_code": "\tpublic static String attributeNameToPropertyName(String attributeName) {\n\t\tAssert.notNull(attributeName, \"'attributeName' must not be null\");\n\t\tif (!attributeName.contains(\"-\")) {\n\t\t\treturn attributeName;\n\t\t}\n\t\tchar[] result = new char[attributeName.length() -1]; // not completely accurate but good guess\n\t\tint currPos = 0;\n\t\tboolean upperCaseNext = false;\n\t\tfor (int i = 0; i < attributeName.length(); i++ ) {\n\t\t\tchar c = attributeName.charAt(i);\n\t\t\tif (c == '-') {\n\t\t\t\tupperCaseNext = true;\n\t\t\t}\n\t\t\telse if (upperCaseNext) {\n\t\t\t\tresult[currPos++] = Character.toUpperCase(c);\n\t\t\t\tupperCaseNext = false;\n\t\t\t}\n\t\t\telse {\n\t\t\t\tresult[currPos++] = c;\n\t\t\t}\n\t\t}\n\t\treturn new String(result, 0, currPos);\n\t}"
+  },
+  "org.springframework.core.Conventions#getQualifiedAttributeName(enclosingClass,attributeName)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return an attribute name qualified by the given enclosing {@link Class}.\n\t * For example the attribute name '{@code foo}' qualified by {@link Class}\n\t * '{@code com.myapp.SomeClass}' would be '{@code com.myapp.SomeClass.foo}'\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "enclosingClass",
+      "attributeName"
+    ],
+    "position": {
+      "column": 1,
+      "line": 250
+    },
+    "return": "String",
+    "signature": "public String getQualifiedAttributeName(Class<?> enclosingClass, String attributeName)",
+    "source_code": "\tpublic static String getQualifiedAttributeName(Class<?> enclosingClass, String attributeName) {\n\t\tAssert.notNull(enclosingClass, \"'enclosingClass' must not be null\");\n\t\tAssert.notNull(attributeName, \"'attributeName' must not be null\");\n\t\treturn enclosingClass.getName() + '.' + attributeName;\n\t}"
+  },
+  "org.springframework.core.Conventions#getVariableName(value)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Determine the conventional variable name for the supplied {@code Object}\n\t * based on its concrete type. The convention used is to return the\n\t * un-capitalized short name of the {@code Class}, according to JavaBeans\n\t * property naming rules.\n\t * <p>For example:<br>\n\t * {@code com.myapp.Product} becomes {@code \"product\"}<br>\n\t * {@code com.myapp.MyProduct} becomes {@code \"myProduct\"}<br>\n\t * {@code com.myapp.UKProduct} becomes {@code \"UKProduct\"}<br>\n\t * <p>For arrays the pluralized version of the array component type is used.\n\t * For {@code Collection}s an attempt is made to 'peek ahead' to determine\n\t * the component type and return its pluralized version.\n\t * @param value the value to generate a variable name for\n\t * @return the generated variable name\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 64
+    },
+    "return": "String",
+    "signature": "public String getVariableName(Object value)",
+    "source_code": "\tpublic static String getVariableName(Object value) {\n\t\tAssert.notNull(value, \"Value must not be null\");\n\t\tClass<?> valueClass;\n\t\tboolean pluralize = false;\n\n\t\tif (value.getClass().isArray()) {\n\t\t\tvalueClass = value.getClass().getComponentType();\n\t\t\tpluralize = true;\n\t\t}\n\t\telse if (value instanceof Collection<?> collection) {\n\t\t\tif (collection.isEmpty()) {\n\t\t\t\tthrow new IllegalArgumentException(\n\t\t\t\t\t\t\"Cannot generate variable name for an empty Collection\");\n\t\t\t}\n\t\t\tObject valueToCheck = peekAhead(collection);\n\t\t\tvalueClass = getClassForValue(valueToCheck);\n\t\t\tpluralize = true;\n\t\t}\n\t\telse {\n\t\t\tvalueClass = getClassForValue(value);\n\t\t}\n\n\t\tString name = ClassUtils.getShortNameAsProperty(valueClass);\n\t\treturn (pluralize ? pluralize(name) : name);\n\t}"
+  },
+  "org.springframework.core.Conventions#getVariableNameForParameter(parameter)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Determine the conventional variable name for the given parameter taking\n\t * the generic collection type, if any, into account.\n\t * <p>As of 5.0 this method supports reactive types:<br>\n\t * {@code Mono<com.myapp.Product>} becomes {@code \"productMono\"}<br>\n\t * {@code Flux<com.myapp.MyProduct>} becomes {@code \"myProductFlux\"}<br>\n\t * {@code Observable<com.myapp.MyProduct>} becomes {@code \"myProductObservable\"}<br>\n\t * @param parameter the method or constructor parameter\n\t * @return the generated variable name\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "parameter"
+    ],
+    "position": {
+      "column": 1,
+      "line": 100
+    },
+    "return": "String",
+    "signature": "public String getVariableNameForParameter(MethodParameter parameter)",
+    "source_code": "\tpublic static String getVariableNameForParameter(MethodParameter parameter) {\n\t\tAssert.notNull(parameter, \"MethodParameter must not be null\");\n\t\tClass<?> valueClass;\n\t\tboolean pluralize = false;\n\t\tString reactiveSuffix = \"\";\n\n\t\tif (parameter.getParameterType().isArray()) {\n\t\t\tvalueClass = parameter.getParameterType().getComponentType();\n\t\t\tpluralize = true;\n\t\t}\n\t\telse if (Collection.class.isAssignableFrom(parameter.getParameterType())) {\n\t\t\tvalueClass = ResolvableType.forMethodParameter(parameter).asCollection().resolveGeneric();\n\t\t\tif (valueClass == null) {\n\t\t\t\tthrow new IllegalArgumentException(\n\t\t\t\t\t\t\"Cannot generate variable name for non-typed Collection parameter type\");\n\t\t\t}\n\t\t\tpluralize = true;\n\t\t}\n\t\telse {\n\t\t\tvalueClass = parameter.getParameterType();\n\t\t\tReactiveAdapter adapter = ReactiveAdapterRegistry.getSharedInstance().getAdapter(valueClass);\n\t\t\tif (adapter != null && !adapter.getDescriptor().isNoValue()) {\n\t\t\t\treactiveSuffix = ClassUtils.getShortName(valueClass);\n\t\t\t\tvalueClass = parameter.nested().getNestedParameterType();\n\t\t\t}\n\t\t}\n\n\t\tString name = ClassUtils.getShortNameAsProperty(valueClass);\n\t\treturn (pluralize ? pluralize(name) : name + reactiveSuffix);\n\t}"
+  },
+  "org.springframework.core.Conventions#getVariableNameForReturnType(method)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Determine the conventional variable name for the return type of the\n\t * given method, taking the generic collection type, if any, into account.\n\t * @param method the method to generate a variable name for\n\t * @return the generated variable name\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "method"
+    ],
+    "position": {
+      "column": 1,
+      "line": 137
+    },
+    "return": "String",
+    "signature": "public String getVariableNameForReturnType(Method method)",
+    "source_code": "\tpublic static String getVariableNameForReturnType(Method method) {\n\t\treturn getVariableNameForReturnType(method, method.getReturnType(), null);\n\t}"
+  },
+  "org.springframework.core.Conventions#getVariableNameForReturnType(method,resolvedType,value)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Determine the conventional variable name for the return type of the given\n\t * method, taking the generic collection type, if any, into account, falling\n\t * back on the given return value if the method declaration is not specific\n\t * enough, e.g. {@code Object} return type or untyped collection.\n\t * <p>As of 5.0 this method supports reactive types:<br>\n\t * {@code Mono<com.myapp.Product>} becomes {@code \"productMono\"}<br>\n\t * {@code Flux<com.myapp.MyProduct>} becomes {@code \"myProductFlux\"}<br>\n\t * {@code Observable<com.myapp.MyProduct>} becomes {@code \"myProductObservable\"}<br>\n\t * @param method the method to generate a variable name for\n\t * @param resolvedType the resolved return type of the method\n\t * @param value the return value (may be {@code null} if not available)\n\t * @return the generated variable name\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "method",
+      "resolvedType",
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 168
+    },
+    "return": "String",
+    "signature": "public String getVariableNameForReturnType(Method method, Class<?> resolvedType, @Nullable Object value)",
+    "source_code": "\tpublic static String getVariableNameForReturnType(Method method, Class<?> resolvedType, @Nullable Object value) {\n\t\tAssert.notNull(method, \"Method must not be null\");\n\n\t\tif (Object.class == resolvedType) {\n\t\t\tif (value == null) {\n\t\t\t\tthrow new IllegalArgumentException(\n\t\t\t\t\t\t\"Cannot generate variable name for an Object return type with null value\");\n\t\t\t}\n\t\t\treturn getVariableName(value);\n\t\t}\n\n\t\tClass<?> valueClass;\n\t\tboolean pluralize = false;\n\t\tString reactiveSuffix = \"\";\n\n\t\tif (resolvedType.isArray()) {\n\t\t\tvalueClass = resolvedType.getComponentType();\n\t\t\tpluralize = true;\n\t\t}\n\t\telse if (Collection.class.isAssignableFrom(resolvedType)) {\n\t\t\tvalueClass = ResolvableType.forMethodReturnType(method).asCollection().resolveGeneric();\n\t\t\tif (valueClass == null) {\n\t\t\t\tif (!(value instanceof Collection<?> collection)) {\n\t\t\t\t\tthrow new IllegalArgumentException(\"Cannot generate variable name \" +\n\t\t\t\t\t\t\t\"for non-typed Collection return type and a non-Collection value\");\n\t\t\t\t}\n\t\t\t\tif (collection.isEmpty()) {\n\t\t\t\t\tthrow new IllegalArgumentException(\"Cannot generate variable name \" +\n\t\t\t\t\t\t\t\"for non-typed Collection return type and an empty Collection value\");\n\t\t\t\t}\n\t\t\t\tObject valueToCheck = peekAhead(collection);\n\t\t\t\tvalueClass = getClassForValue(valueToCheck);\n\t\t\t}\n\t\t\tpluralize = true;\n\t\t}\n\t\telse {\n\t\t\tvalueClass = resolvedType;\n\t\t\tReactiveAdapter adapter = ReactiveAdapterRegistry.getSharedInstance().getAdapter(valueClass);\n\t\t\tif (adapter != null && !adapter.getDescriptor().isNoValue()) {\n\t\t\t\treactiveSuffix = ClassUtils.getShortName(valueClass);\n\t\t\t\tvalueClass = ResolvableType.forMethodReturnType(method).getGeneric().toClass();\n\t\t\t}\n\t\t}\n\n\t\tString name = ClassUtils.getShortNameAsProperty(valueClass);\n\t\treturn (pluralize ? pluralize(name) : name + reactiveSuffix);\n\t}"
+  },
+  "org.springframework.core.Conventions#getVariableNameForReturnType(method,value)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Determine the conventional variable name for the return type of the given\n\t * method, taking the generic collection type, if any, into account, falling\n\t * back on the given actual return value if the method declaration is not\n\t * specific enough, e.g. {@code Object} return type or untyped collection.\n\t * @param method the method to generate a variable name for\n\t * @param value the return value (may be {@code null} if not available)\n\t * @return the generated variable name\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "method",
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 150
+    },
+    "return": "String",
+    "signature": "public String getVariableNameForReturnType(Method method, @Nullable Object value)",
+    "source_code": "\tpublic static String getVariableNameForReturnType(Method method, @Nullable Object value) {\n\t\treturn getVariableNameForReturnType(method, method.getReturnType(), value);\n\t}"
+  },
+  "org.springframework.web.socket.AbstractWebSocketMessage": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "/**\n * A message that can be handled or sent on a WebSocket connection.\n *\n * @author Rossen Stoyanchev\n * @since 4.0\n * @param <T> the payload type\n */",
+    "kind": "class",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 30
+    },
+    "signature": "public class AbstractWebSocketMessage",
+    "source_code": "public abstract class AbstractWebSocketMessage<T> implements WebSocketMessage<T> {\n\n\tprivate final T payload;\n\n\tprivate final boolean last;\n\n\n\t/**\n\t * Create a new WebSocket message with the given payload.\n\t * @param payload the non-null payload\n\t */\n\tAbstractWebSocketMessage(T payload) {\n\t\tthis(payload, true);\n\t}\n\n\t/**\n\t * Create a new WebSocket message given payload representing the full or partial\n\t * message content. When the {@code isLast} boolean flag is set to {@code false}\n\t * the message is sent as partial content and more partial messages will be\n\t * expected until the boolean flag is set to {@code true}.\n\t * @param payload the non-null payload\n\t * @param isLast if the message is the last of a series of partial messages\n\t */\n\tAbstractWebSocketMessage(T payload, boolean isLast) {\n\t\tAssert.notNull(payload, \"payload must not be null\");\n\t\tthis.payload = payload;\n\t\tthis.last = isLast;\n\t}\n\n\n\t/**\n\t * Return the message payload (never {@code null}).\n\t */\n\t@Override\n\tpublic T getPayload() {\n\t\treturn this.payload;\n\t}\n\n\t/**\n\t * Whether this is the last part of a message sent as a series of partial messages.\n\t */\n\t@Override\n\tpublic boolean isLast() {\n\t\treturn this.last;\n\t}\n\n\n\t@Override\n\tpublic boolean equals(@Nullable Object other) {\n\t\tif (this == other) {\n\t\t\treturn true;\n\t\t}\n\t\tif (!(other instanceof AbstractWebSocketMessage<?> otherMessage)) {\n\t\t\treturn false;\n\t\t}\n\t\treturn ObjectUtils.nullSafeEquals(this.payload, otherMessage.payload);\n\t}\n\n\t@Override\n\tpublic int hashCode() {\n\t\treturn ObjectUtils.nullSafeHashCode(this.payload);\n\t}\n\n\t@Override\n\tpublic String toString() {\n\t\treturn getClass().getSimpleName() + \" payload=[\" + toStringPayload() +\n\t\t\t\t\"], byteCount=\" + getPayloadLength() + \", last=\" + isLast() + \"]\";\n\t}\n\n\tprotected abstract String toStringPayload();\n\n}"
+  },
+  "org.springframework.web.socket.AbstractWebSocketMessage#equals(other)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "other"
+    ],
+    "position": {
+      "column": 1,
+      "line": 78
+    },
+    "return": "boolean",
+    "signature": "public boolean equals(@Nullable Object other)",
+    "source_code": "\tpublic boolean equals(@Nullable Object other) {\n\t\tif (this == other) {\n\t\t\treturn true;\n\t\t}\n\t\tif (!(other instanceof AbstractWebSocketMessage<?> otherMessage)) {\n\t\t\treturn false;\n\t\t}\n\t\treturn ObjectUtils.nullSafeEquals(this.payload, otherMessage.payload);\n\t}"
+  },
+  "org.springframework.web.socket.AbstractWebSocketMessage#getPayload()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return the message payload (never {@code null}).\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 64
+    },
+    "return": "T",
+    "signature": "public T getPayload()",
+    "source_code": "\tpublic T getPayload() {\n\t\treturn this.payload;\n\t}"
+  },
+  "org.springframework.web.socket.AbstractWebSocketMessage#hashCode()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 89
+    },
+    "return": "int",
+    "signature": "public int hashCode()",
+    "source_code": "\tpublic int hashCode() {\n\t\treturn ObjectUtils.nullSafeHashCode(this.payload);\n\t}"
+  },
+  "org.springframework.web.socket.AbstractWebSocketMessage#isLast()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Whether this is the last part of a message sent as a series of partial messages.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 72
+    },
+    "return": "boolean",
+    "signature": "public boolean isLast()",
+    "source_code": "\tpublic boolean isLast() {\n\t\treturn this.last;\n\t}"
+  },
+  "org.springframework.web.socket.AbstractWebSocketMessage#toString()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 94
+    },
+    "return": "String",
+    "signature": "public String toString()",
+    "source_code": "\tpublic String toString() {\n\t\treturn getClass().getSimpleName() + \" payload=[\" + toStringPayload() +\n\t\t\t\t\"], byteCount=\" + getPayloadLength() + \", last=\" + isLast() + \"]\";\n\t}"
+  },
+  "org.springframework.web.socket.AbstractWebSocketMessage#toStringPayload()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 99
+    },
+    "return": "String",
+    "signature": "protected String toStringPayload()",
+    "source_code": "\tprotected abstract String toStringPayload();"
+  }
+}

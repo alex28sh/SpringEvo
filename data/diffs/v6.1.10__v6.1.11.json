@@ -1,0 +1,243 @@
+{
+  "org.springframework.messaging.converter.DEFAULT_CHARSET": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * The default charset used by the converter.\n\t */",
+    "kind": "field",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 63
+    },
+    "signature": "public Charset DEFAULT_CHARSET",
+    "source_code": "\tpublic static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;",
+    "type": "Charset"
+  },
+  "org.springframework.messaging.converter.PROTOBUF": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * The mime-type for protobuf {@code application/x-protobuf}.\n\t */",
+    "kind": "field",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 68
+    },
+    "signature": "public MimeType PROTOBUF",
+    "source_code": "\tpublic static final MimeType PROTOBUF = new MimeType(\"application\", \"x-protobuf\", DEFAULT_CHARSET);",
+    "type": "MimeType"
+  },
+  "org.springframework.messaging.converter.ProtobufMessageConverter": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "/**\n * An {@code MessageConverter} that reads and writes\n * {@link com.google.protobuf.Message com.google.protobuf.Messages} using\n * <a href=\"https://developers.google.com/protocol-buffers/\">Google Protocol Buffers</a>.\n *\n * <p>To generate {@code Message} Java classes, you need to install the {@code protoc} binary.\n *\n * <p>This converter supports by default {@code \"application/x-protobuf\"} with the official\n * {@code \"com.google.protobuf:protobuf-java\"} library.\n *\n * <p>{@code \"application/json\"} can be supported with the official\n * {@code \"com.google.protobuf:protobuf-java-util\"} 3.x, with 3.3 or higher recommended.\n *\n * @author Parviz Rozikov\n * @author Rossen Stoyanchev\n * @since 5.2.2\n */",
+    "kind": "class",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 58
+    },
+    "signature": "public class ProtobufMessageConverter",
+    "source_code": "public class ProtobufMessageConverter extends AbstractMessageConverter {\n\n\t/**\n\t * The default charset used by the converter.\n\t */\n\tpublic static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;\n\n\t/**\n\t * The mime-type for protobuf {@code application/x-protobuf}.\n\t */\n\tpublic static final MimeType PROTOBUF = new MimeType(\"application\", \"x-protobuf\", DEFAULT_CHARSET);\n\n\tprivate static final boolean protobufJsonFormatPresent =\n\t\t\tClassUtils.isPresent(\"com.google.protobuf.util.JsonFormat\", ProtobufMessageConverter.class.getClassLoader());\n\n\tprivate static final Map<Class<?>, Method> methodCache = new ConcurrentReferenceHashMap<>();\n\n\n\tfinal ExtensionRegistry extensionRegistry;\n\n\t@Nullable\n\tprivate final ProtobufFormatSupport protobufFormatSupport;\n\n\n\t/**\n\t * Constructor with a default instance of {@link ExtensionRegistry}.\n\t */\n\tpublic ProtobufMessageConverter() {\n\t\tthis(null, null);\n\t}\n\n\t/**\n\t * Constructor with a given {@code ExtensionRegistry}.\n\t */\n\tpublic ProtobufMessageConverter(ExtensionRegistry extensionRegistry) {\n\t\tthis(null, extensionRegistry);\n\t}\n\n\tProtobufMessageConverter(@Nullable ProtobufFormatSupport formatSupport,\n\t\t\t@Nullable ExtensionRegistry extensionRegistry) {\n\n\t\tsuper(PROTOBUF, TEXT_PLAIN);\n\n\t\tif (formatSupport != null) {\n\t\t\tthis.protobufFormatSupport = formatSupport;\n\t\t}\n\t\telse if (protobufJsonFormatPresent) {\n\t\t\tthis.protobufFormatSupport = new ProtobufJavaUtilSupport(null, null);\n\t\t}\n\t\telse {\n\t\t\tthis.protobufFormatSupport = null;\n\t\t}\n\n\t\tif (this.protobufFormatSupport != null) {\n\t\t\taddSupportedMimeTypes(this.protobufFormatSupport.supportedMediaTypes());\n\t\t}\n\n\t\tthis.extensionRegistry = (extensionRegistry == null ? ExtensionRegistry.newInstance() : extensionRegistry);\n\t}\n\n\n\t@Override\n\tprotected boolean supports(Class<?> clazz) {\n\t\treturn Message.class.isAssignableFrom(clazz);\n\t}\n\n\t@Override\n\tprotected boolean canConvertTo(Object payload, @Nullable MessageHeaders headers) {\n\t\tMimeType contentType = getMimeType(headers);\n\t\treturn (super.canConvertTo(payload, headers) ||\n\t\t\t\tthis.protobufFormatSupport != null && this.protobufFormatSupport.supportsWriteOnly(contentType));\n\t}\n\n\t@Override\n\tprotected Object convertFromInternal(org.springframework.messaging.Message<?> message,\n\t\t\tClass<?> targetClass, @Nullable Object conversionHint) {\n\n\t\tMimeType contentType = getMimeType(message.getHeaders());\n\t\tfinal Object payload = message.getPayload();\n\n\t\tif (contentType == null) {\n\t\t\tcontentType = PROTOBUF;\n\t\t}\n\n\t\tCharset charset = contentType.getCharset();\n\t\tif (charset == null) {\n\t\t\tcharset = DEFAULT_CHARSET;\n\t\t}\n\n\t\tMessage.Builder builder = getMessageBuilder(targetClass);\n\t\ttry {\n\t\t\tif (PROTOBUF.isCompatibleWith(contentType)) {\n\t\t\t\tbuilder.mergeFrom((byte[]) payload, this.extensionRegistry);\n\t\t\t}\n\t\t\telse if (this.protobufFormatSupport != null) {\n\t\t\t\tthis.protobufFormatSupport.merge(message, charset, contentType, this.extensionRegistry, builder);\n\t\t\t}\n\t\t}\n\t\tcatch (IOException ex) {\n\t\t\tthrow new MessageConversionException(message, \"Could not read proto message\" + ex.getMessage(), ex);\n\t\t}\n\n\t\treturn builder.build();\n\t}\n\n\n\t@Override\n\tprotected Object convertToInternal(\n\t\t\tObject payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint) {\n\n\t\tfinal Message message = (Message) payload;\n\n\t\tMimeType contentType = getMimeType(headers);\n\t\tif (contentType == null) {\n\t\t\tcontentType = PROTOBUF;\n\t\t}\n\n\t\tCharset charset = contentType.getCharset();\n\t\tif (charset == null) {\n\t\t\tcharset = DEFAULT_CHARSET;\n\t\t}\n\n\t\ttry {\n\t\t\tif (PROTOBUF.isCompatibleWith(contentType)) {\n\t\t\t\tByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();\n\t\t\t\tmessage.writeTo(byteArrayOutputStream);\n\t\t\t\tpayload = byteArrayOutputStream.toByteArray();\n\t\t\t}\n\t\t\telse if (this.protobufFormatSupport != null) {\n\t\t\t\tByteArrayOutputStream outputStream = new ByteArrayOutputStream();\n\t\t\t\tthis.protobufFormatSupport.print(message, outputStream, contentType, charset);\n\t\t\t\tpayload = outputStream.toString(charset);\n\t\t\t}\n\t\t}\n\t\tcatch (IOException ex) {\n\t\t\tthrow new MessageConversionException(\"Failed to print Protobuf message: \" + ex.getMessage(), ex);\n\n\t\t}\n\t\treturn payload;\n\t}\n\n\t/**\n\t * Create a new {@code Message.Builder} instance for the given class.\n\t * <p>This method uses a ConcurrentReferenceHashMap for caching method lookups.\n\t */\n\tprivate Message.Builder getMessageBuilder(Class<?> clazz) {\n\t\ttry {\n\t\t\tMethod method = methodCache.get(clazz);\n\t\t\tif (method == null) {\n\t\t\t\tmethod = clazz.getMethod(\"newBuilder\");\n\t\t\t\tmethodCache.put(clazz, method);\n\t\t\t}\n\t\t\treturn (Message.Builder) method.invoke(clazz);\n\t\t}\n\t\tcatch (Exception ex) {\n\t\t\tthrow new MessageConversionException(\n\t\t\t\t\t\"Invalid Protobuf Message type: no invocable newBuilder() method on \" + clazz, ex);\n\t\t}\n\t}\n\n\n\t/**\n\t * Protobuf format support.\n\t */\n\tinterface ProtobufFormatSupport {\n\n\t\tMimeType[] supportedMediaTypes();\n\n\t\tboolean supportsWriteOnly(@Nullable MimeType mediaType);\n\n\t\tvoid merge(org.springframework.messaging.Message<?> message,\n\t\t\t\tCharset charset, MimeType contentType, ExtensionRegistry extensionRegistry,\n\t\t\t\tMessage.Builder builder) throws IOException, MessageConversionException;\n\n\t\tvoid print(Message message, OutputStream output, MimeType contentType, Charset charset)\n\t\t\t\tthrows IOException, MessageConversionException;\n\t}\n\n\n\t/**\n\t * {@link ProtobufFormatSupport} implementation used when\n\t * {@code com.google.protobuf.util.JsonFormat} is available.\n\t */\n\tstatic class ProtobufJavaUtilSupport implements ProtobufFormatSupport {\n\n\t\tprivate final JsonFormat.Parser parser;\n\n\t\tprivate final JsonFormat.Printer printer;\n\n\t\tpublic ProtobufJavaUtilSupport(@Nullable JsonFormat.Parser parser, @Nullable JsonFormat.Printer printer) {\n\t\t\tthis.parser = (parser != null ? parser : JsonFormat.parser());\n\t\t\tthis.printer = (printer != null ? printer : JsonFormat.printer());\n\t\t}\n\n\t\t@Override\n\t\tpublic MimeType[] supportedMediaTypes() {\n\t\t\treturn new MimeType[]{APPLICATION_JSON};\n\t\t}\n\n\t\t@Override\n\t\tpublic boolean supportsWriteOnly(@Nullable MimeType mimeType) {\n\t\t\treturn false;\n\t\t}\n\n\t\t@Override\n\t\tpublic void merge(org.springframework.messaging.Message<?> message, Charset charset,\n\t\t\t\tMimeType contentType, ExtensionRegistry extensionRegistry, Message.Builder builder)\n\t\t\t\tthrows IOException, MessageConversionException {\n\n\t\t\tif (contentType.isCompatibleWith(APPLICATION_JSON)) {\n\t\t\t\tif (message.getPayload() instanceof byte[] bytes) {\n\t\t\t\t\tthis.parser.merge(new String(bytes, charset), builder);\n\t\t\t\t}\n\t\t\t\telse {\n\t\t\t\t\tthis.parser.merge(message.getPayload().toString(), builder);\n\t\t\t\t}\n\t\t\t}\n\t\t\telse {\n\t\t\t\tthrow new MessageConversionException(\n\t\t\t\t\t\t\"protobuf-java-util does not support parsing \" + contentType);\n\t\t\t}\n\t\t}\n\n\t\t@Override\n\t\tpublic void print(Message message, OutputStream output, MimeType contentType, Charset charset)\n\t\t\t\tthrows IOException, MessageConversionException {\n\n\t\t\tif (contentType.isCompatibleWith(APPLICATION_JSON)) {\n\t\t\t\tOutputStreamWriter writer = new OutputStreamWriter(output, charset);\n\t\t\t\tthis.printer.appendTo(message, writer);\n\t\t\t\twriter.flush();\n\t\t\t}\n\t\t\telse {\n\t\t\t\tthrow new MessageConversionException(\n\t\t\t\t\t\t\"protobuf-java-util does not support printing \" + contentType);\n\t\t\t}\n\t\t}\n\t}\n\n}"
+  },
+  "org.springframework.messaging.converter.ProtobufMessageConverter#canConvertTo(payload,headers)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "payload",
+      "headers"
+    ],
+    "position": {
+      "column": 1,
+      "line": 125
+    },
+    "return": "boolean",
+    "signature": "protected boolean canConvertTo(Object payload, @Nullable MessageHeaders headers)",
+    "source_code": "\tprotected boolean canConvertTo(Object payload, @Nullable MessageHeaders headers) {\n\t\tMimeType contentType = getMimeType(headers);\n\t\treturn (super.canConvertTo(payload, headers) ||\n\t\t\t\tthis.protobufFormatSupport != null && this.protobufFormatSupport.supportsWriteOnly(contentType));\n\t}"
+  },
+  "org.springframework.messaging.converter.ProtobufMessageConverter#convertFromInternal(message,targetClass,conversionHint)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "message",
+      "targetClass",
+      "conversionHint"
+    ],
+    "position": {
+      "column": 1,
+      "line": 132
+    },
+    "return": "Object",
+    "signature": "protected Object convertFromInternal(org.springframework.messaging.Message<?> message,\n\t\t\tClass<?> targetClass, @Nullable Object conversionHint)",
+    "source_code": "\tprotected Object convertFromInternal(org.springframework.messaging.Message<?> message,"
+  },
+  "org.springframework.messaging.converter.ProtobufMessageConverter#convertToInternal(payload,headers,conversionHint)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "payload",
+      "headers",
+      "conversionHint"
+    ],
+    "position": {
+      "column": 1,
+      "line": 165
+    },
+    "return": "Object",
+    "signature": "protected Object convertToInternal(Object payload, @Nullable MessageHeaders headers, @Nullable Object conversionHint)",
+    "source_code": "\tprotected Object convertToInternal("
+  },
+  "org.springframework.messaging.converter.ProtobufMessageConverter#merge(message,charset,contentType,extensionRegistry,builder)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "message",
+      "charset",
+      "contentType",
+      "extensionRegistry",
+      "builder"
+    ],
+    "position": {
+      "column": 1,
+      "line": 263
+    },
+    "return": "void",
+    "signature": "public void merge(org.springframework.messaging.Message<?> message, Charset charset,\n\t\t\t\tMimeType contentType, ExtensionRegistry extensionRegistry, Message.Builder builder)",
+    "source_code": "\t\tpublic void merge(org.springframework.messaging.Message<?> message, Charset charset,"
+  },
+  "org.springframework.messaging.converter.ProtobufMessageConverter#print(message,output,contentType,charset)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "message",
+      "output",
+      "contentType",
+      "charset"
+    ],
+    "position": {
+      "column": 1,
+      "line": 282
+    },
+    "return": "void",
+    "signature": "public void print(Message message, OutputStream output, MimeType contentType, Charset charset)",
+    "source_code": "\t\tpublic void print(Message message, OutputStream output, MimeType contentType, Charset charset)"
+  },
+  "org.springframework.messaging.converter.ProtobufMessageConverter#supportedMediaTypes()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 253
+    },
+    "return": "MimeType[]",
+    "signature": "public MimeType[] supportedMediaTypes()",
+    "source_code": "\t\tpublic MimeType[] supportedMediaTypes() {\n\t\t\treturn new MimeType[]{APPLICATION_JSON};\n\t\t}"
+  },
+  "org.springframework.messaging.converter.ProtobufMessageConverter#supports(clazz)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "clazz"
+    ],
+    "position": {
+      "column": 1,
+      "line": 120
+    },
+    "return": "boolean",
+    "signature": "protected boolean supports(Class<?> clazz)",
+    "source_code": "\tprotected boolean supports(Class<?> clazz) {\n\t\treturn Message.class.isAssignableFrom(clazz);\n\t}"
+  },
+  "org.springframework.messaging.converter.ProtobufMessageConverter#supportsWriteOnly(mimeType)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "mimeType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 258
+    },
+    "return": "boolean",
+    "signature": "public boolean supportsWriteOnly(@Nullable MimeType mimeType)",
+    "source_code": "\t\tpublic boolean supportsWriteOnly(@Nullable MimeType mimeType) {\n\t\t\treturn false;\n\t\t}"
+  },
+  "org.springframework.transaction.interceptor.CoroutinesInvocationCallback": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Coroutines-supporting extension of the callback interface.\n\t */",
+    "kind": "interface",
+    "modifiers": [
+      "protected"
+    ],
+    "position": {
+      "column": 1,
+      "line": 835
+    },
+    "signature": "protected interface CoroutinesInvocationCallback",
+    "source_code": "\tprotected interface CoroutinesInvocationCallback extends InvocationCallback {\n\n\t\tObject getTarget();\n\n\t\tObject[] getArguments();\n\n\t\tdefault Object getContinuation() {\n\t\t\tObject[] args = getArguments();\n\t\t\treturn args[args.length - 1];\n\t\t}\n\t}"
+  },
+  "org.springframework.web.reactive.function.client.WebClientResponseException#getMessage()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 276
+    },
+    "return": "String",
+    "signature": "public String getMessage()",
+    "source_code": "\tpublic String getMessage() {\n\t\tString message = String.valueOf(super.getMessage());\n\t\tif (shouldHintAtResponseFailure()) {\n\t\t\treturn message + \", but response failed with cause: \" + getCause();\n\t\t}\n\t\treturn message;\n\t}"
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "org.springframework.aot.nativex.INSTANCE": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "field",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 50
+    },
+    "signature": "public ReflectionHintsWriter INSTANCE",
+    "source_code": "\tpublic static final ReflectionHintsWriter INSTANCE = new ReflectionHintsWriter();",
+    "type": "ReflectionHintsWriter"
+  },
+  "org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver#checkQualifiers(bdHolder,annotationsToSearch)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Match the given qualifier annotations against the candidate bean definition.\n\t * @return {@code false} if a qualifier has been found but not matched,\n\t * {@code true} if a qualifier has been found and matched,\n\t * {@code null} if no qualifier has been found at all\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "bdHolder",
+      "annotationsToSearch"
+    ],
+    "position": {
+      "column": 1,
+      "line": 185
+    },
+    "return": "Boolean",
+    "signature": "protected Boolean checkQualifiers(BeanDefinitionHolder bdHolder, Annotation[] annotationsToSearch)",
+    "source_code": "\tprotected Boolean checkQualifiers(BeanDefinitionHolder bdHolder, Annotation[] annotationsToSearch) {\n\t\tboolean qualifierFound = false;\n\t\tif (!ObjectUtils.isEmpty(annotationsToSearch)) {\n\t\t\tSimpleTypeConverter typeConverter = new SimpleTypeConverter();\n\t\t\tfor (Annotation annotation : annotationsToSearch) {\n\t\t\t\tClass<? extends Annotation> type = annotation.annotationType();\n\t\t\t\tif (isPlainJavaAnnotation(type)) {\n\t\t\t\t\tcontinue;\n\t\t\t\t}\n\t\t\t\tboolean checkMeta = true;\n\t\t\t\tboolean fallbackToMeta = false;\n\t\t\t\tif (isQualifier(type)) {\n\t\t\t\t\tqualifierFound = true;\n\t\t\t\t\tif (!checkQualifier(bdHolder, annotation, typeConverter)) {\n\t\t\t\t\t\tfallbackToMeta = true;\n\t\t\t\t\t}\n\t\t\t\t\telse {\n\t\t\t\t\t\tcheckMeta = false;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tif (checkMeta) {\n\t\t\t\t\tboolean foundMeta = false;\n\t\t\t\t\tfor (Annotation metaAnn : type.getAnnotations()) {\n\t\t\t\t\t\tClass<? extends Annotation> metaType = metaAnn.annotationType();\n\t\t\t\t\t\tif (isPlainJavaAnnotation(metaType)) {\n\t\t\t\t\t\t\tcontinue;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (isQualifier(metaType)) {\n\t\t\t\t\t\t\tqualifierFound = true;\n\t\t\t\t\t\t\tfoundMeta = true;\n\t\t\t\t\t\t\t// Only accept fallback match if @Qualifier annotation has a value...\n\t\t\t\t\t\t\t// Otherwise, it is just a marker for a custom qualifier annotation.\n\t\t\t\t\t\t\tif ((fallbackToMeta && ObjectUtils.isEmpty(AnnotationUtils.getValue(metaAnn))) ||\n\t\t\t\t\t\t\t\t\t!checkQualifier(bdHolder, metaAnn, typeConverter)) {\n\t\t\t\t\t\t\t\treturn false;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tif (fallbackToMeta && !foundMeta) {\n\t\t\t\t\t\treturn false;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn (qualifierFound ? true : null);\n\t}"
+  },
+  "org.springframework.test.context.bean.override.mockito.SpringMockResolver": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "/**\n * A {@link MockResolver} for testing Spring applications with Mockito.\n *\n * <p>Resolves mocks by walking the Spring AOP proxy chain until the target or a\n * non-static proxy is found.\n *\n * @author Sam Brannen\n * @author Andy Wilkinson\n * @author Juergen Hoeller\n * @since 6.2\n */",
+    "kind": "class",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 38
+    },
+    "signature": "public class SpringMockResolver",
+    "source_code": "public class SpringMockResolver implements MockResolver {\n\n\tstatic final boolean springAopPresent = ClassUtils.isPresent(\n\t\t\t\"org.springframework.aop.framework.Advised\", SpringMockResolver.class.getClassLoader());\n\n\n\t@Override\n\tpublic Object resolve(Object instance) {\n\t\tif (springAopPresent) {\n\t\t\treturn getUltimateTargetObject(instance);\n\t\t}\n\t\treturn instance;\n\t}\n\n\t/**\n\t * This is a modified version of\n\t * {@link org.springframework.test.util.AopTestUtils#getUltimateTargetObject(Object)\n\t * AopTestUtils#getUltimateTargetObject()} which only checks static target sources.\n\t * @param candidate the instance to check (potentially a Spring AOP proxy;\n\t * never {@code null})\n\t * @return the target object or the {@code candidate} (never {@code null})\n\t * @throws IllegalStateException if an error occurs while unwrapping a proxy\n\t * @see Advised#getTargetSource()\n\t * @see TargetSource#isStatic()\n\t */\n\tstatic Object getUltimateTargetObject(Object candidate) {\n\t\tAssert.notNull(candidate, \"Candidate must not be null\");\n\t\ttry {\n\t\t\tif (AopUtils.isAopProxy(candidate) && candidate instanceof Advised advised) {\n\t\t\t\tTargetSource targetSource = advised.getTargetSource();\n\t\t\t\tif (targetSource.isStatic()) {\n\t\t\t\t\tObject target = targetSource.getTarget();\n\t\t\t\t\tif (target != null) {\n\t\t\t\t\t\treturn getUltimateTargetObject(target);\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tcatch (Throwable ex) {\n\t\t\tthrow new IllegalStateException(\"Failed to unwrap proxied object\", ex);\n\t\t}\n\t\treturn candidate;\n\t}\n\n}"
+  },
+  "org.springframework.test.context.bean.override.mockito.SpringMockResolver#resolve(instance)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "instance"
+    ],
+    "position": {
+      "column": 1,
+      "line": 45
+    },
+    "return": "Object",
+    "signature": "public Object resolve(Object instance)",
+    "source_code": "\tpublic Object resolve(Object instance) {\n\t\tif (springAopPresent) {\n\t\t\treturn getUltimateTargetObject(instance);\n\t\t}\n\t\treturn instance;\n\t}"
+  },
+  "org.springframework.web.client.<unknown>#cookie(name,value)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "name",
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 390
+    },
+    "return": "DefaultRequestBodyUriSpec",
+    "signature": "public DefaultRequestBodyUriSpec cookie(String name, String value)",
+    "source_code": "\t\tpublic DefaultRequestBodyUriSpec cookie(String name, String value) {\n\t\t\tgetCookies().add(name, value);\n\t\t\treturn this;\n\t\t}"
+  },
+  "org.springframework.web.client.<unknown>#cookies(Consumer<MultiValueMap<String,cookiesConsumer)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "Consumer<MultiValueMap<String",
+      "cookiesConsumer"
+    ],
+    "position": {
+      "column": 1,
+      "line": 396
+    },
+    "return": "DefaultRequestBodyUriSpec",
+    "signature": "public DefaultRequestBodyUriSpec cookies(Consumer<MultiValueMap<String, String>> cookiesConsumer)",
+    "source_code": "\t\tpublic DefaultRequestBodyUriSpec cookies(Consumer<MultiValueMap<String, String>> cookiesConsumer) {\n\t\t\tcookiesConsumer.accept(getCookies());\n\t\t\treturn this;\n\t\t}"
+  },
+  "org.springframework.web.client.<unknown>#executeAndExtract(exchangeFunction)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "exchangeFunction"
+    ],
+    "position": {
+      "column": 1,
+      "line": 805
+    },
+    "return": "T",
+    "signature": "public T executeAndExtract(RequestHeadersSpec.ExchangeFunction<T> exchangeFunction)",
+    "source_code": "\t\tpublic <T> T executeAndExtract(RequestHeadersSpec.ExchangeFunction<T> exchangeFunction) {\n\t\t\treturn this.requestHeadersSpec.exchange(exchangeFunction);\n\t\t}"
+  },
+  "org.springframework.web.reactive.function.server.<unknown>#build()": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 156
+    },
+    "return": "Mono<RenderingResponse>",
+    "signature": "public Mono<RenderingResponse> build()",
+    "source_code": "\tpublic Mono<RenderingResponse> build() {\n\t\treturn Mono.just(\n\t\t\t\tnew DefaultRenderingResponse(this.status, this.headers, this.cookies, this.name, this.model));\n\t}"
+  },
+  "org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver#handleDisconnectedClientException(ex,request,response,handler)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Handle an Exception that indicates the client has gone away. This is\n\t * typically an {@link IOException} of a specific subtype or with a message\n\t * specific to the underlying Servlet container. Those are detected through\n\t * {@link DisconnectedClientHelper#isClientDisconnectedException(Throwable)}\n\t * <p>By default, do nothing since the response is not usable.\n\t * @param ex the {@code Exception} to be handled\n\t * @param request current HTTP request\n\t * @param response current HTTP response\n\t * @param handler the executed handler, or {@code null} if none chosen\n\t * at the time of the exception (for example, if multipart resolution failed)\n\t * @return an empty ModelAndView indicating the exception was handled\n\t * @since 6.2\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "ex",
+      "request",
+      "response",
+      "handler"
+    ],
+    "position": {
+      "column": 1,
+      "line": 535
+    },
+    "return": "ModelAndView",
+    "signature": "protected ModelAndView handleDisconnectedClientException(Exception ex, HttpServletRequest request, HttpServletResponse response, @Nullable Object handler)",
+    "source_code": "\tprotected ModelAndView handleDisconnectedClientException("
+  }
+}

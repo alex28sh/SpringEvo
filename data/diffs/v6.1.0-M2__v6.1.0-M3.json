@@ -1,0 +1,498 @@
+{
+  "org.springframework.aop.interceptor.CustomizableTraceInterceptor": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "/**\n * {@code MethodInterceptor} implementation that allows for highly customizable\n * method-level tracing, using placeholders.\n *\n * <p>Trace messages are written on method entry, and if the method invocation succeeds\n * on method exit. If an invocation results in an exception, then an exception message\n * is written. The contents of these trace messages is fully customizable and special\n * placeholders are available to allow you to include runtime information in your log\n * messages. The placeholders available are:\n *\n * <p><ul>\n * <li>{@code $[methodName]} - replaced with the name of the method being invoked</li>\n * <li>{@code $[targetClassName]} - replaced with the name of the class that is\n * the target of the invocation</li>\n * <li>{@code $[targetClassShortName]} - replaced with the short name of the class\n * that is the target of the invocation</li>\n * <li>{@code $[returnValue]} - replaced with the value returned by the invocation</li>\n * <li>{@code $[argumentTypes]} - replaced with a comma-separated list of the\n * short class names of the method arguments</li>\n * <li>{@code $[arguments]} - replaced with a comma-separated list of the\n * {@code String} representation of the method arguments</li>\n * <li>{@code $[exception]} - replaced with the {@code String} representation\n * of any {@code Throwable} raised during the invocation</li>\n * <li>{@code $[invocationTime]} - replaced with the time, in milliseconds,\n * taken by the method invocation</li>\n * </ul>\n *\n * <p>There are restrictions on which placeholders can be used in which messages:\n * see the individual message properties for details on the valid placeholders.\n *\n * @author Rob Harrop\n * @author Juergen Hoeller\n * @author Sam Brannen\n * @since 1.2\n * @see #setEnterMessage\n * @see #setExitMessage\n * @see #setExceptionMessage\n * @see SimpleTraceInterceptor\n */",
+    "kind": "class",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 72
+    },
+    "signature": "public class CustomizableTraceInterceptor",
+    "source_code": "public class CustomizableTraceInterceptor extends AbstractTraceInterceptor {\n\n\t/**\n\t * The {@code $[methodName]} placeholder.\n\t * Replaced with the name of the method being invoked.\n\t */\n\tpublic static final String PLACEHOLDER_METHOD_NAME = \"$[methodName]\";\n\n\t/**\n\t * The {@code $[targetClassName]} placeholder.\n\t * Replaced with the fully-qualified name of the {@code Class}\n\t * of the method invocation target.\n\t */\n\tpublic static final String PLACEHOLDER_TARGET_CLASS_NAME = \"$[targetClassName]\";\n\n\t/**\n\t * The {@code $[targetClassShortName]} placeholder.\n\t * Replaced with the short name of the {@code Class} of the\n\t * method invocation target.\n\t */\n\tpublic static final String PLACEHOLDER_TARGET_CLASS_SHORT_NAME = \"$[targetClassShortName]\";\n\n\t/**\n\t * The {@code $[returnValue]} placeholder.\n\t * Replaced with the {@code String} representation of the value\n\t * returned by the method invocation.\n\t */\n\tpublic static final String PLACEHOLDER_RETURN_VALUE = \"$[returnValue]\";\n\n\t/**\n\t * The {@code $[argumentTypes]} placeholder.\n\t * Replaced with a comma-separated list of the argument types for the\n\t * method invocation. Argument types are written as short class names.\n\t */\n\tpublic static final String PLACEHOLDER_ARGUMENT_TYPES = \"$[argumentTypes]\";\n\n\t/**\n\t * The {@code $[arguments]} placeholder.\n\t * Replaced with a comma separated list of the argument values for the\n\t * method invocation. Relies on the {@code toString()} method of\n\t * each argument type.\n\t */\n\tpublic static final String PLACEHOLDER_ARGUMENTS = \"$[arguments]\";\n\n\t/**\n\t * The {@code $[exception]} placeholder.\n\t * Replaced with the {@code String} representation of any\n\t * {@code Throwable} raised during method invocation.\n\t */\n\tpublic static final String PLACEHOLDER_EXCEPTION = \"$[exception]\";\n\n\t/**\n\t * The {@code $[invocationTime]} placeholder.\n\t * Replaced with the time taken by the invocation (in milliseconds).\n\t */\n\tpublic static final String PLACEHOLDER_INVOCATION_TIME = \"$[invocationTime]\";\n\n\t/**\n\t * The default message used for writing method entry messages.\n\t */\n\tprivate static final String DEFAULT_ENTER_MESSAGE = \"Entering method '\" +\n\t\t\tPLACEHOLDER_METHOD_NAME + \"' of class [\" + PLACEHOLDER_TARGET_CLASS_NAME + \"]\";\n\n\t/**\n\t * The default message used for writing method exit messages.\n\t */\n\tprivate static final String DEFAULT_EXIT_MESSAGE = \"Exiting method '\" +\n\t\t\tPLACEHOLDER_METHOD_NAME + \"' of class [\" + PLACEHOLDER_TARGET_CLASS_NAME + \"]\";\n\n\t/**\n\t * The default message used for writing exception messages.\n\t */\n\tprivate static final String DEFAULT_EXCEPTION_MESSAGE = \"Exception thrown in method '\" +\n\t\t\tPLACEHOLDER_METHOD_NAME + \"' of class [\" + PLACEHOLDER_TARGET_CLASS_NAME + \"]\";\n\n\t/**\n\t * The {@code Pattern} used to match placeholders.\n\t */\n\tprivate static final Pattern PATTERN = Pattern.compile(\"\\\\$\\\\[\\\\p{Alpha}+]\");\n\n\t/**\n\t * The {@code Set} of allowed placeholders.\n\t */\n\tstatic final Set<String> ALLOWED_PLACEHOLDERS = Set.of(\n\t\t\tPLACEHOLDER_METHOD_NAME,\n\t\t\tPLACEHOLDER_TARGET_CLASS_NAME,\n\t\t\tPLACEHOLDER_TARGET_CLASS_SHORT_NAME,\n\t\t\tPLACEHOLDER_RETURN_VALUE,\n\t\t\tPLACEHOLDER_ARGUMENT_TYPES,\n\t\t\tPLACEHOLDER_ARGUMENTS,\n\t\t\tPLACEHOLDER_EXCEPTION,\n\t\t\tPLACEHOLDER_INVOCATION_TIME);\n\n\n\t/**\n\t * The message for method entry.\n\t */\n\tprivate String enterMessage = DEFAULT_ENTER_MESSAGE;\n\n\t/**\n\t * The message for method exit.\n\t */\n\tprivate String exitMessage = DEFAULT_EXIT_MESSAGE;\n\n\t/**\n\t * The message for exceptions during method execution.\n\t */\n\tprivate String exceptionMessage = DEFAULT_EXCEPTION_MESSAGE;\n\n\n\t/**\n\t * Set the template used for method entry log messages.\n\t * This template can contain any of the following placeholders:\n\t * <ul>\n\t * <li>{@code $[targetClassName]}</li>\n\t * <li>{@code $[targetClassShortName]}</li>\n\t * <li>{@code $[argumentTypes]}</li>\n\t * <li>{@code $[arguments]}</li>\n\t * </ul>\n\t */\n\tpublic void setEnterMessage(String enterMessage) throws IllegalArgumentException {\n\t\tAssert.hasText(enterMessage, \"enterMessage must not be empty\");\n\t\tcheckForInvalidPlaceholders(enterMessage);\n\t\tAssert.doesNotContain(enterMessage, PLACEHOLDER_RETURN_VALUE,\n\t\t\t\t\"enterMessage cannot contain placeholder \" + PLACEHOLDER_RETURN_VALUE);\n\t\tAssert.doesNotContain(enterMessage, PLACEHOLDER_EXCEPTION,\n\t\t\t\t\"enterMessage cannot contain placeholder \" + PLACEHOLDER_EXCEPTION);\n\t\tAssert.doesNotContain(enterMessage, PLACEHOLDER_INVOCATION_TIME,\n\t\t\t\t\"enterMessage cannot contain placeholder \" + PLACEHOLDER_INVOCATION_TIME);\n\t\tthis.enterMessage = enterMessage;\n\t}\n\n\t/**\n\t * Set the template used for method exit log messages.\n\t * This template can contain any of the following placeholders:\n\t * <ul>\n\t * <li>{@code $[targetClassName]}</li>\n\t * <li>{@code $[targetClassShortName]}</li>\n\t * <li>{@code $[argumentTypes]}</li>\n\t * <li>{@code $[arguments]}</li>\n\t * <li>{@code $[returnValue]}</li>\n\t * <li>{@code $[invocationTime]}</li>\n\t * </ul>\n\t */\n\tpublic void setExitMessage(String exitMessage) {\n\t\tAssert.hasText(exitMessage, \"exitMessage must not be empty\");\n\t\tcheckForInvalidPlaceholders(exitMessage);\n\t\tAssert.doesNotContain(exitMessage, PLACEHOLDER_EXCEPTION,\n\t\t\t\t\"exitMessage cannot contain placeholder\" + PLACEHOLDER_EXCEPTION);\n\t\tthis.exitMessage = exitMessage;\n\t}\n\n\t/**\n\t * Set the template used for method exception log messages.\n\t * This template can contain any of the following placeholders:\n\t * <ul>\n\t * <li>{@code $[targetClassName]}</li>\n\t * <li>{@code $[targetClassShortName]}</li>\n\t * <li>{@code $[argumentTypes]}</li>\n\t * <li>{@code $[arguments]}</li>\n\t * <li>{@code $[exception]}</li>\n\t * </ul>\n\t */\n\tpublic void setExceptionMessage(String exceptionMessage) {\n\t\tAssert.hasText(exceptionMessage, \"exceptionMessage must not be empty\");\n\t\tcheckForInvalidPlaceholders(exceptionMessage);\n\t\tAssert.doesNotContain(exceptionMessage, PLACEHOLDER_RETURN_VALUE,\n\t\t\t\t\"exceptionMessage cannot contain placeholder \" + PLACEHOLDER_RETURN_VALUE);\n\t\tthis.exceptionMessage = exceptionMessage;\n\t}\n\n\n\t/**\n\t * Writes a log message before the invocation based on the value of {@code enterMessage}.\n\t * If the invocation succeeds, then a log message is written on exit based on the value\n\t * {@code exitMessage}. If an exception occurs during invocation, then a message is\n\t * written based on the value of {@code exceptionMessage}.\n\t * @see #setEnterMessage\n\t * @see #setExitMessage\n\t * @see #setExceptionMessage\n\t */\n\t@Override\n\tprotected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {\n\t\tString name = ClassUtils.getQualifiedMethodName(invocation.getMethod());\n\t\tStopWatch stopWatch = new StopWatch(name);\n\t\tObject returnValue = null;\n\t\tboolean exitThroughException = false;\n\t\ttry {\n\t\t\tstopWatch.start(name);\n\t\t\twriteToLog(logger,\n\t\t\t\t\treplacePlaceholders(this.enterMessage, invocation, null, null, -1));\n\t\t\treturnValue = invocation.proceed();\n\t\t\treturn returnValue;\n\t\t}\n\t\tcatch (Throwable ex) {\n\t\t\tif (stopWatch.isRunning()) {\n\t\t\t\tstopWatch.stop();\n\t\t\t}\n\t\t\texitThroughException = true;\n\t\t\twriteToLog(logger, replacePlaceholders(\n\t\t\t\t\tthis.exceptionMessage, invocation, null, ex, stopWatch.getTotalTimeMillis()), ex);\n\t\t\tthrow ex;\n\t\t}\n\t\tfinally {\n\t\t\tif (!exitThroughException) {\n\t\t\t\tif (stopWatch.isRunning()) {\n\t\t\t\t\tstopWatch.stop();\n\t\t\t\t}\n\t\t\t\twriteToLog(logger, replacePlaceholders(\n\t\t\t\t\t\tthis.exitMessage, invocation, returnValue, null, stopWatch.getTotalTimeMillis()));\n\t\t\t}\n\t\t}\n\t}\n\n\t/**\n\t * Replace the placeholders in the given message with the supplied values,\n\t * or values derived from those supplied.\n\t * @param message the message template containing the placeholders to be replaced\n\t * @param methodInvocation the {@code MethodInvocation} being logged.\n\t * Used to derive values for all placeholders except {@code $[exception]}\n\t * and {@code $[returnValue]}.\n\t * @param returnValue any value returned by the invocation.\n\t * Used to replace the {@code $[returnValue]} placeholder. May be {@code null}.\n\t * @param throwable any {@code Throwable} raised during the invocation.\n\t * The value of {@code Throwable.toString()} is replaced for the\n\t * {@code $[exception]} placeholder. May be {@code null}.\n\t * @param invocationTime the value to write in place of the\n\t * {@code $[invocationTime]} placeholder\n\t * @return the formatted output to write to the log\n\t */\n\tprotected String replacePlaceholders(String message, MethodInvocation methodInvocation,\n\t\t\t@Nullable Object returnValue, @Nullable Throwable throwable, long invocationTime) {\n\n\t\tObject target = methodInvocation.getThis();\n\t\tAssert.state(target != null, \"Target must not be null\");\n\n\t\tStringBuilder output = new StringBuilder();\n\t\tMatcher matcher = PATTERN.matcher(message);\n\t\twhile (matcher.find()) {\n\t\t\tString match = matcher.group();\n\t\t\tswitch (match) {\n\t\t\t\tcase PLACEHOLDER_METHOD_NAME -> matcher.appendReplacement(output,\n\t\t\t\t\t\tMatcher.quoteReplacement(methodInvocation.getMethod().getName()));\n\t\t\t\tcase PLACEHOLDER_TARGET_CLASS_NAME -> {\n\t\t\t\t\tString className = getClassForLogging(target).getName();\n\t\t\t\t\tmatcher.appendReplacement(output, Matcher.quoteReplacement(className));\n\t\t\t\t}\n\t\t\t\tcase PLACEHOLDER_TARGET_CLASS_SHORT_NAME -> {\n\t\t\t\t\tString shortName = ClassUtils.getShortName(getClassForLogging(target));\n\t\t\t\t\tmatcher.appendReplacement(output, Matcher.quoteReplacement(shortName));\n\t\t\t\t}\n\t\t\t\tcase PLACEHOLDER_ARGUMENTS -> matcher.appendReplacement(output,\n\t\t\t\t\t\tMatcher.quoteReplacement(StringUtils.arrayToCommaDelimitedString(methodInvocation.getArguments())));\n\t\t\t\tcase PLACEHOLDER_ARGUMENT_TYPES -> appendArgumentTypes(methodInvocation, matcher, output);\n\t\t\t\tcase PLACEHOLDER_RETURN_VALUE -> appendReturnValue(methodInvocation, matcher, output, returnValue);\n\t\t\t\tcase PLACEHOLDER_EXCEPTION -> {\n\t\t\t\t\tif (throwable != null) {\n\t\t\t\t\t\tmatcher.appendReplacement(output, Matcher.quoteReplacement(throwable.toString()));\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tcase PLACEHOLDER_INVOCATION_TIME -> matcher.appendReplacement(output, Long.toString(invocationTime));\n\t\t\t\tdefault -> {\n\t\t\t\t\t// Should not happen since placeholders are checked earlier.\n\t\t\t\t\tthrow new IllegalArgumentException(\"Unknown placeholder [\" + match + \"]\");\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tmatcher.appendTail(output);\n\n\t\treturn output.toString();\n\t}\n\n\t/**\n\t * Adds the {@code String} representation of the method return value\n\t * to the supplied {@code StringBuilder}. Correctly handles\n\t * {@code null} and {@code void} results.\n\t * @param methodInvocation the {@code MethodInvocation} that returned the value\n\t * @param matcher the {@code Matcher} containing the matched placeholder\n\t * @param output the {@code StringBuilder} to write output to\n\t * @param returnValue the value returned by the method invocation.\n\t */\n\tprivate static void appendReturnValue(\n\t\t\tMethodInvocation methodInvocation, Matcher matcher, StringBuilder output, @Nullable Object returnValue) {\n\n\t\tif (methodInvocation.getMethod().getReturnType() == void.class) {\n\t\t\tmatcher.appendReplacement(output, \"void\");\n\t\t}\n\t\telse if (returnValue == null) {\n\t\t\tmatcher.appendReplacement(output, \"null\");\n\t\t}\n\t\telse {\n\t\t\tmatcher.appendReplacement(output, Matcher.quoteReplacement(returnValue.toString()));\n\t\t}\n\t}\n\n\t/**\n\t * Adds a comma-separated list of the short {@code Class} names of the\n\t * method argument types to the output. For example, if a method has signature\n\t * {@code put(java.lang.String, java.lang.Object)} then the value returned\n\t * will be {@code String, Object}.\n\t * @param methodInvocation the {@code MethodInvocation} being logged.\n\t * Arguments will be retrieved from the corresponding {@code Method}.\n\t * @param matcher the {@code Matcher} containing the state of the output\n\t * @param output the {@code StringBuilder} containing the output\n\t */\n\tprivate static void appendArgumentTypes(MethodInvocation methodInvocation, Matcher matcher, StringBuilder output) {\n\t\tClass<?>[] argumentTypes = methodInvocation.getMethod().getParameterTypes();\n\t\tString[] argumentTypeShortNames = new String[argumentTypes.length];\n\t\tfor (int i = 0; i < argumentTypeShortNames.length; i++) {\n\t\t\targumentTypeShortNames[i] = ClassUtils.getShortName(argumentTypes[i]);\n\t\t}\n\t\tmatcher.appendReplacement(output,\n\t\t\t\tMatcher.quoteReplacement(StringUtils.arrayToCommaDelimitedString(argumentTypeShortNames)));\n\t}\n\n\t/**\n\t * Checks to see if the supplied {@code String} has any placeholders\n\t * that are not specified as constants on this class and throws an\n\t * {@code IllegalArgumentException} if so.\n\t */\n\tprivate static void checkForInvalidPlaceholders(String message) throws IllegalArgumentException {\n\t\tMatcher matcher = PATTERN.matcher(message);\n\t\twhile (matcher.find()) {\n\t\t\tString match = matcher.group();\n\t\t\tif (!ALLOWED_PLACEHOLDERS.contains(match)) {\n\t\t\t\tthrow new IllegalArgumentException(\"Placeholder [\" + match + \"] is not valid\");\n\t\t\t}\n\t\t}\n\t}\n\n}"
+  },
+  "org.springframework.aop.interceptor.CustomizableTraceInterceptor#invokeUnderTrace(invocation,logger)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Writes a log message before the invocation based on the value of {@code enterMessage}.\n\t * If the invocation succeeds, then a log message is written on exit based on the value\n\t * {@code exitMessage}. If an exception occurs during invocation, then a message is\n\t * written based on the value of {@code exceptionMessage}.\n\t * @see #setEnterMessage\n\t * @see #setExitMessage\n\t * @see #setExceptionMessage\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "invocation",
+      "logger"
+    ],
+    "position": {
+      "column": 1,
+      "line": 254
+    },
+    "return": "Object",
+    "signature": "protected Object invokeUnderTrace(MethodInvocation invocation, Log logger)",
+    "source_code": "\tprotected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {\n\t\tString name = ClassUtils.getQualifiedMethodName(invocation.getMethod());\n\t\tStopWatch stopWatch = new StopWatch(name);\n\t\tObject returnValue = null;\n\t\tboolean exitThroughException = false;\n\t\ttry {\n\t\t\tstopWatch.start(name);\n\t\t\twriteToLog(logger,\n\t\t\t\t\treplacePlaceholders(this.enterMessage, invocation, null, null, -1));\n\t\t\treturnValue = invocation.proceed();\n\t\t\treturn returnValue;\n\t\t}\n\t\tcatch (Throwable ex) {\n\t\t\tif (stopWatch.isRunning()) {\n\t\t\t\tstopWatch.stop();\n\t\t\t}\n\t\t\texitThroughException = true;\n\t\t\twriteToLog(logger, replacePlaceholders(\n\t\t\t\t\tthis.exceptionMessage, invocation, null, ex, stopWatch.getTotalTimeMillis()), ex);\n\t\t\tthrow ex;\n\t\t}\n\t\tfinally {\n\t\t\tif (!exitThroughException) {\n\t\t\t\tif (stopWatch.isRunning()) {\n\t\t\t\t\tstopWatch.stop();\n\t\t\t\t}\n\t\t\t\twriteToLog(logger, replacePlaceholders(\n\t\t\t\t\t\tthis.exitMessage, invocation, returnValue, null, stopWatch.getTotalTimeMillis()));\n\t\t\t}\n\t\t}\n\t}"
+  },
+  "org.springframework.aop.interceptor.CustomizableTraceInterceptor#replacePlaceholders(message,methodInvocation,returnValue,throwable,invocationTime)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Replace the placeholders in the given message with the supplied values,\n\t * or values derived from those supplied.\n\t * @param message the message template containing the placeholders to be replaced\n\t * @param methodInvocation the {@code MethodInvocation} being logged.\n\t * Used to derive values for all placeholders except {@code $[exception]}\n\t * and {@code $[returnValue]}.\n\t * @param returnValue any value returned by the invocation.\n\t * Used to replace the {@code $[returnValue]} placeholder. May be {@code null}.\n\t * @param throwable any {@code Throwable} raised during the invocation.\n\t * The value of {@code Throwable.toString()} is replaced for the\n\t * {@code $[exception]} placeholder. May be {@code null}.\n\t * @param invocationTime the value to write in place of the\n\t * {@code $[invocationTime]} placeholder\n\t * @return the formatted output to write to the log\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "message",
+      "methodInvocation",
+      "returnValue",
+      "throwable",
+      "invocationTime"
+    ],
+    "position": {
+      "column": 1,
+      "line": 302
+    },
+    "return": "String",
+    "signature": "protected String replacePlaceholders(String message, MethodInvocation methodInvocation,\n\t\t\t@Nullable Object returnValue, @Nullable Throwable throwable, long invocationTime)",
+    "source_code": "\tprotected String replacePlaceholders(String message, MethodInvocation methodInvocation,"
+  },
+  "org.springframework.aop.interceptor.CustomizableTraceInterceptor#setEnterMessage(enterMessage)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Set the template used for method entry log messages.\n\t * This template can contain any of the following placeholders:\n\t * <ul>\n\t * <li>{@code $[targetClassName]}</li>\n\t * <li>{@code $[targetClassShortName]}</li>\n\t * <li>{@code $[argumentTypes]}</li>\n\t * <li>{@code $[arguments]}</li>\n\t * </ul>\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "enterMessage"
+    ],
+    "position": {
+      "column": 1,
+      "line": 192
+    },
+    "return": "void",
+    "signature": "public void setEnterMessage(String enterMessage)",
+    "source_code": "\tpublic void setEnterMessage(String enterMessage) throws IllegalArgumentException {\n\t\tAssert.hasText(enterMessage, \"enterMessage must not be empty\");\n\t\tcheckForInvalidPlaceholders(enterMessage);\n\t\tAssert.doesNotContain(enterMessage, PLACEHOLDER_RETURN_VALUE,\n\t\t\t\t\"enterMessage cannot contain placeholder \" + PLACEHOLDER_RETURN_VALUE);\n\t\tAssert.doesNotContain(enterMessage, PLACEHOLDER_EXCEPTION,\n\t\t\t\t\"enterMessage cannot contain placeholder \" + PLACEHOLDER_EXCEPTION);\n\t\tAssert.doesNotContain(enterMessage, PLACEHOLDER_INVOCATION_TIME,\n\t\t\t\t\"enterMessage cannot contain placeholder \" + PLACEHOLDER_INVOCATION_TIME);\n\t\tthis.enterMessage = enterMessage;\n\t}"
+  },
+  "org.springframework.aop.interceptor.CustomizableTraceInterceptor#setExceptionMessage(exceptionMessage)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Set the template used for method exception log messages.\n\t * This template can contain any of the following placeholders:\n\t * <ul>\n\t * <li>{@code $[targetClassName]}</li>\n\t * <li>{@code $[targetClassShortName]}</li>\n\t * <li>{@code $[argumentTypes]}</li>\n\t * <li>{@code $[arguments]}</li>\n\t * <li>{@code $[exception]}</li>\n\t * </ul>\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "exceptionMessage"
+    ],
+    "position": {
+      "column": 1,
+      "line": 235
+    },
+    "return": "void",
+    "signature": "public void setExceptionMessage(String exceptionMessage)",
+    "source_code": "\tpublic void setExceptionMessage(String exceptionMessage) {\n\t\tAssert.hasText(exceptionMessage, \"exceptionMessage must not be empty\");\n\t\tcheckForInvalidPlaceholders(exceptionMessage);\n\t\tAssert.doesNotContain(exceptionMessage, PLACEHOLDER_RETURN_VALUE,\n\t\t\t\t\"exceptionMessage cannot contain placeholder \" + PLACEHOLDER_RETURN_VALUE);\n\t\tthis.exceptionMessage = exceptionMessage;\n\t}"
+  },
+  "org.springframework.aop.interceptor.CustomizableTraceInterceptor#setExitMessage(exitMessage)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Set the template used for method exit log messages.\n\t * This template can contain any of the following placeholders:\n\t * <ul>\n\t * <li>{@code $[targetClassName]}</li>\n\t * <li>{@code $[targetClassShortName]}</li>\n\t * <li>{@code $[argumentTypes]}</li>\n\t * <li>{@code $[arguments]}</li>\n\t * <li>{@code $[returnValue]}</li>\n\t * <li>{@code $[invocationTime]}</li>\n\t * </ul>\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "exitMessage"
+    ],
+    "position": {
+      "column": 1,
+      "line": 216
+    },
+    "return": "void",
+    "signature": "public void setExitMessage(String exitMessage)",
+    "source_code": "\tpublic void setExitMessage(String exitMessage) {\n\t\tAssert.hasText(exitMessage, \"exitMessage must not be empty\");\n\t\tcheckForInvalidPlaceholders(exitMessage);\n\t\tAssert.doesNotContain(exitMessage, PLACEHOLDER_EXCEPTION,\n\t\t\t\t\"exitMessage cannot contain placeholder\" + PLACEHOLDER_EXCEPTION);\n\t\tthis.exitMessage = exitMessage;\n\t}"
+  },
+  "org.springframework.aop.interceptor.PLACEHOLDER_ARGUMENTS": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * The {@code $[arguments]} placeholder.\n\t * Replaced with a comma separated list of the argument values for the\n\t * method invocation. Relies on the {@code toString()} method of\n\t * each argument type.\n\t */",
+    "kind": "field",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 114
+    },
+    "signature": "public String PLACEHOLDER_ARGUMENTS",
+    "source_code": "\tpublic static final String PLACEHOLDER_ARGUMENTS = \"$[arguments]\";",
+    "type": "String"
+  },
+  "org.springframework.aop.interceptor.PLACEHOLDER_ARGUMENT_TYPES": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * The {@code $[argumentTypes]} placeholder.\n\t * Replaced with a comma-separated list of the argument types for the\n\t * method invocation. Argument types are written as short class names.\n\t */",
+    "kind": "field",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 106
+    },
+    "signature": "public String PLACEHOLDER_ARGUMENT_TYPES",
+    "source_code": "\tpublic static final String PLACEHOLDER_ARGUMENT_TYPES = \"$[argumentTypes]\";",
+    "type": "String"
+  },
+  "org.springframework.aop.interceptor.PLACEHOLDER_EXCEPTION": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * The {@code $[exception]} placeholder.\n\t * Replaced with the {@code String} representation of any\n\t * {@code Throwable} raised during method invocation.\n\t */",
+    "kind": "field",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 121
+    },
+    "signature": "public String PLACEHOLDER_EXCEPTION",
+    "source_code": "\tpublic static final String PLACEHOLDER_EXCEPTION = \"$[exception]\";",
+    "type": "String"
+  },
+  "org.springframework.aop.interceptor.PLACEHOLDER_INVOCATION_TIME": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * The {@code $[invocationTime]} placeholder.\n\t * Replaced with the time taken by the invocation (in milliseconds).\n\t */",
+    "kind": "field",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 127
+    },
+    "signature": "public String PLACEHOLDER_INVOCATION_TIME",
+    "source_code": "\tpublic static final String PLACEHOLDER_INVOCATION_TIME = \"$[invocationTime]\";",
+    "type": "String"
+  },
+  "org.springframework.aop.interceptor.PLACEHOLDER_METHOD_NAME": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * The {@code $[methodName]} placeholder.\n\t * Replaced with the name of the method being invoked.\n\t */",
+    "kind": "field",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 78
+    },
+    "signature": "public String PLACEHOLDER_METHOD_NAME",
+    "source_code": "\tpublic static final String PLACEHOLDER_METHOD_NAME = \"$[methodName]\";",
+    "type": "String"
+  },
+  "org.springframework.aop.interceptor.PLACEHOLDER_RETURN_VALUE": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * The {@code $[returnValue]} placeholder.\n\t * Replaced with the {@code String} representation of the value\n\t * returned by the method invocation.\n\t */",
+    "kind": "field",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 99
+    },
+    "signature": "public String PLACEHOLDER_RETURN_VALUE",
+    "source_code": "\tpublic static final String PLACEHOLDER_RETURN_VALUE = \"$[returnValue]\";",
+    "type": "String"
+  },
+  "org.springframework.aop.interceptor.PLACEHOLDER_TARGET_CLASS_NAME": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * The {@code $[targetClassName]} placeholder.\n\t * Replaced with the fully-qualified name of the {@code Class}\n\t * of the method invocation target.\n\t */",
+    "kind": "field",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 85
+    },
+    "signature": "public String PLACEHOLDER_TARGET_CLASS_NAME",
+    "source_code": "\tpublic static final String PLACEHOLDER_TARGET_CLASS_NAME = \"$[targetClassName]\";",
+    "type": "String"
+  },
+  "org.springframework.aop.interceptor.PLACEHOLDER_TARGET_CLASS_SHORT_NAME": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * The {@code $[targetClassShortName]} placeholder.\n\t * Replaced with the short name of the {@code Class} of the\n\t * method invocation target.\n\t */",
+    "kind": "field",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 92
+    },
+    "signature": "public String PLACEHOLDER_TARGET_CLASS_SHORT_NAME",
+    "source_code": "\tpublic static final String PLACEHOLDER_TARGET_CLASS_SHORT_NAME = \"$[targetClassShortName]\";",
+    "type": "String"
+  },
+  "org.springframework.beans.factory.support.<unknown>#hasShortcut()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 1429
+    },
+    "return": "boolean",
+    "signature": "public boolean hasShortcut()",
+    "source_code": "\t\tpublic boolean hasShortcut() {\n\t\t\treturn (this.shortcut != null);\n\t\t}"
+  },
+  "org.springframework.beans.factory.support.<unknown>#resolveAutowiredArgument(descriptor,beanName,autowiredBeanNames,typeConverter,fallback)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Template method for resolving the specified argument which is supposed to be autowired.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "descriptor",
+      "beanName",
+      "autowiredBeanNames",
+      "typeConverter",
+      "fallback"
+    ],
+    "position": {
+      "column": 1,
+      "line": 876
+    },
+    "return": "Object",
+    "signature": "protected Object resolveAutowiredArgument(DependencyDescriptor descriptor, String beanName,\n\t\t\t@Nullable Set<String> autowiredBeanNames, TypeConverter typeConverter, boolean fallback)",
+    "source_code": "\tprotected Object resolveAutowiredArgument(DependencyDescriptor descriptor, String beanName,"
+  },
+  "org.springframework.beans.factory.support.<unknown>#resolveShortcut(beanFactory)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "beanFactory"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1434
+    },
+    "return": "Object",
+    "signature": "public Object resolveShortcut(BeanFactory beanFactory)",
+    "source_code": "\t\tpublic Object resolveShortcut(BeanFactory beanFactory) {\n\t\t\tString shortcut = this.shortcut;\n\t\t\treturn (shortcut != null ? beanFactory.getBean(shortcut, getDependencyType()) : null);\n\t\t}"
+  },
+  "org.springframework.beans.factory.support.<unknown>#setShortcut(shortcut)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "shortcut"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1425
+    },
+    "return": "void",
+    "signature": "public void setShortcut(@Nullable String shortcut)",
+    "source_code": "\t\tpublic void setShortcut(@Nullable String shortcut) {\n\t\t\tthis.shortcut = shortcut;\n\t\t}"
+  },
+  "org.springframework.cache.interceptor.CacheAspectSupport#getBean(beanName,expectedType)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return a bean with the specified name and type. Used to resolve services that\n\t * are referenced by name in a {@link CacheOperation}.\n\t * @param beanName the name of the bean, as defined by the operation\n\t * @param expectedType type for the bean\n\t * @return the bean matching that name\n\t * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException if such bean does not exist\n\t * @see CacheOperation#getKeyGenerator()\n\t * @see CacheOperation#getCacheManager()\n\t * @see CacheOperation#getCacheResolver()\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "beanName",
+      "expectedType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 320
+    },
+    "return": "T",
+    "signature": "protected T getBean(String beanName, Class<T> expectedType)",
+    "source_code": "\tprotected <T> T getBean(String beanName, Class<T> expectedType) {\n\t\tif (this.beanFactory == null) {\n\t\t\tthrow new IllegalStateException(\n\t\t\t\t\t\"BeanFactory must be set on cache aspect for \" + expectedType.getSimpleName() + \" retrieval\");\n\t\t}\n\t\treturn BeanFactoryAnnotationUtils.qualifiedBeanOfType(this.beanFactory, expectedType, beanName);\n\t}"
+  },
+  "org.springframework.cache.interceptor.CacheAspectSupport#getBean(name,serviceType)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Retrieve a bean with the specified name and type.\n\t * Used to resolve services that are referenced by name in a {@link CacheOperation}.\n\t * @param name the name of the bean, as defined by the cache operation\n\t * @param serviceType the type expected by the operation's service reference\n\t * @return the bean matching the expected type, qualified by the given name\n\t * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException if such bean does not exist\n\t * @see CacheOperation#getKeyGenerator()\n\t * @see CacheOperation#getCacheManager()\n\t * @see CacheOperation#getCacheResolver()\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "name",
+      "serviceType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 320
+    },
+    "return": "T",
+    "signature": "protected T getBean(String name, Class<T> serviceType)",
+    "source_code": "\tprotected <T> T getBean(String name, Class<T> serviceType) {\n\t\tif (this.beanFactory == null) {\n\t\t\tthrow new IllegalStateException(\n\t\t\t\t\t\"BeanFactory must be set on cache aspect for \" + serviceType.getSimpleName() + \" retrieval\");\n\t\t}\n\t\treturn BeanFactoryAnnotationUtils.qualifiedBeanOfType(this.beanFactory, serviceType, name);\n\t}"
+  },
+  "org.springframework.core.convert.support.GenericConversionService#convert(source,targetType)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "source",
+      "targetType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 164
+    },
+    "return": "T",
+    "signature": "public T convert(@Nullable Object source, Class<T> targetType)",
+    "source_code": "\tpublic <T> T convert(@Nullable Object source, Class<T> targetType) {\n\t\tAssert.notNull(targetType, \"Target type to convert to cannot be null\");\n\t\treturn (T) convert(source, TypeDescriptor.forObject(source), TypeDescriptor.valueOf(targetType));\n\t}"
+  },
+  "org.springframework.dao.support.DataAccessUtils#optionalResult(results)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return a single result object from the given Iterator.\n\t * <p>Returns {@code Optional.empty()} if 0 result objects found;\n\t * throws an exception if more than 1 element found.\n\t * @param results the result Iterator (can be {@code null})\n\t * @return the single optional result object, or {@code Optional.empty()} if none\n\t * @throws IncorrectResultSizeDataAccessException if more than one\n\t * element has been found in the given Iterator\n\t * @since 6.1\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "results"
+    ],
+    "position": {
+      "column": 1,
+      "line": 148
+    },
+    "return": "Optional<T>",
+    "signature": "public Optional<T> optionalResult(@Nullable Iterator<T> results)",
+    "source_code": "\tpublic static <T> Optional<T> optionalResult(@Nullable Iterator<T> results) throws IncorrectResultSizeDataAccessException {\n\t\treturn Optional.ofNullable(singleResult(results));\n\t}"
+  },
+  "org.springframework.http.server.ServletServerHttpRequest#initURI(servletRequest)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Initialize a URI from the given Servlet request.\n\t * @param servletRequest the request\n\t * @return the initialized URI\n\t * @since 6.1\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "servletRequest"
+    ],
+    "position": {
+      "column": 1,
+      "line": 111
+    },
+    "return": "URI",
+    "signature": "public URI initURI(HttpServletRequest servletRequest)",
+    "source_code": "\tpublic static URI initURI(HttpServletRequest servletRequest) {\n\t\tString urlString = null;\n\t\tboolean hasQuery = false;\n\t\ttry {\n\t\t\tStringBuffer url = servletRequest.getRequestURL();\n\t\t\tString query = servletRequest.getQueryString();\n\t\t\thasQuery = StringUtils.hasText(query);\n\t\t\tif (hasQuery) {\n\t\t\t\turl.append('?').append(query);\n\t\t\t}\n\t\t\turlString = url.toString();\n\t\t\treturn new URI(urlString);\n\t\t}\n\t\tcatch (URISyntaxException ex) {\n\t\t\tif (!hasQuery) {\n\t\t\t\tthrow new IllegalStateException(\n\t\t\t\t\t\t\"Could not resolve HttpServletRequest as URI: \" + urlString, ex);\n\t\t\t}\n\t\t\t// Maybe a malformed query string... try plain request URL\n\t\t\ttry {\n\t\t\t\turlString = servletRequest.getRequestURL().toString();\n\t\t\t\treturn new URI(urlString);\n\t\t\t}\n\t\t\tcatch (URISyntaxException ex2) {\n\t\t\t\tthrow new IllegalStateException(\n\t\t\t\t\t\t\"Could not resolve HttpServletRequest as URI: \" + urlString, ex2);\n\t\t\t}\n\t\t}\n\t}"
+  },
+  "org.springframework.jms.connection.CachingConnectionFactory#equals(obj)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "obj"
+    ],
+    "position": {
+      "column": 1,
+      "line": 562
+    },
+    "return": "boolean",
+    "signature": "public boolean equals(@Nullable Object obj)",
+    "source_code": "\t\tpublic boolean equals(@Nullable Object obj) {\n\t\t\t// Effectively checking object equality as well as toString equality.\n\t\t\t// On WebSphere MQ, Destination objects do not implement equals...\n\t\t\treturn (this == obj || (obj instanceof DestinationCacheKey otherKey &&\n\t\t\t\t\tdestinationEquals(otherKey)));\n\t\t}"
+  },
+  "org.springframework.jms.connection.ConnectionFactoryUtils#afterCompletion(status)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "status"
+    ],
+    "position": {
+      "column": 1,
+      "line": 446
+    },
+    "return": "void",
+    "signature": "public void afterCompletion(int status)",
+    "source_code": "\t\tpublic void afterCompletion(int status) {\n\t\t\tif (status == STATUS_COMMITTED && this.transacted && !this.commitProcessed) {\n\t\t\t\t// JmsResourceSynchronization registered in afterCommit phase of other synchronization\n\t\t\t\t// -> late local JMS transaction commit here, otherwise it would silently get dropped.\n\t\t\t\tafterCommit();\n\t\t\t}\n\t\t\tsuper.afterCompletion(status);\n\t\t}"
+  },
+  "org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter#execute(task)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "task"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1058
+    },
+    "return": "void",
+    "signature": "public void execute(Runnable task)",
+    "source_code": "\t\tpublic void execute(Runnable task) {\n\t\t\tif (taskExecutorWarning && logger.isWarnEnabled()) {\n\t\t\t\tsynchronized (this) {\n\t\t\t\t\tif (taskExecutorWarning) {\n\t\t\t\t\t\tlogger.warn(\"\"\"\n\t\t\t\t\t\t\t\t!!!\n\t\t\t\t\t\t\t\tPerforming asynchronous handling through the default Spring MVC SimpleAsyncTaskExecutor.\n\t\t\t\t\t\t\t\tThis executor is not suitable for production use under load.\n\t\t\t\t\t\t\t\tPlease, configure an AsyncTaskExecutor through the WebMvc config.\n\t\t\t\t\t\t\t\t-------------------------------\n\t\t\t\t\t\t\t\t!!!\"\"\");\n\t\t\t\t\t\ttaskExecutorWarning = false;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tsuper.execute(task);\n\t\t}"
+  },
+  "org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver#logException(ex,request)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "ex",
+      "request"
+    ],
+    "position": {
+      "column": 1,
+      "line": 666
+    },
+    "return": "void",
+    "signature": "protected void logException(Exception ex, HttpServletRequest request)",
+    "source_code": "\tprotected void logException(Exception ex, HttpServletRequest request) {\n\t\tif (ex instanceof NoHandlerFoundException || ex instanceof NoResourceFoundException) {\n\t\t\tif (logger.isDebugEnabled()) {\n\t\t\t\tlogger.debug(buildLogMessage(ex, request));\n\t\t\t}\n\t\t\treturn;\n\t\t}\n\t\tsuper.logException(ex, request);\n\t}"
+  }
+}

@@ -1,0 +1,781 @@
+{
+  "org.springframework.aot.nativex.INSTANCE": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "field",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 45
+    },
+    "signature": "public ResourceHintsWriter INSTANCE",
+    "source_code": "\tpublic static final ResourceHintsWriter INSTANCE = new ResourceHintsWriter();",
+    "type": "ResourceHintsWriter"
+  },
+  "org.springframework.beans.factory.support.DefaultListableBeanFactory#findAllAnnotationsOnBean(beanName,annotationType,allowFactoryBeanInit)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "beanName",
+      "annotationType",
+      "allowFactoryBeanInit"
+    ],
+    "position": {
+      "column": 1,
+      "line": 767
+    },
+    "return": "Set<A>",
+    "signature": "public Set<A> findAllAnnotationsOnBean(String beanName, Class<A> annotationType, boolean allowFactoryBeanInit)",
+    "source_code": "\tpublic <A extends Annotation> Set<A> findAllAnnotationsOnBean("
+  },
+  "org.springframework.context.support.AbstractApplicationContext#findAllAnnotationsOnBean(beanName,annotationType,allowFactoryBeanInit)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "beanName",
+      "annotationType",
+      "allowFactoryBeanInit"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1322
+    },
+    "return": "Set<A>",
+    "signature": "public Set<A> findAllAnnotationsOnBean(String beanName, Class<A> annotationType, boolean allowFactoryBeanInit)",
+    "source_code": "\tpublic <A extends Annotation> Set<A> findAllAnnotationsOnBean("
+  },
+  "org.springframework.messaging.rsocket.<unknown>#encode()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Encode the collected metadata entries to a {@code DataBuffer}.\n\t * @see PayloadUtils#createPayload(DataBuffer, DataBuffer)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 177
+    },
+    "return": "Mono<DataBuffer>",
+    "signature": "public Mono<DataBuffer> encode()",
+    "source_code": "\tpublic Mono<DataBuffer> encode() {\n\t\treturn this.hasAsyncValues ?\n\t\t\t\tresolveAsyncMetadata().map(this::encodeEntries) :\n\t\t\t\tMono.fromCallable(() -> encodeEntries(this.metadataEntries));\n\t}"
+  },
+  "org.springframework.messaging.rsocket.<unknown>#metadata(metadata,mimeType)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Add a metadata entry. If called more than once or in addition to route,\n\t * composite metadata must be in use.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "metadata",
+      "mimeType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 130
+    },
+    "return": "MetadataEncoder",
+    "signature": "public MetadataEncoder metadata(Object metadata, @Nullable MimeType mimeType)",
+    "source_code": "\tpublic MetadataEncoder metadata(Object metadata, @Nullable MimeType mimeType) {\n\t\tif (this.isComposite) {\n\t\t\tAssert.notNull(mimeType, \"MimeType is required for composite metadata entries.\");\n\t\t}\n\t\telse if (mimeType == null) {\n\t\t\tmimeType = this.metadataMimeType;\n\t\t}\n\t\telse if (!this.metadataMimeType.equals(mimeType)) {\n\t\t\tthrow new IllegalArgumentException(\n\t\t\t\t\t\"Mime type is optional when not using composite metadata, but it was provided \" +\n\t\t\t\t\t\t\t\"and does not match the connection metadata mime type '\" + this.metadataMimeType + \"'.\");\n\t\t}\n\t\tReactiveAdapter adapter = this.strategies.reactiveAdapterRegistry().getAdapter(metadata.getClass());\n\t\tif (adapter != null) {\n\t\t\tObject originalMetadata = metadata;\n\t\t\tAssert.isTrue(!adapter.isMultiValue(), () -> \"Expected single value: \" + originalMetadata);\n\t\t\tmetadata = Mono.from(adapter.toPublisher(metadata)).defaultIfEmpty(NO_VALUE);\n\t\t\tthis.hasAsyncValues = true;\n\t\t}\n\t\tthis.metadataEntries.add(new MetadataEntry(metadata, mimeType));\n\t\tassertMetadataEntryCount();\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.messaging.rsocket.<unknown>#metadataAndOrRoute(Map<Object,metadata,route,vars)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Add route and/or metadata, both optional.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "Map<Object",
+      "metadata",
+      "route",
+      "vars"
+    ],
+    "position": {
+      "column": 1,
+      "line": 157
+    },
+    "return": "MetadataEncoder",
+    "signature": "public MetadataEncoder metadataAndOrRoute(@Nullable Map<Object, MimeType> metadata,\n\t\t\t@Nullable String route, @Nullable Object[] vars)",
+    "source_code": "\tpublic MetadataEncoder metadataAndOrRoute(@Nullable Map<Object, MimeType> metadata,"
+  },
+  "org.springframework.messaging.rsocket.<unknown>#mimeType()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 293
+    },
+    "return": "MimeType",
+    "signature": "public MimeType mimeType()",
+    "source_code": "\t\tpublic MimeType mimeType() {\n\t\t\treturn this.mimeType;\n\t\t}"
+  },
+  "org.springframework.messaging.rsocket.<unknown>#route(route,routeVars)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Set the route to a remote handler as described in\n\t * {@link RSocketRequester#route(String, Object...)}.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "route",
+      "routeVars"
+    ],
+    "position": {
+      "column": 1,
+      "line": 95
+    },
+    "return": "MetadataEncoder",
+    "signature": "public MetadataEncoder route(String route, Object... routeVars)",
+    "source_code": "\tpublic MetadataEncoder route(String route, Object... routeVars) {\n\t\tthis.route = expand(route, routeVars);\n\t\tassertMetadataEntryCount();\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.messaging.rsocket.<unknown>#value()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 289
+    },
+    "return": "Object",
+    "signature": "public Object value()",
+    "source_code": "\t\tpublic Object value() {\n\t\t\treturn this.value;\n\t\t}"
+  },
+  "org.springframework.messaging.rsocket.service.RSocketServiceProxyFactory#addCustomArgumentResolver(resolver)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "resolver"
+    ],
+    "position": {
+      "column": 1,
+      "line": 416
+    },
+    "return": "void",
+    "signature": "public void addCustomArgumentResolver(RSocketServiceArgumentResolver resolver)",
+    "source_code": "\t\tpublic void addCustomArgumentResolver(RSocketServiceArgumentResolver resolver) {\n\t\t\tif (this.customArgumentResolvers == null) {\n\t\t\t\tthis.customArgumentResolvers = new ArrayList<>();\n\t\t\t}\n\t\t\tthis.customArgumentResolvers.add(resolver);\n\t\t}"
+  },
+  "org.springframework.messaging.rsocket.service.RSocketServiceProxyFactory#afterPropertiesSet()": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 442
+    },
+    "return": "void",
+    "signature": "public void afterPropertiesSet()",
+    "source_code": "\t\tpublic void afterPropertiesSet() {\n\t\t\tthis.argumentResolvers = initArgumentResolvers();\n\t\t}"
+  },
+  "org.springframework.messaging.rsocket.service.RSocketServiceProxyFactory#setBlockTimeout(blockTimeout)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "blockTimeout"
+    ],
+    "position": {
+      "column": 1,
+      "line": 436
+    },
+    "return": "void",
+    "signature": "public void setBlockTimeout(Duration blockTimeout)",
+    "source_code": "\t\tpublic void setBlockTimeout(Duration blockTimeout) {\n\t\t\tthis.blockTimeout = blockTimeout;\n\t\t}"
+  },
+  "org.springframework.messaging.rsocket.service.RSocketServiceProxyFactory#setCustomArgumentResolvers(resolvers)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "resolvers"
+    ],
+    "position": {
+      "column": 1,
+      "line": 423
+    },
+    "return": "void",
+    "signature": "public void setCustomArgumentResolvers(List<RSocketServiceArgumentResolver> resolvers)",
+    "source_code": "\t\tpublic void setCustomArgumentResolvers(List<RSocketServiceArgumentResolver> resolvers) {\n\t\t\tthis.customArgumentResolvers = new ArrayList<>(resolvers);\n\t\t}"
+  },
+  "org.springframework.messaging.rsocket.service.RSocketServiceProxyFactory#setEmbeddedValueResolver(resolver)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "resolver"
+    ],
+    "position": {
+      "column": 1,
+      "line": 428
+    },
+    "return": "void",
+    "signature": "public void setEmbeddedValueResolver(StringValueResolver resolver)",
+    "source_code": "\t\tpublic void setEmbeddedValueResolver(StringValueResolver resolver) {\n\t\t\tthis.embeddedValueResolver = resolver;\n\t\t}"
+  },
+  "org.springframework.messaging.rsocket.service.RSocketServiceProxyFactory#setReactiveAdapterRegistry(registry)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "registry"
+    ],
+    "position": {
+      "column": 1,
+      "line": 432
+    },
+    "return": "void",
+    "signature": "public void setReactiveAdapterRegistry(ReactiveAdapterRegistry registry)",
+    "source_code": "\t\tpublic void setReactiveAdapterRegistry(ReactiveAdapterRegistry registry) {\n\t\t\tthis.reactiveAdapterRegistry = registry;\n\t\t}"
+  },
+  "org.springframework.mock.web.MockHttpServletRequest#getConnectionId()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 982
+    },
+    "return": "String",
+    "signature": "public String getConnectionId()",
+    "source_code": "\t\t\tpublic String getConnectionId() {\n\t\t\t\treturn MockHttpServletRequest.this.getRequestId();\n\t\t\t}"
+  },
+  "org.springframework.mock.web.MockHttpServletRequest#getProtocolConnectionId()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 990
+    },
+    "return": "String",
+    "signature": "public String getProtocolConnectionId()",
+    "source_code": "\t\t\tpublic String getProtocolConnectionId() {\n\t\t\t\treturn MockHttpServletRequest.this.getProtocolRequestId();\n\t\t\t}"
+  },
+  "org.springframework.mock.web.MockHttpServletRequest#getProtocolRequestId()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 974
+    },
+    "return": "String",
+    "signature": "public String getProtocolRequestId()",
+    "source_code": "\tpublic String getProtocolRequestId() {\n\t\treturn \"\";\n\t}"
+  },
+  "org.springframework.mock.web.MockHttpServletRequest#getRealPath(path)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "path"
+    ],
+    "position": {
+      "column": 1,
+      "line": 883
+    },
+    "return": "String",
+    "signature": "public String getRealPath(String path)",
+    "source_code": "\tpublic String getRealPath(String path) {\n\t\treturn this.servletContext.getRealPath(path);\n\t}"
+  },
+  "org.springframework.mock.web.MockHttpServletRequest#getRequestId()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 969
+    },
+    "return": "String",
+    "signature": "public String getRequestId()",
+    "source_code": "\tpublic String getRequestId() {\n\t\treturn \"\";\n\t}"
+  },
+  "org.springframework.mock.web.MockHttpServletRequest#getServletConnection()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 979
+    },
+    "return": "ServletConnection",
+    "signature": "public ServletConnection getServletConnection()",
+    "source_code": "\tpublic ServletConnection getServletConnection() {\n\t\treturn new ServletConnection() {\n\t\t\t@Override\n\t\t\tpublic String getConnectionId() {\n\t\t\t\treturn MockHttpServletRequest.this.getRequestId();\n\t\t\t}\n\t\t\t@Override\n\t\t\tpublic String getProtocol() {\n\t\t\t\treturn MockHttpServletRequest.this.getProtocol();\n\t\t\t}\n\t\t\t@Override\n\t\t\tpublic String getProtocolConnectionId() {\n\t\t\t\treturn MockHttpServletRequest.this.getProtocolRequestId();\n\t\t\t}\n\t\t\t@Override\n\t\t\tpublic boolean isSecure() {\n\t\t\t\treturn MockHttpServletRequest.this.isSecure();\n\t\t\t}\n\t\t};\n\t}"
+  },
+  "org.springframework.mock.web.MockHttpServletRequest#isRequestedSessionIdFromUrl()": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 1357
+    },
+    "return": "boolean",
+    "signature": "public boolean isRequestedSessionIdFromUrl()",
+    "source_code": "\tpublic boolean isRequestedSessionIdFromUrl() {\n\t\treturn isRequestedSessionIdFromURL();\n\t}"
+  },
+  "org.springframework.mock.web.MockHttpServletResponse#encodeRedirectUrl(url)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "url"
+    ],
+    "position": {
+      "column": 1,
+      "line": 583
+    },
+    "return": "String",
+    "signature": "public String encodeRedirectUrl(String url)",
+    "source_code": "\tpublic String encodeRedirectUrl(String url) {\n\t\treturn encodeRedirectURL(url);\n\t}"
+  },
+  "org.springframework.mock.web.MockHttpServletResponse#encodeUrl(url)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "url"
+    ],
+    "position": {
+      "column": 1,
+      "line": 577
+    },
+    "return": "String",
+    "signature": "public String encodeUrl(String url)",
+    "source_code": "\tpublic String encodeUrl(String url) {\n\t\treturn encodeURL(url);\n\t}"
+  },
+  "org.springframework.mock.web.MockHttpServletResponse#setStatus(status,errorMessage)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "status",
+      "errorMessage"
+    ],
+    "position": {
+      "column": 1,
+      "line": 763
+    },
+    "return": "void",
+    "signature": "public void setStatus(int status, String errorMessage)",
+    "source_code": "\tpublic void setStatus(int status, String errorMessage) {\n\t\tif (!this.isCommitted()) {\n\t\t\tthis.status = status;\n\t\t\tthis.errorMessage = errorMessage;\n\t\t}\n\t}"
+  },
+  "org.springframework.web.reactive.DispatcherHandler": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "/**\n * Central dispatcher for HTTP request handlers/controllers. Dispatches to\n * registered handlers for processing a request, providing convenient mapping\n * facilities.\n *\n * <p>{@code DispatcherHandler} discovers the delegate components it needs from\n * Spring configuration. It detects the following in the application context:\n * <ul>\n * <li>{@link HandlerMapping} -- map requests to handler objects\n * <li>{@link HandlerAdapter} -- for using any handler interface\n * <li>{@link HandlerResultHandler} -- process handler return values\n * </ul>\n *\n * <p>{@code DispatcherHandler} is also designed to be a Spring bean itself and\n * implements {@link ApplicationContextAware} for access to the context it runs\n * in. If {@code DispatcherHandler} is declared as a bean with the name\n * \"webHandler\", it is discovered by\n * {@link WebHttpHandlerBuilder#applicationContext(ApplicationContext)} which\n * puts together a processing chain together with {@code WebFilter},\n * {@code WebExceptionHandler} and others.\n *\n * <p>A {@code DispatcherHandler} bean declaration is included in\n * {@link org.springframework.web.reactive.config.EnableWebFlux @EnableWebFlux}\n * configuration.\n *\n * @author Rossen Stoyanchev\n * @author Sebastien Deleuze\n * @author Juergen Hoeller\n * @since 5.0\n * @see WebHttpHandlerBuilder#applicationContext(ApplicationContext)\n */",
+    "kind": "class",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 72
+    },
+    "signature": "public class DispatcherHandler",
+    "source_code": "public class DispatcherHandler implements WebHandler, PreFlightRequestHandler, ApplicationContextAware {\n\n\t@Nullable\n\tprivate List<HandlerMapping> handlerMappings;\n\n\t@Nullable\n\tprivate List<HandlerAdapter> handlerAdapters;\n\n\t@Nullable\n\tprivate List<HandlerResultHandler> resultHandlers;\n\n\n\t/**\n\t * Create a new {@code DispatcherHandler} which needs to be configured with\n\t * an {@link ApplicationContext} through {@link #setApplicationContext}.\n\t */\n\tpublic DispatcherHandler() {\n\t}\n\n\t/**\n\t * Create a new {@code DispatcherHandler} for the given {@link ApplicationContext}.\n\t * @param applicationContext the application context to find the handler beans in\n\t */\n\tpublic DispatcherHandler(ApplicationContext applicationContext) {\n\t\tinitStrategies(applicationContext);\n\t}\n\n\n\t/**\n\t * Return all {@link HandlerMapping} beans detected by type in the\n\t * {@link #setApplicationContext injected context} and also\n\t * {@link AnnotationAwareOrderComparator#sort(List) sorted}.\n\t * <p><strong>Note:</strong> This method may return {@code null} if invoked\n\t * prior to {@link #setApplicationContext(ApplicationContext)}.\n\t * @return immutable list with the configured mappings or {@code null}\n\t */\n\t@Nullable\n\tpublic final List<HandlerMapping> getHandlerMappings() {\n\t\treturn this.handlerMappings;\n\t}\n\n\t@Override\n\tpublic void setApplicationContext(ApplicationContext applicationContext) {\n\t\tinitStrategies(applicationContext);\n\t}\n\n\n\tprotected void initStrategies(ApplicationContext context) {\n\t\tMap<String, HandlerMapping> mappingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(\n\t\t\t\tcontext, HandlerMapping.class, true, false);\n\n\t\tArrayList<HandlerMapping> mappings = new ArrayList<>(mappingBeans.values());\n\t\tAnnotationAwareOrderComparator.sort(mappings);\n\t\tthis.handlerMappings = Collections.unmodifiableList(mappings);\n\n\t\tMap<String, HandlerAdapter> adapterBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(\n\t\t\t\tcontext, HandlerAdapter.class, true, false);\n\n\t\tthis.handlerAdapters = new ArrayList<>(adapterBeans.values());\n\t\tAnnotationAwareOrderComparator.sort(this.handlerAdapters);\n\n\t\tMap<String, HandlerResultHandler> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(\n\t\t\t\tcontext, HandlerResultHandler.class, true, false);\n\n\t\tthis.resultHandlers = new ArrayList<>(beans.values());\n\t\tAnnotationAwareOrderComparator.sort(this.resultHandlers);\n\t}\n\n\n\t@Override\n\tpublic Mono<Void> handle(ServerWebExchange exchange) {\n\t\tif (this.handlerMappings == null) {\n\t\t\treturn createNotFoundError();\n\t\t}\n\t\tif (CorsUtils.isPreFlightRequest(exchange.getRequest())) {\n\t\t\treturn handlePreFlight(exchange);\n\t\t}\n\t\treturn Flux.fromIterable(this.handlerMappings)\n\t\t\t\t.concatMap(mapping -> mapping.getHandler(exchange))\n\t\t\t\t.next()\n\t\t\t\t.switchIfEmpty(createNotFoundError())\n\t\t\t\t.onErrorResume(ex -> handleDispatchError(exchange, ex))\n\t\t\t\t.flatMap(handler -> handleRequestWith(exchange, handler));\n\t}\n\n\tprivate <R> Mono<R> createNotFoundError() {\n\t\treturn Mono.defer(() -> {\n\t\t\tException ex = new ResponseStatusException(HttpStatus.NOT_FOUND);\n\t\t\treturn Mono.error(ex);\n\t\t});\n\t}\n\n\tprivate Mono<Void> handleDispatchError(ServerWebExchange exchange, Throwable ex) {\n\t\tMono<HandlerResult> resultMono = Mono.error(ex);\n\t\tif (this.handlerAdapters != null) {\n\t\t\tfor (HandlerAdapter adapter : this.handlerAdapters) {\n\t\t\t\tif (adapter instanceof DispatchExceptionHandler exceptionHandler) {\n\t\t\t\t\tresultMono = resultMono.onErrorResume(ex2 -> exceptionHandler.handleError(exchange, ex2));\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn resultMono.flatMap(result -> handleResult(exchange, result));\n\t}\n\n\tprivate Mono<Void> handleRequestWith(ServerWebExchange exchange, Object handler) {\n\t\tif (ObjectUtils.nullSafeEquals(exchange.getResponse().getStatusCode(), HttpStatus.FORBIDDEN)) {\n\t\t\treturn Mono.empty();  // CORS rejection\n\t\t}\n\t\tif (this.handlerAdapters != null) {\n\t\t\tfor (HandlerAdapter adapter : this.handlerAdapters) {\n\t\t\t\tif (adapter.supports(handler)) {\n\t\t\t\t\treturn adapter.handle(exchange, handler)\n\t\t\t\t\t\t\t.flatMap(result -> handleResult(exchange, result));\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn Mono.error(new IllegalStateException(\"No HandlerAdapter: \" + handler));\n\t}\n\n\tprivate Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {\n\t\tMono<Void> resultMono = doHandleResult(exchange, result, \"Handler \" + result.getHandler());\n\t\tif (result.getExceptionHandler() != null) {\n\t\t\tresultMono = resultMono.onErrorResume(ex ->\n\t\t\t\t\tresult.getExceptionHandler().handleError(exchange, ex).flatMap(result2 ->\n\t\t\t\t\t\t\tdoHandleResult(exchange, result2, \"Exception handler \" +\n\t\t\t\t\t\t\t\t\tresult2.getHandler() + \", error=\\\"\" + ex.getMessage() + \"\\\"\")));\n\t\t}\n\t\treturn resultMono;\n\t}\n\n\tprivate Mono<Void> doHandleResult(\n\t\t\tServerWebExchange exchange, HandlerResult handlerResult, String description) {\n\n\t\tif (this.resultHandlers != null) {\n\t\t\tfor (HandlerResultHandler resultHandler : this.resultHandlers) {\n\t\t\t\tif (resultHandler.supports(handlerResult)) {\n\t\t\t\t\tdescription += \" [DispatcherHandler]\";\n\t\t\t\t\treturn resultHandler.handleResult(exchange, handlerResult).checkpoint(description);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn Mono.error(new IllegalStateException(\n\t\t\t\t\"No HandlerResultHandler for \" + handlerResult.getReturnValue()));\n\t}\n\n\t@Override\n\tpublic Mono<Void> handlePreFlight(ServerWebExchange exchange) {\n\t\treturn Flux.fromIterable(this.handlerMappings != null ? this.handlerMappings : Collections.emptyList())\n\t\t\t\t.concatMap(mapping -> mapping.getHandler(exchange))\n\t\t\t\t.switchIfEmpty(Mono.fromRunnable(() -> exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN)))\n\t\t\t\t.next()\n\t\t\t\t.then();\n\t}\n\n}"
+  },
+  "org.springframework.web.reactive.DispatcherHandler#getHandlerMappings()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return all {@link HandlerMapping} beans detected by type in the\n\t * {@link #setApplicationContext injected context} and also\n\t * {@link AnnotationAwareOrderComparator#sort(List) sorted}.\n\t * <p><strong>Note:</strong> This method may return {@code null} if invoked\n\t * prior to {@link #setApplicationContext(ApplicationContext)}.\n\t * @return immutable list with the configured mappings or {@code null}\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 109
+    },
+    "return": "List<HandlerMapping>",
+    "signature": "public List<HandlerMapping> getHandlerMappings()",
+    "source_code": "\tpublic final List<HandlerMapping> getHandlerMappings() {\n\t\treturn this.handlerMappings;\n\t}"
+  },
+  "org.springframework.web.reactive.DispatcherHandler#handle(exchange)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "exchange"
+    ],
+    "position": {
+      "column": 1,
+      "line": 142
+    },
+    "return": "Mono<Void>",
+    "signature": "public Mono<Void> handle(ServerWebExchange exchange)",
+    "source_code": "\tpublic Mono<Void> handle(ServerWebExchange exchange) {\n\t\tif (this.handlerMappings == null) {\n\t\t\treturn createNotFoundError();\n\t\t}\n\t\tif (CorsUtils.isPreFlightRequest(exchange.getRequest())) {\n\t\t\treturn handlePreFlight(exchange);\n\t\t}\n\t\treturn Flux.fromIterable(this.handlerMappings)\n\t\t\t\t.concatMap(mapping -> mapping.getHandler(exchange))\n\t\t\t\t.next()\n\t\t\t\t.switchIfEmpty(createNotFoundError())\n\t\t\t\t.onErrorResume(ex -> handleDispatchError(exchange, ex))\n\t\t\t\t.flatMap(handler -> handleRequestWith(exchange, handler));\n\t}"
+  },
+  "org.springframework.web.reactive.DispatcherHandler#handlePreFlight(exchange)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "exchange"
+    ],
+    "position": {
+      "column": 1,
+      "line": 218
+    },
+    "return": "Mono<Void>",
+    "signature": "public Mono<Void> handlePreFlight(ServerWebExchange exchange)",
+    "source_code": "\tpublic Mono<Void> handlePreFlight(ServerWebExchange exchange) {\n\t\treturn Flux.fromIterable(this.handlerMappings != null ? this.handlerMappings : Collections.emptyList())\n\t\t\t\t.concatMap(mapping -> mapping.getHandler(exchange))\n\t\t\t\t.switchIfEmpty(Mono.fromRunnable(() -> exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN)))\n\t\t\t\t.next()\n\t\t\t\t.then();\n\t}"
+  },
+  "org.springframework.web.reactive.DispatcherHandler#initStrategies(context)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "context"
+    ],
+    "position": {
+      "column": 1,
+      "line": 119
+    },
+    "return": "void",
+    "signature": "protected void initStrategies(ApplicationContext context)",
+    "source_code": "\tprotected void initStrategies(ApplicationContext context) {\n\t\tMap<String, HandlerMapping> mappingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(\n\t\t\t\tcontext, HandlerMapping.class, true, false);\n\n\t\tArrayList<HandlerMapping> mappings = new ArrayList<>(mappingBeans.values());\n\t\tAnnotationAwareOrderComparator.sort(mappings);\n\t\tthis.handlerMappings = Collections.unmodifiableList(mappings);\n\n\t\tMap<String, HandlerAdapter> adapterBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(\n\t\t\t\tcontext, HandlerAdapter.class, true, false);\n\n\t\tthis.handlerAdapters = new ArrayList<>(adapterBeans.values());\n\t\tAnnotationAwareOrderComparator.sort(this.handlerAdapters);\n\n\t\tMap<String, HandlerResultHandler> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(\n\t\t\t\tcontext, HandlerResultHandler.class, true, false);\n\n\t\tthis.resultHandlers = new ArrayList<>(beans.values());\n\t\tAnnotationAwareOrderComparator.sort(this.resultHandlers);\n\t}"
+  },
+  "org.springframework.web.reactive.DispatcherHandler#setApplicationContext(applicationContext)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "applicationContext"
+    ],
+    "position": {
+      "column": 1,
+      "line": 114
+    },
+    "return": "void",
+    "signature": "public void setApplicationContext(ApplicationContext applicationContext)",
+    "source_code": "\tpublic void setApplicationContext(ApplicationContext applicationContext) {\n\t\tinitStrategies(applicationContext);\n\t}"
+  },
+  "org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter#handleError(exchange,ex)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "exchange",
+      "ex"
+    ],
+    "position": {
+      "column": 1,
+      "line": 258
+    },
+    "return": "Mono<HandlerResult>",
+    "signature": "public Mono<HandlerResult> handleError(ServerWebExchange exchange, Throwable ex)",
+    "source_code": "\tpublic Mono<HandlerResult> handleError(ServerWebExchange exchange, Throwable ex) {\n\t\treturn handleException(exchange, ex, null, null);\n\t}"
+  },
+  "org.springframework.web.service.invoker.HttpServiceProxyFactory#addCustomArgumentResolver(resolver)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "resolver"
+    ],
+    "position": {
+      "column": 1,
+      "line": 450
+    },
+    "return": "void",
+    "signature": "public void addCustomArgumentResolver(HttpServiceArgumentResolver resolver)",
+    "source_code": "\t\tpublic void addCustomArgumentResolver(HttpServiceArgumentResolver resolver) {\n\t\t\tif (this.customArgumentResolvers == null) {\n\t\t\t\tthis.customArgumentResolvers = new ArrayList<>();\n\t\t\t}\n\t\t\tthis.customArgumentResolvers.add(resolver);\n\t\t}"
+  },
+  "org.springframework.web.service.invoker.HttpServiceProxyFactory#afterPropertiesSet()": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 480
+    },
+    "return": "void",
+    "signature": "public void afterPropertiesSet()",
+    "source_code": "\t\tpublic void afterPropertiesSet() throws Exception {\n\n\t\t\tthis.conversionService = (this.conversionService != null ?\n\t\t\t\t\tthis.conversionService : new DefaultFormattingConversionService());\n\n\t\t\tthis.argumentResolvers = initArgumentResolvers(this.conversionService);\n\t\t}"
+  },
+  "org.springframework.web.service.invoker.HttpServiceProxyFactory#setBlockTimeout(blockTimeout)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "blockTimeout"
+    ],
+    "position": {
+      "column": 1,
+      "line": 474
+    },
+    "return": "void",
+    "signature": "public void setBlockTimeout(Duration blockTimeout)",
+    "source_code": "\t\tpublic void setBlockTimeout(Duration blockTimeout) {\n\t\t\tthis.blockTimeout = blockTimeout;\n\t\t}"
+  },
+  "org.springframework.web.service.invoker.HttpServiceProxyFactory#setConversionService(conversionService)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "conversionService"
+    ],
+    "position": {
+      "column": 1,
+      "line": 461
+    },
+    "return": "void",
+    "signature": "public void setConversionService(ConversionService conversionService)",
+    "source_code": "\t\tpublic void setConversionService(ConversionService conversionService) {\n\t\t\tthis.conversionService = conversionService;\n\t\t}"
+  },
+  "org.springframework.web.service.invoker.HttpServiceProxyFactory#setCustomArgumentResolvers(resolvers)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "resolvers"
+    ],
+    "position": {
+      "column": 1,
+      "line": 457
+    },
+    "return": "void",
+    "signature": "public void setCustomArgumentResolvers(List<HttpServiceArgumentResolver> resolvers)",
+    "source_code": "\t\tpublic void setCustomArgumentResolvers(List<HttpServiceArgumentResolver> resolvers) {\n\t\t\tthis.customArgumentResolvers = new ArrayList<>(resolvers);\n\t\t}"
+  },
+  "org.springframework.web.service.invoker.HttpServiceProxyFactory#setEmbeddedValueResolver(resolver)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "resolver"
+    ],
+    "position": {
+      "column": 1,
+      "line": 466
+    },
+    "return": "void",
+    "signature": "public void setEmbeddedValueResolver(StringValueResolver resolver)",
+    "source_code": "\t\tpublic void setEmbeddedValueResolver(StringValueResolver resolver) {\n\t\t\tthis.embeddedValueResolver = resolver;\n\t\t}"
+  },
+  "org.springframework.web.service.invoker.HttpServiceProxyFactory#setReactiveAdapterRegistry(registry)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "registry"
+    ],
+    "position": {
+      "column": 1,
+      "line": 470
+    },
+    "return": "void",
+    "signature": "public void setReactiveAdapterRegistry(ReactiveAdapterRegistry registry)",
+    "source_code": "\t\tpublic void setReactiveAdapterRegistry(ReactiveAdapterRegistry registry) {\n\t\t\tthis.reactiveAdapterRegistry = registry;\n\t\t}"
+  },
+  "org.springframework.web.servlet.function.<unknown>#encodeRedirectUrl(url)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "url"
+    ],
+    "position": {
+      "column": 1,
+      "line": 564
+    },
+    "return": "String",
+    "signature": "public String encodeRedirectUrl(String url)",
+    "source_code": "\t\tpublic String encodeRedirectUrl(String url) {\n\t\t\tthrow new UnsupportedOperationException();\n\t\t}"
+  },
+  "org.springframework.web.servlet.function.<unknown>#encodeUrl(url)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "url"
+    ],
+    "position": {
+      "column": 1,
+      "line": 558
+    },
+    "return": "String",
+    "signature": "public String encodeUrl(String url)",
+    "source_code": "\t\tpublic String encodeUrl(String url) {\n\t\t\tthrow new UnsupportedOperationException();\n\t\t}"
+  },
+  "org.springframework.web.servlet.function.<unknown>#setStatus(sc,sm)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "sc",
+      "sm"
+    ],
+    "position": {
+      "column": 1,
+      "line": 512
+    },
+    "return": "void",
+    "signature": "public void setStatus(int sc, String sm)",
+    "source_code": "\t\tpublic void setStatus(int sc, String sm) {\n\t\t\tthis.status = sc;\n\t\t}"
+  }
+}

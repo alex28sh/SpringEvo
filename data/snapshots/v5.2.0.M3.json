@@ -1,0 +1,995 @@
+{
+  "org.springframework.core.annotation.MergedAnnotationCollectors": {
+    "deprecated": false,
+    "doc": "/**\n * Collector implementations that provide various reduction operations for\n * {@link MergedAnnotation} instances.\n *\n * @author Phillip Webb\n * @since 5.2\n */",
+    "kind": "class",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 40
+    },
+    "signature": "public class MergedAnnotationCollectors",
+    "source_code": "public abstract class MergedAnnotationCollectors {\n\n\tprivate static final Characteristics[] NO_CHARACTERISTICS = {};\n\n\tprivate static final Characteristics[] IDENTITY_FINISH_CHARACTERISTICS = {Characteristics.IDENTITY_FINISH};\n\n\n\tprivate MergedAnnotationCollectors() {\n\t}\n\n\n\t/**\n\t * Create a new {@link Collector} that accumulates merged annotations to a\n\t * {@link LinkedHashSet} containing {@linkplain MergedAnnotation#synthesize()\n\t * synthesized} versions.\n\t * @param <A> the annotation type\n\t * @return a {@link Collector} which collects and synthesizes the\n\t * annotations into a {@link Set}\n\t */\n\tpublic static <A extends Annotation> Collector<MergedAnnotation<A>, ?, Set<A>> toAnnotationSet() {\n\t\treturn Collector.of(ArrayList<A>::new, (list, annotation) -> list.add(annotation.synthesize()),\n\t\t\t\tMergedAnnotationCollectors::addAll, LinkedHashSet::new);\n\t}\n\n\t/**\n\t * Create a new {@link Collector} that accumulates merged annotations to an\n\t * {@link Annotation} array containing {@linkplain MergedAnnotation#synthesize()\n\t * synthesized} versions.\n\t * @param <A> the annotation type\n\t * @return a {@link Collector} which collects and synthesizes the\n\t * annotations into an {@code Annotation[]}\n\t * @see #toAnnotationArray(IntFunction)\n\t */\n\tpublic static <A extends Annotation> Collector<MergedAnnotation<A>, ?, Annotation[]> toAnnotationArray() {\n\t\treturn toAnnotationArray(Annotation[]::new);\n\t}\n\n\t/**\n\t * Create a new {@link Collector} that accumulates merged annotations to an\n\t * {@link Annotation} array containing {@linkplain MergedAnnotation#synthesize()\n\t * synthesized} versions.\n\t * @param <A> the annotation type\n\t * @param <R> the resulting array type\n\t * @param generator a function which produces a new array of the desired\n\t * type and the provided length\n\t * @return a {@link Collector} which collects and synthesizes the\n\t * annotations into an annotation array\n\t * @see #toAnnotationArray\n\t */\n\tpublic static <R extends Annotation, A extends R> Collector<MergedAnnotation<A>, ?, R[]> toAnnotationArray(\n\t\t\tIntFunction<R[]> generator) {\n\n\t\treturn Collector.of(ArrayList::new, (list, annotation) -> list.add(annotation.synthesize()),\n\t\t\t\tMergedAnnotationCollectors::addAll, list -> list.toArray(generator.apply(list.size())));\n\t}\n\n\t/**\n\t * Create a new {@link Collector} that accumulates merged annotations to an\n\t * {@link MultiValueMap} with items {@linkplain MultiValueMap#add(Object, Object)\n\t * added} from each merged annotation\n\t * {@link MergedAnnotation#asMap(Adapt...) as a map}.\n\t * @param <A> the annotation type\n\t * @param adaptations adaptations that should be applied to the annotation values\n\t * @return a {@link Collector} which collects and synthesizes the\n\t * annotations into a {@link LinkedMultiValueMap}\n\t * @see #toMultiValueMap(Function, MergedAnnotation.Adapt...)\n\t */\n\tpublic static <A extends Annotation> Collector<MergedAnnotation<A>, ?, MultiValueMap<String, Object>> toMultiValueMap(\n\t\t\tAdapt... adaptations) {\n\n\t\treturn toMultiValueMap(Function.identity(), adaptations);\n\t}\n\n\t/**\n\t * Create a new {@link Collector} that accumulates merged annotations to an\n\t * {@link MultiValueMap} with items {@linkplain MultiValueMap#add(Object, Object)\n\t * added} from each merged annotation\n\t * {@link MergedAnnotation#asMap(Adapt...) as a map}.\n\t * @param <A> the annotation type\n\t * @param adaptations adaptations that should be applied to the annotation values\n\t * @param finisher the finisher function for the new {@link MultiValueMap}\n\t * @return a {@link Collector} which collects and synthesizes the\n\t * annotations into a {@link LinkedMultiValueMap}\n\t * @see #toMultiValueMap(MergedAnnotation.Adapt...)\n\t */\n\tpublic static <A extends Annotation> Collector<MergedAnnotation<A>, ?, MultiValueMap<String, Object>> toMultiValueMap(\n\t\t\tFunction<MultiValueMap<String, Object>, MultiValueMap<String, Object>> finisher,\n\t\t\tAdapt... adaptations) {\n\n\t\tCharacteristics[] characteristics = (isSameInstance(finisher, Function.identity()) ?\n\t\t\t\tIDENTITY_FINISH_CHARACTERISTICS : NO_CHARACTERISTICS);\n\t\treturn Collector.of(LinkedMultiValueMap::new,\n\t\t\t\t(map, annotation) -> annotation.asMap(adaptations).forEach(map::add),\n\t\t\t\tMergedAnnotationCollectors::merge, finisher, characteristics);\n\t}\n\n\n\tprivate static boolean isSameInstance(Object instance, Object candidate) {\n\t\treturn instance == candidate;\n\t}\n\n\tprivate static <E, L extends List<E>> L addAll(L list, L additions) {\n\t\tlist.addAll(additions);\n\t\treturn list;\n\t}\n\n\tprivate static <K, V> MultiValueMap<K, V> merge(MultiValueMap<K, V> map,\n\t\t\tMultiValueMap<K, V> additions) {\n\t\tmap.addAll(additions);\n\t\treturn map;\n\t}\n\n}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer": {
+    "deprecated": false,
+    "doc": "/**\n * Default implementation of the {@link DataBuffer} interface that uses a\n * {@link ByteBuffer} internally. with separate read and write positions.\n * Constructed using the {@link DefaultDataBufferFactory}.\n *\n * <p>Inspired by Netty's {@code ByteBuf}. Introduced so that non-Netty runtimes\n * (i.e. Servlet) do not require Netty on the classpath.\n *\n * @author Arjen Poutsma\n * @author Juergen Hoeller\n * @author Brian Clozel\n * @since 5.0\n * @see DefaultDataBufferFactory\n */",
+    "kind": "class",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 45
+    },
+    "signature": "public class DefaultDataBuffer",
+    "source_code": "public class DefaultDataBuffer implements DataBuffer {\n\n\tprivate static final int MAX_CAPACITY = Integer.MAX_VALUE;\n\n\tprivate static final int CAPACITY_THRESHOLD = 1024 * 1024 * 4;\n\n\n\tprivate final DefaultDataBufferFactory dataBufferFactory;\n\n\tprivate ByteBuffer byteBuffer;\n\n\tprivate int capacity;\n\n\tprivate int readPosition;\n\n\tprivate int writePosition;\n\n\n\tprivate DefaultDataBuffer(DefaultDataBufferFactory dataBufferFactory, ByteBuffer byteBuffer) {\n\t\tAssert.notNull(dataBufferFactory, \"DefaultDataBufferFactory must not be null\");\n\t\tAssert.notNull(byteBuffer, \"ByteBuffer must not be null\");\n\t\tthis.dataBufferFactory = dataBufferFactory;\n\t\tByteBuffer slice = byteBuffer.slice();\n\t\tthis.byteBuffer = slice;\n\t\tthis.capacity = slice.remaining();\n\t}\n\n\tstatic DefaultDataBuffer fromFilledByteBuffer(DefaultDataBufferFactory dataBufferFactory, ByteBuffer byteBuffer) {\n\t\tDefaultDataBuffer dataBuffer = new DefaultDataBuffer(dataBufferFactory, byteBuffer);\n\t\tdataBuffer.writePosition(byteBuffer.remaining());\n\t\treturn dataBuffer;\n\t}\n\n\tstatic DefaultDataBuffer fromEmptyByteBuffer(DefaultDataBufferFactory dataBufferFactory, ByteBuffer byteBuffer) {\n\t\treturn new DefaultDataBuffer(dataBufferFactory, byteBuffer);\n\t}\n\n\n\t/**\n\t * Directly exposes the native {@code ByteBuffer} that this buffer is based\n\t * on also updating the {@code ByteBuffer's} position and limit to match\n\t * the current {@link #readPosition()} and {@link #readableByteCount()}.\n\t * @return the wrapped byte buffer\n\t */\n\tpublic ByteBuffer getNativeBuffer() {\n\t\tthis.byteBuffer.position(this.readPosition);\n\t\tthis.byteBuffer.limit(readableByteCount());\n\t\treturn this.byteBuffer;\n\t}\n\n\tprivate void setNativeBuffer(ByteBuffer byteBuffer) {\n\t\tthis.byteBuffer = byteBuffer;\n\t\tthis.capacity = byteBuffer.remaining();\n\t}\n\n\n\t@Override\n\tpublic DefaultDataBufferFactory factory() {\n\t\treturn this.dataBufferFactory;\n\t}\n\n\t@Override\n\tpublic int indexOf(IntPredicate predicate, int fromIndex) {\n\t\tAssert.notNull(predicate, \"IntPredicate must not be null\");\n\t\tif (fromIndex < 0) {\n\t\t\tfromIndex = 0;\n\t\t}\n\t\telse if (fromIndex >= this.writePosition) {\n\t\t\treturn -1;\n\t\t}\n\t\tfor (int i = fromIndex; i < this.writePosition; i++) {\n\t\t\tbyte b = this.byteBuffer.get(i);\n\t\t\tif (predicate.test(b)) {\n\t\t\t\treturn i;\n\t\t\t}\n\t\t}\n\t\treturn -1;\n\t}\n\n\t@Override\n\tpublic int lastIndexOf(IntPredicate predicate, int fromIndex) {\n\t\tAssert.notNull(predicate, \"IntPredicate must not be null\");\n\t\tint i = Math.min(fromIndex, this.writePosition - 1);\n\t\tfor (; i >= 0; i--) {\n\t\t\tbyte b = this.byteBuffer.get(i);\n\t\t\tif (predicate.test(b)) {\n\t\t\t\treturn i;\n\t\t\t}\n\t\t}\n\t\treturn -1;\n\t}\n\n\t@Override\n\tpublic int readableByteCount() {\n\t\treturn this.writePosition - this.readPosition;\n\t}\n\n\t@Override\n\tpublic int writableByteCount() {\n\t\treturn this.capacity - this.writePosition;\n\t}\n\n\t@Override\n\tpublic int readPosition() {\n\t\treturn this.readPosition;\n\t}\n\n\t@Override\n\tpublic DefaultDataBuffer readPosition(int readPosition) {\n\t\tassertIndex(readPosition >= 0, \"'readPosition' %d must be >= 0\", readPosition);\n\t\tassertIndex(readPosition <= this.writePosition, \"'readPosition' %d must be <= %d\",\n\t\t\t\treadPosition, this.writePosition);\n\t\tthis.readPosition = readPosition;\n\t\treturn this;\n\t}\n\n\t@Override\n\tpublic int writePosition() {\n\t\treturn this.writePosition;\n\t}\n\n\t@Override\n\tpublic DefaultDataBuffer writePosition(int writePosition) {\n\t\tassertIndex(writePosition >= this.readPosition, \"'writePosition' %d must be >= %d\",\n\t\t\t\twritePosition, this.readPosition);\n\t\tassertIndex(writePosition <= this.capacity, \"'writePosition' %d must be <= %d\",\n\t\t\t\twritePosition, this.capacity);\n\t\tthis.writePosition = writePosition;\n\t\treturn this;\n\t}\n\n\t@Override\n\tpublic int capacity() {\n\t\treturn this.capacity;\n\t}\n\n\t@Override\n\tpublic DefaultDataBuffer capacity(int newCapacity) {\n\t\tif (newCapacity <= 0) {\n\t\t\tthrow new IllegalArgumentException(String.format(\"'newCapacity' %d must be higher than 0\", newCapacity));\n\t\t}\n\t\tint readPosition = readPosition();\n\t\tint writePosition = writePosition();\n\t\tint oldCapacity = capacity();\n\n\t\tif (newCapacity > oldCapacity) {\n\t\t\tByteBuffer oldBuffer = this.byteBuffer;\n\t\t\tByteBuffer newBuffer = allocate(newCapacity, oldBuffer.isDirect());\n\t\t\t((Buffer) oldBuffer).position(0).limit(oldBuffer.capacity());\n\t\t\t((Buffer) newBuffer).position(0).limit(oldBuffer.capacity());\n\t\t\tnewBuffer.put(oldBuffer);\n\t\t\tnewBuffer.clear();\n\t\t\tsetNativeBuffer(newBuffer);\n\t\t}\n\t\telse if (newCapacity < oldCapacity) {\n\t\t\tByteBuffer oldBuffer = this.byteBuffer;\n\t\t\tByteBuffer newBuffer = allocate(newCapacity, oldBuffer.isDirect());\n\t\t\tif (readPosition < newCapacity) {\n\t\t\t\tif (writePosition > newCapacity) {\n\t\t\t\t\twritePosition = newCapacity;\n\t\t\t\t\twritePosition(writePosition);\n\t\t\t\t}\n\t\t\t\t((Buffer) oldBuffer).position(readPosition).limit(writePosition);\n\t\t\t\t((Buffer) newBuffer).position(readPosition).limit(writePosition);\n\t\t\t\tnewBuffer.put(oldBuffer);\n\t\t\t\tnewBuffer.clear();\n\t\t\t}\n\t\t\telse {\n\t\t\t\treadPosition(newCapacity);\n\t\t\t\twritePosition(newCapacity);\n\t\t\t}\n\t\t\tsetNativeBuffer(newBuffer);\n\t\t}\n\t\treturn this;\n\t}\n\n\t@Override\n\tpublic DataBuffer ensureCapacity(int length) {\n\t\tif (length > writableByteCount()) {\n\t\t\tint newCapacity = calculateCapacity(this.writePosition + length);\n\t\t\tcapacity(newCapacity);\n\t\t}\n\t\treturn this;\n\t}\n\n\tprivate static ByteBuffer allocate(int capacity, boolean direct) {\n\t\treturn (direct ? ByteBuffer.allocateDirect(capacity) : ByteBuffer.allocate(capacity));\n\t}\n\n\t@Override\n\tpublic byte getByte(int index) {\n\t\tassertIndex(index >= 0, \"index %d must be >= 0\", index);\n\t\tassertIndex(index <= this.writePosition - 1, \"index %d must be <= %d\", index, this.writePosition - 1);\n\t\treturn this.byteBuffer.get(index);\n\t}\n\n\t@Override\n\tpublic byte read() {\n\t\tassertIndex(this.readPosition <= this.writePosition - 1, \"readPosition %d must be <= %d\",\n\t\t\t\tthis.readPosition, this.writePosition - 1);\n\t\tint pos = this.readPosition;\n\t\tbyte b = this.byteBuffer.get(pos);\n\t\tthis.readPosition = pos + 1;\n\t\treturn b;\n\t}\n\n\t@Override\n\tpublic DefaultDataBuffer read(byte[] destination) {\n\t\tAssert.notNull(destination, \"Byte array must not be null\");\n\t\tread(destination, 0, destination.length);\n\t\treturn this;\n\t}\n\n\t@Override\n\tpublic DefaultDataBuffer read(byte[] destination, int offset, int length) {\n\t\tAssert.notNull(destination, \"Byte array must not be null\");\n\t\tassertIndex(this.readPosition <= this.writePosition - length,\n\t\t\t\t\"readPosition %d and length %d should be smaller than writePosition %d\",\n\t\t\t\tthis.readPosition, length, this.writePosition);\n\n\t\tByteBuffer tmp = this.byteBuffer.duplicate();\n\t\tint limit = this.readPosition + length;\n\t\t((Buffer) tmp).clear().position(this.readPosition).limit(limit);\n\t\ttmp.get(destination, offset, length);\n\n\t\tthis.readPosition += length;\n\t\treturn this;\n\t}\n\n\t@Override\n\tpublic DefaultDataBuffer write(byte b) {\n\t\tensureCapacity(1);\n\t\tint pos = this.writePosition;\n\t\tthis.byteBuffer.put(pos, b);\n\t\tthis.writePosition = pos + 1;\n\t\treturn this;\n\t}\n\n\t@Override\n\tpublic DefaultDataBuffer write(byte[] source) {\n\t\tAssert.notNull(source, \"Byte array must not be null\");\n\t\twrite(source, 0, source.length);\n\t\treturn this;\n\t}\n\n\t@Override\n\tpublic DefaultDataBuffer write(byte[] source, int offset, int length) {\n\t\tAssert.notNull(source, \"Byte array must not be null\");\n\t\tensureCapacity(length);\n\n\t\tByteBuffer tmp = this.byteBuffer.duplicate();\n\t\tint limit = this.writePosition + length;\n\t\t((Buffer) tmp).clear().position(this.writePosition).limit(limit);\n\t\ttmp.put(source, offset, length);\n\n\t\tthis.writePosition += length;\n\t\treturn this;\n\t}\n\n\t@Override\n\tpublic DefaultDataBuffer write(DataBuffer... buffers) {\n\t\tif (!ObjectUtils.isEmpty(buffers)) {\n\t\t\twrite(Arrays.stream(buffers).map(DataBuffer::asByteBuffer).toArray(ByteBuffer[]::new));\n\t\t}\n\t\treturn this;\n\t}\n\n\t@Override\n\tpublic DefaultDataBuffer write(ByteBuffer... buffers) {\n\t\tif (!ObjectUtils.isEmpty(buffers)) {\n\t\t\tint capacity = Arrays.stream(buffers).mapToInt(ByteBuffer::remaining).sum();\n\t\t\tensureCapacity(capacity);\n\t\t\tArrays.stream(buffers).forEach(this::write);\n\t\t}\n\t\treturn this;\n\t}\n\n\tprivate void write(ByteBuffer source) {\n\t\tint length = source.remaining();\n\t\tByteBuffer tmp = this.byteBuffer.duplicate();\n\t\tint limit = this.writePosition + source.remaining();\n\t\t((Buffer) tmp).clear().position(this.writePosition).limit(limit);\n\t\ttmp.put(source);\n\t\tthis.writePosition += length;\n\t}\n\n\t@Override\n\tpublic DefaultDataBuffer slice(int index, int length) {\n\t\tcheckIndex(index, length);\n\t\tint oldPosition = this.byteBuffer.position();\n\t\t// Explicit access via Buffer base type for compatibility\n\t\t// with covariant return type on JDK 9's ByteBuffer...\n\t\tBuffer buffer = this.byteBuffer;\n\t\ttry {\n\t\t\tbuffer.position(index);\n\t\t\tByteBuffer slice = this.byteBuffer.slice();\n\t\t\t// Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer\n\t\t\t((Buffer) slice).limit(length);\n\t\t\treturn new SlicedDefaultDataBuffer(slice, this.dataBufferFactory, length);\n\t\t}\n\t\tfinally {\n\t\t\tbuffer.position(oldPosition);\n\t\t}\n\t}\n\n\t@Override\n\tpublic ByteBuffer asByteBuffer() {\n\t\treturn asByteBuffer(this.readPosition, readableByteCount());\n\t}\n\n\t@Override\n\tpublic ByteBuffer asByteBuffer(int index, int length) {\n\t\tcheckIndex(index, length);\n\n\t\tByteBuffer duplicate = this.byteBuffer.duplicate();\n\t\t// Explicit access via Buffer base type for compatibility\n\t\t// with covariant return type on JDK 9's ByteBuffer...\n\t\tBuffer buffer = duplicate;\n\t\tbuffer.position(index);\n\t\tbuffer.limit(index + length);\n\t\treturn duplicate.slice();\n\t}\n\n\t@Override\n\tpublic InputStream asInputStream() {\n\t\treturn new DefaultDataBufferInputStream();\n\t}\n\n\t@Override\n\tpublic InputStream asInputStream(boolean releaseOnClose) {\n\t\treturn new DefaultDataBufferInputStream();\n\t}\n\n\t@Override\n\tpublic OutputStream asOutputStream() {\n\t\treturn new DefaultDataBufferOutputStream();\n\t}\n\n\n\t/**\n\t * Calculate the capacity of the buffer.\n\t * @see io.netty.buffer.AbstractByteBufAllocator#calculateNewCapacity(int, int)\n\t */\n\tprivate int calculateCapacity(int neededCapacity) {\n\t\tAssert.isTrue(neededCapacity >= 0, \"'neededCapacity' must >= 0\");\n\n\t\tif (neededCapacity == CAPACITY_THRESHOLD) {\n\t\t\treturn CAPACITY_THRESHOLD;\n\t\t}\n\t\telse if (neededCapacity > CAPACITY_THRESHOLD) {\n\t\t\tint newCapacity = neededCapacity / CAPACITY_THRESHOLD * CAPACITY_THRESHOLD;\n\t\t\tif (newCapacity > MAX_CAPACITY - CAPACITY_THRESHOLD) {\n\t\t\t\tnewCapacity = MAX_CAPACITY;\n\t\t\t}\n\t\t\telse {\n\t\t\t\tnewCapacity += CAPACITY_THRESHOLD;\n\t\t\t}\n\t\t\treturn newCapacity;\n\t\t}\n\t\telse {\n\t\t\tint newCapacity = 64;\n\t\t\twhile (newCapacity < neededCapacity) {\n\t\t\t\tnewCapacity <<= 1;\n\t\t\t}\n\t\t\treturn Math.min(newCapacity, MAX_CAPACITY);\n\t\t}\n\t}\n\n\n\t@Override\n\tpublic boolean equals(@Nullable Object other) {\n\t\tif (this == other) {\n\t\t\treturn true;\n\t\t}\n\t\tif (!(other instanceof DefaultDataBuffer)) {\n\t\t\treturn false;\n\t\t}\n\t\tDefaultDataBuffer otherBuffer = (DefaultDataBuffer) other;\n\t\treturn (this.readPosition == otherBuffer.readPosition &&\n\t\t\t\tthis.writePosition == otherBuffer.writePosition &&\n\t\t\t\tthis.byteBuffer.equals(otherBuffer.byteBuffer));\n\t}\n\n\t@Override\n\tpublic int hashCode() {\n\t\treturn this.byteBuffer.hashCode();\n\t}\n\n\t@Override\n\tpublic String toString() {\n\t\treturn String.format(\"DefaultDataBuffer (r: %d, w: %d, c: %d)\",\n\t\t\t\tthis.readPosition, this.writePosition, this.capacity);\n\t}\n\n\n\tprivate void checkIndex(int index, int length) {\n\t\tassertIndex(index >= 0, \"index %d must be >= 0\", index);\n\t\tassertIndex(length >= 0, \"length %d must be >= 0\", index);\n\t\tassertIndex(index <= this.capacity, \"index %d must be <= %d\", index, this.capacity);\n\t\tassertIndex(length <= this.capacity, \"length %d must be <= %d\", index, this.capacity);\n\t}\n\n\tprivate void assertIndex(boolean expression, String format, Object... args) {\n\t\tif (!expression) {\n\t\t\tString message = String.format(format, args);\n\t\t\tthrow new IndexOutOfBoundsException(message);\n\t\t}\n\t}\n\n\n\tprivate class DefaultDataBufferInputStream extends InputStream {\n\n\t\t@Override\n\t\tpublic int available() {\n\t\t\treturn readableByteCount();\n\t\t}\n\n\t\t@Override\n\t\tpublic int read() {\n\t\t\treturn available() > 0 ? DefaultDataBuffer.this.read() & 0xFF : -1;\n\t\t}\n\n\t\t@Override\n\t\tpublic int read(byte[] bytes, int off, int len) throws IOException {\n\t\t\tint available = available();\n\t\t\tif (available > 0) {\n\t\t\t\tlen = Math.min(len, available);\n\t\t\t\tDefaultDataBuffer.this.read(bytes, off, len);\n\t\t\t\treturn len;\n\t\t\t}\n\t\t\telse {\n\t\t\t\treturn -1;\n\t\t\t}\n\t\t}\n\t}\n\n\n\tprivate class DefaultDataBufferOutputStream extends OutputStream {\n\n\t\t@Override\n\t\tpublic void write(int b) throws IOException {\n\t\t\tDefaultDataBuffer.this.write((byte) b);\n\t\t}\n\n\t\t@Override\n\t\tpublic void write(byte[] bytes, int off, int len) throws IOException {\n\t\t\tDefaultDataBuffer.this.write(bytes, off, len);\n\t\t}\n\t}\n\n\n\tprivate static class SlicedDefaultDataBuffer extends DefaultDataBuffer {\n\n\t\tSlicedDefaultDataBuffer(ByteBuffer byteBuffer, DefaultDataBufferFactory dataBufferFactory, int length) {\n\t\t\tsuper(dataBufferFactory, byteBuffer);\n\t\t\twritePosition(length);\n\t\t}\n\n\t\t@Override\n\t\tpublic DefaultDataBuffer capacity(int newCapacity) {\n\t\t\tthrow new UnsupportedOperationException(\"Changing the capacity of a sliced buffer is not supported\");\n\t\t}\n\t}\n\n}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#asByteBuffer()": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 351
+    },
+    "return": "ByteBuffer",
+    "signature": "public ByteBuffer asByteBuffer()",
+    "source_code": "\tpublic ByteBuffer asByteBuffer() {\n\t\treturn asByteBuffer(this.readPosition, readableByteCount());\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#asByteBuffer(index,length)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "index",
+      "length"
+    ],
+    "position": {
+      "column": 1,
+      "line": 356
+    },
+    "return": "ByteBuffer",
+    "signature": "public ByteBuffer asByteBuffer(int index, int length)",
+    "source_code": "\tpublic ByteBuffer asByteBuffer(int index, int length) {\n\t\tcheckIndex(index, length);\n\n\t\tByteBuffer duplicate = this.byteBuffer.duplicate();\n\t\t// Explicit access via Buffer base type for compatibility\n\t\t// with covariant return type on JDK 9's ByteBuffer...\n\t\tBuffer buffer = duplicate;\n\t\tbuffer.position(index);\n\t\tbuffer.limit(index + length);\n\t\treturn duplicate.slice();\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#asInputStream()": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 369
+    },
+    "return": "InputStream",
+    "signature": "public InputStream asInputStream()",
+    "source_code": "\tpublic InputStream asInputStream() {\n\t\treturn new DefaultDataBufferInputStream();\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#asInputStream(releaseOnClose)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "releaseOnClose"
+    ],
+    "position": {
+      "column": 1,
+      "line": 374
+    },
+    "return": "InputStream",
+    "signature": "public InputStream asInputStream(boolean releaseOnClose)",
+    "source_code": "\tpublic InputStream asInputStream(boolean releaseOnClose) {\n\t\treturn new DefaultDataBufferInputStream();\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#asOutputStream()": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 379
+    },
+    "return": "OutputStream",
+    "signature": "public OutputStream asOutputStream()",
+    "source_code": "\tpublic OutputStream asOutputStream() {\n\t\treturn new DefaultDataBufferOutputStream();\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#available()": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 458
+    },
+    "return": "int",
+    "signature": "public int available()",
+    "source_code": "\t\tpublic int available() {\n\t\t\treturn readableByteCount();\n\t\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#capacity()": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 177
+    },
+    "return": "int",
+    "signature": "public int capacity()",
+    "source_code": "\tpublic int capacity() {\n\t\treturn this.capacity;\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#capacity(newCapacity)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "newCapacity"
+    ],
+    "position": {
+      "column": 1,
+      "line": 504
+    },
+    "return": "DefaultDataBuffer",
+    "signature": "public DefaultDataBuffer capacity(int newCapacity)",
+    "source_code": "\t\tpublic DefaultDataBuffer capacity(int newCapacity) {\n\t\t\tthrow new UnsupportedOperationException(\"Changing the capacity of a sliced buffer is not supported\");\n\t\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#ensureCapacity(length)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "length"
+    ],
+    "position": {
+      "column": 1,
+      "line": 222
+    },
+    "return": "DataBuffer",
+    "signature": "public DataBuffer ensureCapacity(int length)",
+    "source_code": "\tpublic DataBuffer ensureCapacity(int length) {\n\t\tif (length > writableByteCount()) {\n\t\t\tint newCapacity = calculateCapacity(this.writePosition + length);\n\t\t\tcapacity(newCapacity);\n\t\t}\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#equals(other)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "other"
+    ],
+    "position": {
+      "column": 1,
+      "line": 415
+    },
+    "return": "boolean",
+    "signature": "public boolean equals(@Nullable Object other)",
+    "source_code": "\tpublic boolean equals(@Nullable Object other) {\n\t\tif (this == other) {\n\t\t\treturn true;\n\t\t}\n\t\tif (!(other instanceof DefaultDataBuffer)) {\n\t\t\treturn false;\n\t\t}\n\t\tDefaultDataBuffer otherBuffer = (DefaultDataBuffer) other;\n\t\treturn (this.readPosition == otherBuffer.readPosition &&\n\t\t\t\tthis.writePosition == otherBuffer.writePosition &&\n\t\t\t\tthis.byteBuffer.equals(otherBuffer.byteBuffer));\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#factory()": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 102
+    },
+    "return": "DefaultDataBufferFactory",
+    "signature": "public DefaultDataBufferFactory factory()",
+    "source_code": "\tpublic DefaultDataBufferFactory factory() {\n\t\treturn this.dataBufferFactory;\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#getByte(index)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "index"
+    ],
+    "position": {
+      "column": 1,
+      "line": 235
+    },
+    "return": "byte",
+    "signature": "public byte getByte(int index)",
+    "source_code": "\tpublic byte getByte(int index) {\n\t\tassertIndex(index >= 0, \"index %d must be >= 0\", index);\n\t\tassertIndex(index <= this.writePosition - 1, \"index %d must be <= %d\", index, this.writePosition - 1);\n\t\treturn this.byteBuffer.get(index);\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#getNativeBuffer()": {
+    "deprecated": false,
+    "doc": "\t/**\n\t * Directly exposes the native {@code ByteBuffer} that this buffer is based\n\t * on also updating the {@code ByteBuffer's} position and limit to match\n\t * the current {@link #readPosition()} and {@link #readableByteCount()}.\n\t * @return the wrapped byte buffer\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 89
+    },
+    "return": "ByteBuffer",
+    "signature": "public ByteBuffer getNativeBuffer()",
+    "source_code": "\tpublic ByteBuffer getNativeBuffer() {\n\t\tthis.byteBuffer.position(this.readPosition);\n\t\tthis.byteBuffer.limit(readableByteCount());\n\t\treturn this.byteBuffer;\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#hashCode()": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 429
+    },
+    "return": "int",
+    "signature": "public int hashCode()",
+    "source_code": "\tpublic int hashCode() {\n\t\treturn this.byteBuffer.hashCode();\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#indexOf(predicate,fromIndex)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "predicate",
+      "fromIndex"
+    ],
+    "position": {
+      "column": 1,
+      "line": 107
+    },
+    "return": "int",
+    "signature": "public int indexOf(IntPredicate predicate, int fromIndex)",
+    "source_code": "\tpublic int indexOf(IntPredicate predicate, int fromIndex) {\n\t\tAssert.notNull(predicate, \"IntPredicate must not be null\");\n\t\tif (fromIndex < 0) {\n\t\t\tfromIndex = 0;\n\t\t}\n\t\telse if (fromIndex >= this.writePosition) {\n\t\t\treturn -1;\n\t\t}\n\t\tfor (int i = fromIndex; i < this.writePosition; i++) {\n\t\t\tbyte b = this.byteBuffer.get(i);\n\t\t\tif (predicate.test(b)) {\n\t\t\t\treturn i;\n\t\t\t}\n\t\t}\n\t\treturn -1;\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#lastIndexOf(predicate,fromIndex)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "predicate",
+      "fromIndex"
+    ],
+    "position": {
+      "column": 1,
+      "line": 125
+    },
+    "return": "int",
+    "signature": "public int lastIndexOf(IntPredicate predicate, int fromIndex)",
+    "source_code": "\tpublic int lastIndexOf(IntPredicate predicate, int fromIndex) {\n\t\tAssert.notNull(predicate, \"IntPredicate must not be null\");\n\t\tint i = Math.min(fromIndex, this.writePosition - 1);\n\t\tfor (; i >= 0; i--) {\n\t\t\tbyte b = this.byteBuffer.get(i);\n\t\t\tif (predicate.test(b)) {\n\t\t\t\treturn i;\n\t\t\t}\n\t\t}\n\t\treturn -1;\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#read()": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 463
+    },
+    "return": "int",
+    "signature": "public int read()",
+    "source_code": "\t\tpublic int read() {\n\t\t\treturn available() > 0 ? DefaultDataBuffer.this.read() & 0xFF : -1;\n\t\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#read(bytes,off,len)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "bytes",
+      "off",
+      "len"
+    ],
+    "position": {
+      "column": 1,
+      "line": 468
+    },
+    "return": "int",
+    "signature": "public int read(byte[] bytes, int off, int len)",
+    "source_code": "\t\tpublic int read(byte[] bytes, int off, int len) throws IOException {\n\t\t\tint available = available();\n\t\t\tif (available > 0) {\n\t\t\t\tlen = Math.min(len, available);\n\t\t\t\tDefaultDataBuffer.this.read(bytes, off, len);\n\t\t\t\treturn len;\n\t\t\t}\n\t\t\telse {\n\t\t\t\treturn -1;\n\t\t\t}\n\t\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#read(destination)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "destination"
+    ],
+    "position": {
+      "column": 1,
+      "line": 252
+    },
+    "return": "DefaultDataBuffer",
+    "signature": "public DefaultDataBuffer read(byte[] destination)",
+    "source_code": "\tpublic DefaultDataBuffer read(byte[] destination) {\n\t\tAssert.notNull(destination, \"Byte array must not be null\");\n\t\tread(destination, 0, destination.length);\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#read(destination,offset,length)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "destination",
+      "offset",
+      "length"
+    ],
+    "position": {
+      "column": 1,
+      "line": 259
+    },
+    "return": "DefaultDataBuffer",
+    "signature": "public DefaultDataBuffer read(byte[] destination, int offset, int length)",
+    "source_code": "\tpublic DefaultDataBuffer read(byte[] destination, int offset, int length) {\n\t\tAssert.notNull(destination, \"Byte array must not be null\");\n\t\tassertIndex(this.readPosition <= this.writePosition - length,\n\t\t\t\t\"readPosition %d and length %d should be smaller than writePosition %d\",\n\t\t\t\tthis.readPosition, length, this.writePosition);\n\n\t\tByteBuffer tmp = this.byteBuffer.duplicate();\n\t\tint limit = this.readPosition + length;\n\t\t((Buffer) tmp).clear().position(this.readPosition).limit(limit);\n\t\ttmp.get(destination, offset, length);\n\n\t\tthis.readPosition += length;\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#readPosition()": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 148
+    },
+    "return": "int",
+    "signature": "public int readPosition()",
+    "source_code": "\tpublic int readPosition() {\n\t\treturn this.readPosition;\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#readPosition(readPosition)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "readPosition"
+    ],
+    "position": {
+      "column": 1,
+      "line": 153
+    },
+    "return": "DefaultDataBuffer",
+    "signature": "public DefaultDataBuffer readPosition(int readPosition)",
+    "source_code": "\tpublic DefaultDataBuffer readPosition(int readPosition) {\n\t\tassertIndex(readPosition >= 0, \"'readPosition' %d must be >= 0\", readPosition);\n\t\tassertIndex(readPosition <= this.writePosition, \"'readPosition' %d must be <= %d\",\n\t\t\t\treadPosition, this.writePosition);\n\t\tthis.readPosition = readPosition;\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#readableByteCount()": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 138
+    },
+    "return": "int",
+    "signature": "public int readableByteCount()",
+    "source_code": "\tpublic int readableByteCount() {\n\t\treturn this.writePosition - this.readPosition;\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#slice(index,length)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "index",
+      "length"
+    ],
+    "position": {
+      "column": 1,
+      "line": 332
+    },
+    "return": "DefaultDataBuffer",
+    "signature": "public DefaultDataBuffer slice(int index, int length)",
+    "source_code": "\tpublic DefaultDataBuffer slice(int index, int length) {\n\t\tcheckIndex(index, length);\n\t\tint oldPosition = this.byteBuffer.position();\n\t\t// Explicit access via Buffer base type for compatibility\n\t\t// with covariant return type on JDK 9's ByteBuffer...\n\t\tBuffer buffer = this.byteBuffer;\n\t\ttry {\n\t\t\tbuffer.position(index);\n\t\t\tByteBuffer slice = this.byteBuffer.slice();\n\t\t\t// Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer\n\t\t\t((Buffer) slice).limit(length);\n\t\t\treturn new SlicedDefaultDataBuffer(slice, this.dataBufferFactory, length);\n\t\t}\n\t\tfinally {\n\t\t\tbuffer.position(oldPosition);\n\t\t}\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#toString()": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 434
+    },
+    "return": "String",
+    "signature": "public String toString()",
+    "source_code": "\tpublic String toString() {\n\t\treturn String.format(\"DefaultDataBuffer (r: %d, w: %d, c: %d)\",\n\t\t\t\tthis.readPosition, this.writePosition, this.capacity);\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#writableByteCount()": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 143
+    },
+    "return": "int",
+    "signature": "public int writableByteCount()",
+    "source_code": "\tpublic int writableByteCount() {\n\t\treturn this.capacity - this.writePosition;\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#write(b)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "b"
+    ],
+    "position": {
+      "column": 1,
+      "line": 485
+    },
+    "return": "void",
+    "signature": "public void write(int b)",
+    "source_code": "\t\tpublic void write(int b) throws IOException {\n\t\t\tDefaultDataBuffer.this.write((byte) b);\n\t\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#write(buffers)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "buffers"
+    ],
+    "position": {
+      "column": 1,
+      "line": 313
+    },
+    "return": "DefaultDataBuffer",
+    "signature": "public DefaultDataBuffer write(ByteBuffer... buffers)",
+    "source_code": "\tpublic DefaultDataBuffer write(ByteBuffer... buffers) {\n\t\tif (!ObjectUtils.isEmpty(buffers)) {\n\t\t\tint capacity = Arrays.stream(buffers).mapToInt(ByteBuffer::remaining).sum();\n\t\t\tensureCapacity(capacity);\n\t\t\tArrays.stream(buffers).forEach(this::write);\n\t\t}\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#write(bytes,off,len)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "bytes",
+      "off",
+      "len"
+    ],
+    "position": {
+      "column": 1,
+      "line": 490
+    },
+    "return": "void",
+    "signature": "public void write(byte[] bytes, int off, int len)",
+    "source_code": "\t\tpublic void write(byte[] bytes, int off, int len) throws IOException {\n\t\t\tDefaultDataBuffer.this.write(bytes, off, len);\n\t\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#write(source)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "source"
+    ],
+    "position": {
+      "column": 1,
+      "line": 284
+    },
+    "return": "DefaultDataBuffer",
+    "signature": "public DefaultDataBuffer write(byte[] source)",
+    "source_code": "\tpublic DefaultDataBuffer write(byte[] source) {\n\t\tAssert.notNull(source, \"Byte array must not be null\");\n\t\twrite(source, 0, source.length);\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#write(source,offset,length)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "source",
+      "offset",
+      "length"
+    ],
+    "position": {
+      "column": 1,
+      "line": 291
+    },
+    "return": "DefaultDataBuffer",
+    "signature": "public DefaultDataBuffer write(byte[] source, int offset, int length)",
+    "source_code": "\tpublic DefaultDataBuffer write(byte[] source, int offset, int length) {\n\t\tAssert.notNull(source, \"Byte array must not be null\");\n\t\tensureCapacity(length);\n\n\t\tByteBuffer tmp = this.byteBuffer.duplicate();\n\t\tint limit = this.writePosition + length;\n\t\t((Buffer) tmp).clear().position(this.writePosition).limit(limit);\n\t\ttmp.put(source, offset, length);\n\n\t\tthis.writePosition += length;\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#writePosition()": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 162
+    },
+    "return": "int",
+    "signature": "public int writePosition()",
+    "source_code": "\tpublic int writePosition() {\n\t\treturn this.writePosition;\n\t}"
+  },
+  "org.springframework.core.io.buffer.DefaultDataBuffer#writePosition(writePosition)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "writePosition"
+    ],
+    "position": {
+      "column": 1,
+      "line": 167
+    },
+    "return": "DefaultDataBuffer",
+    "signature": "public DefaultDataBuffer writePosition(int writePosition)",
+    "source_code": "\tpublic DefaultDataBuffer writePosition(int writePosition) {\n\t\tassertIndex(writePosition >= this.readPosition, \"'writePosition' %d must be >= %d\",\n\t\t\t\twritePosition, this.readPosition);\n\t\tassertIndex(writePosition <= this.capacity, \"'writePosition' %d must be <= %d\",\n\t\t\t\twritePosition, this.capacity);\n\t\tthis.writePosition = writePosition;\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler": {
+    "deprecated": false,
+    "doc": "/**\n * Extension of {@link AbstractMethodMessageHandler} for reactive, non-blocking\n * handling of messages via {@link MessageMapping @MessageMapping} methods.\n * By default such methods are detected in {@code @Controller} Spring beans but\n * that can be changed via {@link #setHandlerPredicate(Predicate)}.\n *\n * <p>Payloads for incoming messages are decoded through the configured\n * {@link #setDecoders(List)} decoders, with the help of\n * {@link PayloadMethodArgumentResolver}.\n *\n * <p>There is no default handling for return values but\n * {@link #setReturnValueHandlerConfigurer} can be used to configure custom\n * return value handlers. Sub-classes may also override\n * {@link #initReturnValueHandlers()} to set up default return value handlers.\n *\n * @author Rossen Stoyanchev\n * @since 5.2\n * @see AbstractEncoderMethodReturnValueHandler\n */",
+    "kind": "class",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 83
+    },
+    "signature": "public class MessageMappingMessageHandler",
+    "source_code": "public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<CompositeMessageCondition>"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#createExceptionMethodResolverFor(beanType)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "beanType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 329
+    },
+    "return": "AbstractExceptionHandlerMethodResolver",
+    "signature": "protected AbstractExceptionHandlerMethodResolver createExceptionMethodResolverFor(Class<?> beanType)",
+    "source_code": "\tprotected AbstractExceptionHandlerMethodResolver createExceptionMethodResolverFor(Class<?> beanType) {\n\t\treturn new AnnotationExceptionHandlerMethodResolver(beanType);\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#getConversionService()": {
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return the configured ConversionService.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 224
+    },
+    "return": "ConversionService",
+    "signature": "public ConversionService getConversionService()",
+    "source_code": "\tpublic ConversionService getConversionService() {\n\t\treturn this.conversionService;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#getDirectLookupMappings(mapping)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "mapping"
+    ],
+    "position": {
+      "column": 1,
+      "line": 302
+    },
+    "return": "Set<String>",
+    "signature": "protected Set<String> getDirectLookupMappings(CompositeMessageCondition mapping)",
+    "source_code": "\tprotected Set<String> getDirectLookupMappings(CompositeMessageCondition mapping) {\n\t\tSet<String> result = new LinkedHashSet<>();\n\t\tfor (String pattern : mapping.getCondition(DestinationPatternsMessageCondition.class).getPatterns()) {\n\t\t\tif (!this.routeMatcher.isPattern(pattern)) {\n\t\t\t\tresult.add(pattern);\n\t\t\t}\n\t\t}\n\t\treturn result;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#getMappingComparator(message)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "message"
+    ],
+    "position": {
+      "column": 1,
+      "line": 324
+    },
+    "return": "Comparator<CompositeMessageCondition>",
+    "signature": "protected Comparator<CompositeMessageCondition> getMappingComparator(Message<?> message)",
+    "source_code": "\tprotected Comparator<CompositeMessageCondition> getMappingComparator(Message<?> message) {\n\t\treturn (info1, info2) -> info1.compareTo(info2, message);\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#getMappingForMethod(method,handlerType)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "method",
+      "handlerType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 274
+    },
+    "return": "CompositeMessageCondition",
+    "signature": "protected CompositeMessageCondition getMappingForMethod(Method method, Class<?> handlerType)",
+    "source_code": "\tprotected CompositeMessageCondition getMappingForMethod(Method method, Class<?> handlerType) {\n\t\tCompositeMessageCondition methodCondition = getCondition(method);\n\t\tif (methodCondition != null) {\n\t\t\tCompositeMessageCondition typeCondition = getCondition(handlerType);\n\t\t\tif (typeCondition != null) {\n\t\t\t\treturn typeCondition.combine(methodCondition);\n\t\t\t}\n\t\t}\n\t\treturn methodCondition;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#getMatchingMapping(mapping,message)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "mapping",
+      "message"
+    ],
+    "position": {
+      "column": 1,
+      "line": 319
+    },
+    "return": "CompositeMessageCondition",
+    "signature": "protected CompositeMessageCondition getMatchingMapping(CompositeMessageCondition mapping, Message<?> message)",
+    "source_code": "\tprotected CompositeMessageCondition getMatchingMapping(CompositeMessageCondition mapping, Message<?> message) {\n\t\treturn mapping.getMatchingCondition(message);\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#getRouteMatcher()": {
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return the {@code RouteMatcher} used to map messages to handlers.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 207
+    },
+    "return": "RouteMatcher",
+    "signature": "public RouteMatcher getRouteMatcher()",
+    "source_code": "\tpublic RouteMatcher getRouteMatcher() {\n\t\treturn this.routeMatcher;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#getValidator()": {
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return the configured Validator instance.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 187
+    },
+    "return": "Validator",
+    "signature": "public Validator getValidator()",
+    "source_code": "\tpublic Validator getValidator() {\n\t\treturn this.validator;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#handleMatch(mapping,handlerMethod,message)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "mapping",
+      "handlerMethod",
+      "message"
+    ],
+    "position": {
+      "column": 1,
+      "line": 334
+    },
+    "return": "Mono<Void>",
+    "signature": "protected Mono<Void> handleMatch(CompositeMessageCondition mapping, HandlerMethod handlerMethod, Message<?> message)",
+    "source_code": "\tprotected Mono<Void> handleMatch("
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#setAutoDetectDisabled()": {
+    "deprecated": false,
+    "doc": "\t/**\n\t * Disable auto-detection of {@code @MessageMapping} methods, e.g. in\n\t * {@code @Controller}s, by setting {@link #setHandlerPredicate(Predicate)\n\t * setHandlerPredicate(null)}.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 156
+    },
+    "return": "void",
+    "signature": "public void setAutoDetectDisabled()",
+    "source_code": "\tpublic void setAutoDetectDisabled() {\n\t\tthis.handlerPredicate = null;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#setConversionService(conversionService)": {
+    "deprecated": false,
+    "doc": "\t/**\n\t * Configure a {@link ConversionService} to use for type conversion of\n\t * String based values, e.g. in destination variables or headers.\n\t * <p>By default {@link DefaultFormattingConversionService} is used.\n\t * @param conversionService the conversion service to use\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "conversionService"
+    ],
+    "position": {
+      "column": 1,
+      "line": 217
+    },
+    "return": "void",
+    "signature": "public void setConversionService(ConversionService conversionService)",
+    "source_code": "\tpublic void setConversionService(ConversionService conversionService) {\n\t\tthis.conversionService = conversionService;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#setDecoders(decoders)": {
+    "deprecated": false,
+    "doc": "\t/**\n\t * Configure the decoders to use for incoming payloads.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "decoders"
+    ],
+    "position": {
+      "column": 1,
+      "line": 163
+    },
+    "return": "void",
+    "signature": "public void setDecoders(List<? extends Decoder<?>> decoders)",
+    "source_code": "\tpublic void setDecoders(List<? extends Decoder<?>> decoders) {\n\t\tthis.decoders.addAll(decoders);\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#setEmbeddedValueResolver(resolver)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "resolver"
+    ],
+    "position": {
+      "column": 1,
+      "line": 229
+    },
+    "return": "void",
+    "signature": "public void setEmbeddedValueResolver(StringValueResolver resolver)",
+    "source_code": "\tpublic void setEmbeddedValueResolver(StringValueResolver resolver) {\n\t\tthis.valueResolver = resolver;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#setHandlerPredicate(handlerPredicate)": {
+    "deprecated": false,
+    "doc": "\t/**\n\t * Configure the predicate to use for selecting which Spring beans to check\n\t * for {@code @MessageMapping} methods. When set to {@code null},\n\t * auto-detection is turned off which is what\n\t * {@link #setAutoDetectDisabled()} does internally.\n\t * <p>The predicate used by default selects {@code @Controller} classes.\n\t * @see #setHandlers(List)\n\t * @see #setAutoDetectDisabled()\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "handlerPredicate"
+    ],
+    "position": {
+      "column": 1,
+      "line": 139
+    },
+    "return": "void",
+    "signature": "public void setHandlerPredicate(@Nullable Predicate<Class<?>> handlerPredicate)",
+    "source_code": "\tpublic void setHandlerPredicate(@Nullable Predicate<Class<?>> handlerPredicate) {\n\t\tthis.handlerPredicate = handlerPredicate;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#setHandlers(handlers)": {
+    "deprecated": false,
+    "doc": "\t/**\n\t * Manually configure handlers to check for {@code @MessageMapping} methods.\n\t * <p><strong>Note:</strong> the given handlers are not required to be\n\t * annotated with {@code @Controller}. Consider also using\n\t * {@link #setAutoDetectDisabled()} if the intent is to use these handlers\n\t * instead of, and not in addition to {@code @Controller} classes. Or\n\t * alternatively use {@link #setHandlerPredicate(Predicate)} to select a\n\t * different set of beans based on a different criteria.\n\t * @param handlers the handlers to register\n\t * @see #setAutoDetectDisabled()\n\t * @see #setHandlerPredicate(Predicate)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "handlers"
+    ],
+    "position": {
+      "column": 1,
+      "line": 122
+    },
+    "return": "void",
+    "signature": "public void setHandlers(List<Object> handlers)",
+    "source_code": "\tpublic void setHandlers(List<Object> handlers) {\n\t\tfor (Object handler : handlers) {\n\t\t\tdetectHandlerMethods(handler);\n\t\t}\n\t\t// Disable auto-detection..\n\t\tthis.handlerPredicate = null;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#setRouteMatcher(routeMatcher)": {
+    "deprecated": false,
+    "doc": "\t/**\n\t * Set the {@code RouteMatcher} to use for mapping messages to handlers\n\t * based on the route patterns they're configured with.\n\t * <p>By default, {@link SimpleRouteMatcher} is used, backed by\n\t * {@link AntPathMatcher} with \".\" as separator. For greater\n\t * efficiency consider using the {@code PathPatternRouteMatcher} from\n\t * {@code spring-web} instead.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "routeMatcher"
+    ],
+    "position": {
+      "column": 1,
+      "line": 199
+    },
+    "return": "void",
+    "signature": "public void setRouteMatcher(RouteMatcher routeMatcher)",
+    "source_code": "\tpublic void setRouteMatcher(RouteMatcher routeMatcher) {\n\t\tAssert.notNull(routeMatcher, \"RouteMatcher must not be null\");\n\t\tthis.routeMatcher = routeMatcher;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#setValidator(validator)": {
+    "deprecated": false,
+    "doc": "\t/**\n\t * Set the Validator instance used for validating {@code @Payload} arguments.\n\t * @see org.springframework.validation.annotation.Validated\n\t * @see PayloadMethodArgumentResolver\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "validator"
+    ],
+    "position": {
+      "column": 1,
+      "line": 179
+    },
+    "return": "void",
+    "signature": "public void setValidator(@Nullable Validator validator)",
+    "source_code": "\tpublic void setValidator(@Nullable Validator validator) {\n\t\tthis.validator = validator;\n\t}"
+  },
+  "org.springframework.test.context.util.TestContextResourceUtils": {
+    "deprecated": false,
+    "doc": "/**\n * Utility methods for working with resources within the <em>Spring TestContext\n * Framework</em>. Mainly for internal use within the framework.\n *\n * @author Sam Brannen\n * @author Tadaya Tsuyukubo\n * @since 4.1\n * @see org.springframework.util.ResourceUtils\n * @see org.springframework.core.io.Resource\n * @see org.springframework.core.io.ClassPathResource\n * @see org.springframework.core.io.FileSystemResource\n * @see org.springframework.core.io.UrlResource\n * @see org.springframework.core.io.ResourceLoader\n */",
+    "kind": "class",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 45
+    },
+    "signature": "public class TestContextResourceUtils",
+    "source_code": "public abstract class TestContextResourceUtils {\n\n\tprivate static final String SLASH = \"/\";\n\n\n\t/**\n\t * Convert the supplied paths to classpath resource paths.\n\t *\n\t * <p>For each of the supplied paths:\n\t * <ul>\n\t * <li>A plain path &mdash; for example, {@code \"context.xml\"} &mdash; will\n\t * be treated as a classpath resource that is relative to the package in\n\t * which the specified class is defined.\n\t * <li>A path starting with a slash will be treated as an absolute path\n\t * within the classpath, for example: {@code \"/org/example/schema.sql\"}.\n\t * <li>A path which is prefixed with a URL protocol (e.g.,\n\t * {@link ResourceUtils#CLASSPATH_URL_PREFIX classpath:},\n\t * {@link ResourceUtils#FILE_URL_PREFIX file:}, {@code http:}, etc.) will be\n\t * {@link StringUtils#cleanPath cleaned} but otherwise unmodified.\n\t * </ul>\n\t * @param clazz the class with which the paths are associated\n\t * @param paths the paths to be converted\n\t * @return a new array of converted resource paths\n\t * @see #convertToResources\n\t */\n\tpublic static String[] convertToClasspathResourcePaths(Class<?> clazz, String... paths) {\n\t\tString[] convertedPaths = new String[paths.length];\n\t\tfor (int i = 0; i < paths.length; i++) {\n\t\t\tString path = paths[i];\n\t\t\tif (path.startsWith(SLASH)) {\n\t\t\t\tconvertedPaths[i] = ResourceUtils.CLASSPATH_URL_PREFIX + path;\n\t\t\t}\n\t\t\telse if (!ResourcePatternUtils.isUrl(path)) {\n\t\t\t\tconvertedPaths[i] = ResourceUtils.CLASSPATH_URL_PREFIX + SLASH +\n\t\t\t\t\t\tStringUtils.cleanPath(ClassUtils.classPackageAsResourcePath(clazz) + SLASH + path);\n\t\t\t}\n\t\t\telse {\n\t\t\t\tconvertedPaths[i] = StringUtils.cleanPath(path);\n\t\t\t}\n\t\t}\n\t\treturn convertedPaths;\n\t}\n\n\t/**\n\t * Convert the supplied paths to an array of {@link Resource} handles using\n\t * the given {@link ResourceLoader}.\n\t * @param resourceLoader the {@code ResourceLoader} to use to convert the paths\n\t * @param paths the paths to be converted\n\t * @return a new array of resources\n\t * @see #convertToResourceList(ResourceLoader, String...)\n\t * @see #convertToClasspathResourcePaths\n\t */\n\tpublic static Resource[] convertToResources(ResourceLoader resourceLoader, String... paths) {\n\t\treturn stream(resourceLoader, paths).toArray(Resource[]::new);\n\t}\n\n\t/**\n\t * Convert the supplied paths to a list of {@link Resource} handles using\n\t * the given {@link ResourceLoader}.\n\t * @param resourceLoader the {@code ResourceLoader} to use to convert the paths\n\t * @param paths the paths to be converted\n\t * @return a new list of resources\n\t * @since 4.2\n\t * @see #convertToResources(ResourceLoader, String...)\n\t * @see #convertToClasspathResourcePaths\n\t */\n\tpublic static List<Resource> convertToResourceList(ResourceLoader resourceLoader, String... paths) {\n\t\treturn stream(resourceLoader, paths).collect(Collectors.toList());\n\t}\n\n\tprivate static Stream<Resource> stream(ResourceLoader resourceLoader, String... paths) {\n\t\treturn Arrays.stream(paths).map(resourceLoader::getResource);\n\t}\n\n}"
+  },
+  "org.springframework.test.context.util.TestContextResourceUtils#convertToClasspathResourcePaths(clazz,paths)": {
+    "deprecated": false,
+    "doc": "\t/**\n\t * Convert the supplied paths to classpath resource paths.\n\t *\n\t * <p>For each of the supplied paths:\n\t * <ul>\n\t * <li>A plain path &mdash; for example, {@code \"context.xml\"} &mdash; will\n\t * be treated as a classpath resource that is relative to the package in\n\t * which the specified class is defined.\n\t * <li>A path starting with a slash will be treated as an absolute path\n\t * within the classpath, for example: {@code \"/org/example/schema.sql\"}.\n\t * <li>A path which is prefixed with a URL protocol (e.g.,\n\t * {@link ResourceUtils#CLASSPATH_URL_PREFIX classpath:},\n\t * {@link ResourceUtils#FILE_URL_PREFIX file:}, {@code http:}, etc.) will be\n\t * {@link StringUtils#cleanPath cleaned} but otherwise unmodified.\n\t * </ul>\n\t * @param clazz the class with which the paths are associated\n\t * @param paths the paths to be converted\n\t * @return a new array of converted resource paths\n\t * @see #convertToResources\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "clazz",
+      "paths"
+    ],
+    "position": {
+      "column": 1,
+      "line": 70
+    },
+    "return": "String[]",
+    "signature": "public String[] convertToClasspathResourcePaths(Class<?> clazz, String... paths)",
+    "source_code": "\tpublic static String[] convertToClasspathResourcePaths(Class<?> clazz, String... paths) {\n\t\tString[] convertedPaths = new String[paths.length];\n\t\tfor (int i = 0; i < paths.length; i++) {\n\t\t\tString path = paths[i];\n\t\t\tif (path.startsWith(SLASH)) {\n\t\t\t\tconvertedPaths[i] = ResourceUtils.CLASSPATH_URL_PREFIX + path;\n\t\t\t}\n\t\t\telse if (!ResourcePatternUtils.isUrl(path)) {\n\t\t\t\tconvertedPaths[i] = ResourceUtils.CLASSPATH_URL_PREFIX + SLASH +\n\t\t\t\t\t\tStringUtils.cleanPath(ClassUtils.classPackageAsResourcePath(clazz) + SLASH + path);\n\t\t\t}\n\t\t\telse {\n\t\t\t\tconvertedPaths[i] = StringUtils.cleanPath(path);\n\t\t\t}\n\t\t}\n\t\treturn convertedPaths;\n\t}"
+  },
+  "org.springframework.test.context.util.TestContextResourceUtils#convertToResourceList(resourceLoader,paths)": {
+    "deprecated": false,
+    "doc": "\t/**\n\t * Convert the supplied paths to a list of {@link Resource} handles using\n\t * the given {@link ResourceLoader}.\n\t * @param resourceLoader the {@code ResourceLoader} to use to convert the paths\n\t * @param paths the paths to be converted\n\t * @return a new list of resources\n\t * @since 4.2\n\t * @see #convertToResources(ResourceLoader, String...)\n\t * @see #convertToClasspathResourcePaths\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "resourceLoader",
+      "paths"
+    ],
+    "position": {
+      "column": 1,
+      "line": 111
+    },
+    "return": "List<Resource>",
+    "signature": "public List<Resource> convertToResourceList(ResourceLoader resourceLoader, String... paths)",
+    "source_code": "\tpublic static List<Resource> convertToResourceList(ResourceLoader resourceLoader, String... paths) {\n\t\treturn stream(resourceLoader, paths).collect(Collectors.toList());\n\t}"
+  },
+  "org.springframework.test.context.util.TestContextResourceUtils#convertToResources(resourceLoader,paths)": {
+    "deprecated": false,
+    "doc": "\t/**\n\t * Convert the supplied paths to an array of {@link Resource} handles using\n\t * the given {@link ResourceLoader}.\n\t * @param resourceLoader the {@code ResourceLoader} to use to convert the paths\n\t * @param paths the paths to be converted\n\t * @return a new array of resources\n\t * @see #convertToResourceList(ResourceLoader, String...)\n\t * @see #convertToClasspathResourcePaths\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "resourceLoader",
+      "paths"
+    ],
+    "position": {
+      "column": 1,
+      "line": 97
+    },
+    "return": "Resource[]",
+    "signature": "public Resource[] convertToResources(ResourceLoader resourceLoader, String... paths)",
+    "source_code": "\tpublic static Resource[] convertToResources(ResourceLoader resourceLoader, String... paths) {\n\t\treturn stream(resourceLoader, paths).toArray(Resource[]::new);\n\t}"
+  }
+}

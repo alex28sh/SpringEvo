@@ -1,0 +1,448 @@
+{
+  "org.springframework.expression.spel.support.ReflectionHelper": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "/**\n * Utility methods used by the reflection resolver code to discover the appropriate\n * methods, constructors, and fields that should be used in expressions.\n *\n * @author Andy Clement\n * @author Juergen Hoeller\n * @author Sam Brannen\n * @since 3.0\n */",
+    "kind": "class",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 48
+    },
+    "signature": "public class ReflectionHelper",
+    "source_code": "public abstract class ReflectionHelper {\n\n\t/**\n\t * Compare argument arrays and return information about whether they match.\n\t * <p>The supplied type converter allows for matches to take into account that a type\n\t * may be transformed into a different type by the converter.\n\t * @param expectedArgTypes the types the method/constructor is expecting\n\t * @param suppliedArgTypes the types that are being supplied at the point of invocation\n\t * @param typeConverter a registered type converter\n\t * @return an {@code ArgumentsMatchInfo} object indicating what kind of match it was,\n\t * or {@code null} if it was not a match\n\t */\n\t@Nullable\n\tstatic ArgumentsMatchInfo compareArguments(\n\t\t\tList<TypeDescriptor> expectedArgTypes, List<TypeDescriptor> suppliedArgTypes, TypeConverter typeConverter) {\n\n\t\tAssert.isTrue(expectedArgTypes.size() == suppliedArgTypes.size(),\n\t\t\t\t\"Expected argument types and supplied argument types should be lists of the same size\");\n\n\t\tArgumentsMatchKind match = ArgumentsMatchKind.EXACT;\n\t\tfor (int i = 0; i < expectedArgTypes.size() && match != null; i++) {\n\t\t\tTypeDescriptor suppliedArg = suppliedArgTypes.get(i);\n\t\t\tTypeDescriptor expectedArg = expectedArgTypes.get(i);\n\t\t\t// The user may supply null, and that will be OK unless a primitive is expected.\n\t\t\tif (suppliedArg == null) {\n\t\t\t\tif (expectedArg.isPrimitive()) {\n\t\t\t\t\tmatch = null;\n\t\t\t\t}\n\t\t\t}\n\t\t\telse if (!expectedArg.equals(suppliedArg)) {\n\t\t\t\tif (suppliedArg.isAssignableTo(expectedArg)) {\n\t\t\t\t\tif (match != ArgumentsMatchKind.REQUIRES_CONVERSION) {\n\t\t\t\t\t\tmatch = ArgumentsMatchKind.CLOSE;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\telse if (typeConverter.canConvert(suppliedArg, expectedArg)) {\n\t\t\t\t\tmatch = ArgumentsMatchKind.REQUIRES_CONVERSION;\n\t\t\t\t}\n\t\t\t\telse {\n\t\t\t\t\tmatch = null;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn (match != null ? new ArgumentsMatchInfo(match) : null);\n\t}\n\n\t/**\n\t * Based on {@link MethodInvoker#getTypeDifferenceWeight(Class[], Object[])} but operates on TypeDescriptors.\n\t */\n\tpublic static int getTypeDifferenceWeight(List<TypeDescriptor> paramTypes, List<TypeDescriptor> argTypes) {\n\t\tint result = 0;\n\t\tfor (int i = 0; i < paramTypes.size(); i++) {\n\t\t\tTypeDescriptor paramType = paramTypes.get(i);\n\t\t\tTypeDescriptor argType = (i < argTypes.size() ? argTypes.get(i) : null);\n\t\t\tif (argType == null) {\n\t\t\t\tif (paramType.isPrimitive()) {\n\t\t\t\t\treturn Integer.MAX_VALUE;\n\t\t\t\t}\n\t\t\t}\n\t\t\telse {\n\t\t\t\tClass<?> paramTypeClazz = paramType.getType();\n\t\t\t\tif (!ClassUtils.isAssignable(paramTypeClazz, argType.getType())) {\n\t\t\t\t\treturn Integer.MAX_VALUE;\n\t\t\t\t}\n\t\t\t\tif (paramTypeClazz.isPrimitive()) {\n\t\t\t\t\tparamTypeClazz = Object.class;\n\t\t\t\t}\n\t\t\t\tClass<?> superClass = argType.getType().getSuperclass();\n\t\t\t\twhile (superClass != null) {\n\t\t\t\t\tif (paramTypeClazz.equals(superClass)) {\n\t\t\t\t\t\tresult = result + 2;\n\t\t\t\t\t\tsuperClass = null;\n\t\t\t\t\t}\n\t\t\t\t\telse if (ClassUtils.isAssignable(paramTypeClazz, superClass)) {\n\t\t\t\t\t\tresult = result + 2;\n\t\t\t\t\t\tsuperClass = superClass.getSuperclass();\n\t\t\t\t\t}\n\t\t\t\t\telse {\n\t\t\t\t\t\tsuperClass = null;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tif (paramTypeClazz.isInterface()) {\n\t\t\t\t\tresult = result + 1;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn result;\n\t}\n\n\t/**\n\t * Compare argument arrays and return information about whether they match.\n\t * <p>The supplied type converter allows for matches to take into account that a type\n\t * may be transformed into a different type by the converter.\n\t * <p>This variant of {@link #compareArguments(List, List, TypeConverter)} also allows\n\t * for a varargs match.\n\t * @param expectedArgTypes the types the method/constructor is expecting\n\t * @param suppliedArgTypes the types that are being supplied at the point of invocation\n\t * @param typeConverter a registered type converter\n\t * @return an {@code ArgumentsMatchInfo} object indicating what kind of match it was,\n\t * or {@code null} if it was not a match\n\t */\n\t@Nullable\n\tstatic ArgumentsMatchInfo compareArgumentsVarargs(\n\t\t\tList<TypeDescriptor> expectedArgTypes, List<TypeDescriptor> suppliedArgTypes, TypeConverter typeConverter) {\n\n\t\tAssert.isTrue(!CollectionUtils.isEmpty(expectedArgTypes),\n\t\t\t\t\"Expected arguments must at least include one array (the varargs parameter)\");\n\t\tAssert.isTrue(expectedArgTypes.get(expectedArgTypes.size() - 1).isArray(),\n\t\t\t\t\"Final expected argument should be array type (the varargs parameter)\");\n\n\t\tArgumentsMatchKind match = ArgumentsMatchKind.EXACT;\n\n\t\t// Check up until the varargs argument:\n\n\t\t// Deal with the arguments up to 'expected number' - 1 (that is everything but the varargs argument)\n\t\tint argCountUpToVarargs = expectedArgTypes.size() - 1;\n\t\tfor (int i = 0; i < argCountUpToVarargs && match != null; i++) {\n\t\t\tTypeDescriptor suppliedArg = suppliedArgTypes.get(i);\n\t\t\tTypeDescriptor expectedArg = expectedArgTypes.get(i);\n\t\t\tif (suppliedArg == null) {\n\t\t\t\tif (expectedArg.isPrimitive()) {\n\t\t\t\t\tmatch = null;\n\t\t\t\t}\n\t\t\t}\n\t\t\telse {\n\t\t\t\tif (!expectedArg.equals(suppliedArg)) {\n\t\t\t\t\tif (suppliedArg.isAssignableTo(expectedArg)) {\n\t\t\t\t\t\tif (match != ArgumentsMatchKind.REQUIRES_CONVERSION) {\n\t\t\t\t\t\t\tmatch = ArgumentsMatchKind.CLOSE;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\telse if (typeConverter.canConvert(suppliedArg, expectedArg)) {\n\t\t\t\t\t\tmatch = ArgumentsMatchKind.REQUIRES_CONVERSION;\n\t\t\t\t\t}\n\t\t\t\t\telse {\n\t\t\t\t\t\tmatch = null;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\t// If already confirmed it cannot be a match, then return\n\t\tif (match == null) {\n\t\t\treturn null;\n\t\t}\n\n\t\tif (suppliedArgTypes.size() == expectedArgTypes.size() &&\n\t\t\t\texpectedArgTypes.get(expectedArgTypes.size() - 1).equals(\n\t\t\t\t\t\tsuppliedArgTypes.get(suppliedArgTypes.size() - 1))) {\n\t\t\t// Special case: there is one parameter left and it is an array and it matches the varargs\n\t\t\t// expected argument - that is a match, the caller has already built the array. Proceed with it.\n\t\t}\n\t\telse {\n\t\t\t// Now... we have the final argument in the method we are checking as a match and we have 0\n\t\t\t// or more other arguments left to pass to it.\n\t\t\tTypeDescriptor varargsDesc = expectedArgTypes.get(expectedArgTypes.size() - 1);\n\t\t\tTypeDescriptor componentTypeDesc = varargsDesc.getElementTypeDescriptor();\n\t\t\tAssert.state(componentTypeDesc != null, \"Component type must not be null for a varargs array\");\n\t\t\tClass<?> varargsComponentType = componentTypeDesc.getType();\n\n\t\t\t// All remaining parameters must be of this type or convertible to this type\n\t\t\tfor (int i = expectedArgTypes.size() - 1; i < suppliedArgTypes.size(); i++) {\n\t\t\t\tTypeDescriptor suppliedArg = suppliedArgTypes.get(i);\n\t\t\t\tif (suppliedArg == null) {\n\t\t\t\t\tif (varargsComponentType.isPrimitive()) {\n\t\t\t\t\t\tmatch = null;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\telse {\n\t\t\t\t\tif (varargsComponentType != suppliedArg.getType()) {\n\t\t\t\t\t\tif (ClassUtils.isAssignable(varargsComponentType, suppliedArg.getType())) {\n\t\t\t\t\t\t\tif (match != ArgumentsMatchKind.REQUIRES_CONVERSION) {\n\t\t\t\t\t\t\t\tmatch = ArgumentsMatchKind.CLOSE;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t\telse if (typeConverter.canConvert(suppliedArg, TypeDescriptor.valueOf(varargsComponentType))) {\n\t\t\t\t\t\t\tmatch = ArgumentsMatchKind.REQUIRES_CONVERSION;\n\t\t\t\t\t\t}\n\t\t\t\t\t\telse {\n\t\t\t\t\t\t\tmatch = null;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\treturn (match != null ? new ArgumentsMatchInfo(match) : null);\n\t}\n\n\t/**\n\t * Convert the supplied set of arguments into the parameter types of the supplied\n\t * {@link Method}.\n\t * <p>If the supplied method is a varargs method, the final parameter type must be an\n\t * array whose component type should be used as the conversion target for extraneous\n\t * arguments. For example, if the parameter types are <code>{Integer, String[]}</code>\n\t * and the input arguments are <code>{Integer, boolean, float}</code>, then both the\n\t * {@code boolean} and the {@code float} must be converted to strings.\n\t * <p>This method does <strong>not</strong> repackage the arguments into a form suitable\n\t * for the varargs invocation: a subsequent call to\n\t * {@link #setupArgumentsForVarargsInvocation(Class[], Object...)} is required for that.\n\t * @param converter the converter to use for type conversions\n\t * @param arguments the arguments to convert to the required parameter types\n\t * @param method the target {@code Method}\n\t * @return {@code true} if some kind of conversion occurred on an argument\n\t * @throws SpelEvaluationException if a problem occurs during conversion\n\t */\n\tpublic static boolean convertAllArguments(TypeConverter converter, Object[] arguments, Method method)\n\t\t\tthrows SpelEvaluationException {\n\n\t\tInteger varargsPosition = (method.isVarArgs() ? method.getParameterCount() - 1 : null);\n\t\treturn convertArguments(converter, arguments, method, varargsPosition);\n\t}\n\n\t/**\n\t * Convert the supplied set of arguments into the parameter types of the supplied\n\t * {@link Executable}, taking the varargs position into account.\n\t * <p>The arguments are converted 'in-place' in the input array.\n\t * @param converter the converter to use for type conversions\n\t * @param arguments the arguments to convert to the required parameter types\n\t * @param executable the target {@code Method} or {@code Constructor}\n\t * @param varargsPosition the known position of the varargs argument, if any\n\t * ({@code null} if not varargs)\n\t * @return {@code true} if some kind of conversion occurred on an argument\n\t * @throws EvaluationException if a problem occurs during conversion\n\t */\n\tstatic boolean convertArguments(TypeConverter converter, Object[] arguments, Executable executable,\n\t\t\t@Nullable Integer varargsPosition) throws EvaluationException {\n\n\t\tboolean conversionOccurred = false;\n\t\tif (varargsPosition == null) {\n\t\t\tfor (int i = 0; i < arguments.length; i++) {\n\t\t\t\tTypeDescriptor targetType = new TypeDescriptor(MethodParameter.forExecutable(executable, i));\n\t\t\t\tObject argument = arguments[i];\n\t\t\t\targuments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);\n\t\t\t\tconversionOccurred |= (argument != arguments[i]);\n\t\t\t}\n\t\t}\n\t\telse {\n\t\t\t// Convert everything up to the varargs position\n\t\t\tfor (int i = 0; i < varargsPosition; i++) {\n\t\t\t\tTypeDescriptor targetType = new TypeDescriptor(MethodParameter.forExecutable(executable, i));\n\t\t\t\tObject argument = arguments[i];\n\t\t\t\targuments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);\n\t\t\t\tconversionOccurred |= (argument != arguments[i]);\n\t\t\t}\n\n\t\t\tMethodParameter methodParam = MethodParameter.forExecutable(executable, varargsPosition);\n\t\t\tTypeDescriptor targetType = new TypeDescriptor(methodParam);\n\t\t\tTypeDescriptor componentTypeDesc = targetType.getElementTypeDescriptor();\n\t\t\tAssert.state(componentTypeDesc != null, \"Component type must not be null for a varargs array\");\n\n\t\t\t// If the target is varargs and there is just one more argument, then convert it here.\n\t\t\tif (varargsPosition == arguments.length - 1) {\n\t\t\t\tObject argument = arguments[varargsPosition];\n\t\t\t\tTypeDescriptor sourceType = TypeDescriptor.forObject(argument);\n\t\t\t\tif (argument == null) {\n\t\t\t\t\t// Perform the equivalent of GenericConversionService.convertNullSource() for a single argument.\n\t\t\t\t\tif (componentTypeDesc.getObjectType() == Optional.class) {\n\t\t\t\t\t\targuments[varargsPosition] = Optional.empty();\n\t\t\t\t\t\tconversionOccurred = true;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t// If the argument type is assignable to the varargs component type, there is no need to\n\t\t\t\t// convert it or wrap it in an array. For example, using StringToArrayConverter to\n\t\t\t\t// convert a String containing a comma would result in the String being split and\n\t\t\t\t// repackaged in an array when it should be used as-is.\n\t\t\t\telse if (!sourceType.isAssignableTo(componentTypeDesc)) {\n\t\t\t\t\targuments[varargsPosition] = converter.convertValue(argument, sourceType, targetType);\n\t\t\t\t}\n\t\t\t\t// Possible outcomes of the above if-else block:\n\t\t\t\t// 1) the input argument was null, and nothing was done.\n\t\t\t\t// 2) the input argument was null; the varargs component type is Optional; and the argument was converted to Optional.empty().\n\t\t\t\t// 3) the input argument was correct type but not wrapped in an array, and nothing was done.\n\t\t\t\t// 4) the input argument was already compatible (i.e., array of valid type), and nothing was done.\n\t\t\t\t// 5) the input argument was the wrong type and got converted and wrapped in an array.\n\t\t\t\tif (argument != arguments[varargsPosition] &&\n\t\t\t\t\t\t!isFirstEntryInArray(argument, arguments[varargsPosition])) {\n\t\t\t\t\tconversionOccurred = true; // case 5\n\t\t\t\t}\n\t\t\t}\n\t\t\t// Otherwise, convert remaining arguments to the varargs component type.\n\t\t\telse {\n\t\t\t\tfor (int i = varargsPosition; i < arguments.length; i++) {\n\t\t\t\t\tObject argument = arguments[i];\n\t\t\t\t\tTypeDescriptor sourceType = TypeDescriptor.forObject(argument);\n\t\t\t\t\targuments[i] = converter.convertValue(argument, sourceType, componentTypeDesc);\n\t\t\t\t\tconversionOccurred |= (argument != arguments[i]);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn conversionOccurred;\n\t}\n\n\t/**\n\t * Convert the supplied set of arguments into the parameter types of the supplied\n\t * {@link MethodHandle}, taking the varargs position into account.\n\t * <p>The arguments are converted 'in-place' in the input array.\n\t * @param converter the converter to use for type conversions\n\t * @param arguments the arguments to convert to the required parameter types\n\t * @param methodHandle the target {@code MethodHandle}\n\t * @param varargsPosition the known position of the varargs argument, if any\n\t * ({@code null} if not varargs)\n\t * @return {@code true} if some kind of conversion occurred on an argument\n\t * @throws EvaluationException if a problem occurs during conversion\n\t * @since 6.1\n\t */\n\tpublic static boolean convertAllMethodHandleArguments(TypeConverter converter, Object[] arguments,\n\t\t\tMethodHandle methodHandle, @Nullable Integer varargsPosition) throws EvaluationException {\n\n\t\tboolean conversionOccurred = false;\n\t\tMethodType methodHandleType = methodHandle.type();\n\t\tif (varargsPosition == null) {\n\t\t\tfor (int i = 0; i < arguments.length; i++) {\n\t\t\t\tClass<?> argumentClass = methodHandleType.parameterType(i);\n\t\t\t\tResolvableType resolvableType = ResolvableType.forClass(argumentClass);\n\t\t\t\tTypeDescriptor targetType = new TypeDescriptor(resolvableType, argumentClass, null);\n\n\t\t\t\tObject argument = arguments[i];\n\t\t\t\targuments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);\n\t\t\t\tconversionOccurred |= (argument != arguments[i]);\n\t\t\t}\n\t\t}\n\t\telse {\n\t\t\t// Convert everything up to the varargs position\n\t\t\tfor (int i = 0; i < varargsPosition; i++) {\n\t\t\t\tClass<?> argumentClass = methodHandleType.parameterType(i);\n\t\t\t\tResolvableType resolvableType = ResolvableType.forClass(argumentClass);\n\t\t\t\tTypeDescriptor targetType = new TypeDescriptor(resolvableType, argumentClass, null);\n\n\t\t\t\tObject argument = arguments[i];\n\t\t\t\targuments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);\n\t\t\t\tconversionOccurred |= (argument != arguments[i]);\n\t\t\t}\n\n\t\t\tClass<?> varArgClass = methodHandleType.lastParameterType();\n\t\t\tResolvableType varArgResolvableType = ResolvableType.forClass(varArgClass);\n\t\t\tTypeDescriptor targetType = new TypeDescriptor(varArgResolvableType, varArgClass.componentType(), null);\n\t\t\tTypeDescriptor componentTypeDesc = targetType.getElementTypeDescriptor();\n\t\t\tAssert.state(componentTypeDesc != null, \"Component type must not be null for a varargs array\");\n\n\t\t\t// If the target is varargs and there is just one more argument, then convert it here.\n\t\t\tif (varargsPosition == arguments.length - 1) {\n\t\t\t\tObject argument = arguments[varargsPosition];\n\t\t\t\tTypeDescriptor sourceType = TypeDescriptor.forObject(argument);\n\t\t\t\tif (argument == null) {\n\t\t\t\t\t// Perform the equivalent of GenericConversionService.convertNullSource() for a single argument.\n\t\t\t\t\tif (componentTypeDesc.getObjectType() == Optional.class) {\n\t\t\t\t\t\targuments[varargsPosition] = Optional.empty();\n\t\t\t\t\t\tconversionOccurred = true;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t// If the argument type is assignable to the varargs component type, there is no need to\n\t\t\t\t// convert it or wrap it in an array. For example, using StringToArrayConverter to\n\t\t\t\t// convert a String containing a comma would result in the String being split and\n\t\t\t\t// repackaged in an array when it should be used as-is.\n\t\t\t\telse if (!sourceType.isAssignableTo(componentTypeDesc)) {\n\t\t\t\t\targuments[varargsPosition] = converter.convertValue(argument, sourceType, targetType);\n\t\t\t\t}\n\t\t\t\t// Possible outcomes of the above if-else block:\n\t\t\t\t// 1) the input argument was null, and nothing was done.\n\t\t\t\t// 2) the input argument was null; the varargs component type is Optional; and the argument was converted to Optional.empty().\n\t\t\t\t// 3) the input argument was correct type but not wrapped in an array, and nothing was done.\n\t\t\t\t// 4) the input argument was already compatible (i.e., array of valid type), and nothing was done.\n\t\t\t\t// 5) the input argument was the wrong type and got converted and wrapped in an array.\n\t\t\t\tif (argument != arguments[varargsPosition] &&\n\t\t\t\t\t\t!isFirstEntryInArray(argument, arguments[varargsPosition])) {\n\t\t\t\t\tconversionOccurred = true; // case 5\n\t\t\t\t}\n\t\t\t}\n\t\t\t// Otherwise, convert remaining arguments to the varargs component type.\n\t\t\telse {\n\t\t\t\tfor (int i = varargsPosition; i < arguments.length; i++) {\n\t\t\t\t\tObject argument = arguments[i];\n\t\t\t\t\targuments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), componentTypeDesc);\n\t\t\t\t\tconversionOccurred |= (argument != arguments[i]);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn conversionOccurred;\n\t}\n\n\t/**\n\t * Check if the supplied value is the first entry in the array represented by the possibleArray value.\n\t * @param value the value to check for in the array\n\t * @param possibleArray an array object that may have the supplied value as the first element\n\t * @return true if the supplied value is the first entry in the array\n\t */\n\tprivate static boolean isFirstEntryInArray(Object value, @Nullable Object possibleArray) {\n\t\tif (possibleArray == null) {\n\t\t\treturn false;\n\t\t}\n\t\tClass<?> type = possibleArray.getClass();\n\t\tif (!type.isArray() || Array.getLength(possibleArray) == 0 ||\n\t\t\t\t!ClassUtils.isAssignableValue(type.componentType(), value)) {\n\t\t\treturn false;\n\t\t}\n\t\tObject arrayValue = Array.get(possibleArray, 0);\n\t\treturn (type.componentType().isPrimitive() ? arrayValue.equals(value) : arrayValue == value);\n\t}\n\n\t/**\n\t * Package up the supplied {@code args} so that they correctly match what is\n\t * expected in {@code requiredParameterTypes}.\n\t * <p>For example, if {@code requiredParameterTypes} is {@code (int, String[])}\n\t * because the second parameter was declared as {@code String...}, then if\n\t * {@code args} is {@code [1, \"a\", \"b\"]} it must be repackaged as\n\t * {@code [1, new String[] {\"a\", \"b\"}]} in order to match the expected types.\n\t * @param requiredParameterTypes the types of the parameters for the invocation\n\t * @param args the arguments to be set up for the invocation\n\t * @return a repackaged array of arguments where any varargs setup has been performed\n\t */\n\tpublic static Object[] setupArgumentsForVarargsInvocation(Class<?>[] requiredParameterTypes, Object... args) {\n\t\tAssert.notEmpty(requiredParameterTypes, \"Required parameter types array must not be empty\");\n\n\t\tint parameterCount = requiredParameterTypes.length;\n\t\tClass<?> lastRequiredParameterType = requiredParameterTypes[parameterCount - 1];\n\t\tAssert.isTrue(lastRequiredParameterType.isArray(),\n\t\t\t\t\"The last required parameter type must be an array to support varargs invocation\");\n\n\t\tint argumentCount = args.length;\n\t\tObject lastArgument = (argumentCount > 0 ? args[argumentCount - 1] : null);\n\n\t\t// Check if repackaging is needed...\n\t\tif (parameterCount != argumentCount || !lastRequiredParameterType.isInstance(lastArgument)) {\n\t\t\t// Create an array for the leading arguments plus the varargs array argument.\n\t\t\tObject[] newArgs = new Object[parameterCount];\n\t\t\t// Copy all leading arguments to the new array, omitting the varargs array argument.\n\t\t\tSystem.arraycopy(args, 0, newArgs, 0, newArgs.length - 1);\n\n\t\t\t// Now sort out the final argument, which is the varargs one. Before entering this method,\n\t\t\t// the arguments should have been converted to the box form of the required type.\n\t\t\tint varargsArraySize = 0;  // zero size array if nothing to pass as the varargs parameter\n\t\t\tif (argumentCount >= parameterCount) {\n\t\t\t\tvarargsArraySize = argumentCount - (parameterCount - 1);\n\t\t\t}\n\t\t\tClass<?> componentType = lastRequiredParameterType.componentType();\n\t\t\tObject varargsArray = Array.newInstance(componentType, varargsArraySize);\n\t\t\tfor (int i = 0; i < varargsArraySize; i++) {\n\t\t\t\tArray.set(varargsArray, i, args[parameterCount - 1 + i]);\n\t\t\t}\n\t\t\t// Finally, add the varargs array to the new arguments array.\n\t\t\tnewArgs[newArgs.length - 1] = varargsArray;\n\t\t\treturn newArgs;\n\t\t}\n\n\t\treturn args;\n\t}\n\n\n\t/**\n\t * Arguments match kinds.\n\t */\n\tenum ArgumentsMatchKind {\n\n\t\t/** An exact match is where the parameter types exactly match what the method/constructor is expecting. */\n\t\tEXACT,\n\n\t\t/** A close match is where the parameter types either exactly match or are assignment-compatible. */\n\t\tCLOSE,\n\n\t\t/** A conversion match is where the type converter must be used to transform some of the parameter types. */\n\t\tREQUIRES_CONVERSION\n\t}\n\n\n\t/**\n\t * An instance of {@code ArgumentsMatchInfo} describes what kind of match was achieved\n\t * between two sets of arguments - the set that a method/constructor is expecting\n\t * and the set that is being supplied at the point of invocation.\n\t *\n\t * @param kind the kind of match that was achieved\n\t */\n\trecord ArgumentsMatchInfo(ArgumentsMatchKind kind) {\n\n\t\tpublic boolean isExactMatch() {\n\t\t\treturn (this.kind == ArgumentsMatchKind.EXACT);\n\t\t}\n\n\t\tpublic boolean isCloseMatch() {\n\t\t\treturn (this.kind == ArgumentsMatchKind.CLOSE);\n\t\t}\n\n\t\tpublic boolean isMatchRequiringConversion() {\n\t\t\treturn (this.kind == ArgumentsMatchKind.REQUIRES_CONVERSION);\n\t\t}\n\n\t\t@Override\n\t\tpublic String toString() {\n\t\t\treturn \"ArgumentsMatchInfo: \" + this.kind;\n\t\t}\n\t}\n\n}"
+  },
+  "org.springframework.expression.spel.support.ReflectionHelper#convertAllArguments(converter,arguments,method)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Convert the supplied set of arguments into the parameter types of the supplied\n\t * {@link Method}.\n\t * <p>If the supplied method is a varargs method, the final parameter type must be an\n\t * array whose component type should be used as the conversion target for extraneous\n\t * arguments. For example, if the parameter types are <code>{Integer, String[]}</code>\n\t * and the input arguments are <code>{Integer, boolean, float}</code>, then both the\n\t * {@code boolean} and the {@code float} must be converted to strings.\n\t * <p>This method does <strong>not</strong> repackage the arguments into a form suitable\n\t * for the varargs invocation: a subsequent call to\n\t * {@link #setupArgumentsForVarargsInvocation(Class[], Object...)} is required for that.\n\t * @param converter the converter to use for type conversions\n\t * @param arguments the arguments to convert to the required parameter types\n\t * @param method the target {@code Method}\n\t * @return {@code true} if some kind of conversion occurred on an argument\n\t * @throws SpelEvaluationException if a problem occurs during conversion\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "converter",
+      "arguments",
+      "method"
+    ],
+    "position": {
+      "column": 1,
+      "line": 254
+    },
+    "return": "boolean",
+    "signature": "public boolean convertAllArguments(TypeConverter converter, Object[] arguments, Method method)",
+    "source_code": "\tpublic static boolean convertAllArguments(TypeConverter converter, Object[] arguments, Method method)"
+  },
+  "org.springframework.expression.spel.support.ReflectionHelper#convertAllMethodHandleArguments(converter,arguments,methodHandle,varargsPosition)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Convert the supplied set of arguments into the parameter types of the supplied\n\t * {@link MethodHandle}, taking the varargs position into account.\n\t * <p>The arguments are converted 'in-place' in the input array.\n\t * @param converter the converter to use for type conversions\n\t * @param arguments the arguments to convert to the required parameter types\n\t * @param methodHandle the target {@code MethodHandle}\n\t * @param varargsPosition the known position of the varargs argument, if any\n\t * ({@code null} if not varargs)\n\t * @return {@code true} if some kind of conversion occurred on an argument\n\t * @throws EvaluationException if a problem occurs during conversion\n\t * @since 6.1\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "converter",
+      "arguments",
+      "methodHandle",
+      "varargsPosition"
+    ],
+    "position": {
+      "column": 1,
+      "line": 354
+    },
+    "return": "boolean",
+    "signature": "public boolean convertAllMethodHandleArguments(TypeConverter converter, Object[] arguments,\n\t\t\tMethodHandle methodHandle, @Nullable Integer varargsPosition)",
+    "source_code": "\tpublic static boolean convertAllMethodHandleArguments(TypeConverter converter, Object[] arguments,"
+  },
+  "org.springframework.expression.spel.support.ReflectionHelper#getTypeDifferenceWeight(paramTypes,argTypes)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Based on {@link MethodInvoker#getTypeDifferenceWeight(Class[], Object[])} but operates on TypeDescriptors.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "paramTypes",
+      "argTypes"
+    ],
+    "position": {
+      "column": 1,
+      "line": 97
+    },
+    "return": "int",
+    "signature": "public int getTypeDifferenceWeight(List<TypeDescriptor> paramTypes, List<TypeDescriptor> argTypes)",
+    "source_code": "\tpublic static int getTypeDifferenceWeight(List<TypeDescriptor> paramTypes, List<TypeDescriptor> argTypes) {\n\t\tint result = 0;\n\t\tfor (int i = 0; i < paramTypes.size(); i++) {\n\t\t\tTypeDescriptor paramType = paramTypes.get(i);\n\t\t\tTypeDescriptor argType = (i < argTypes.size() ? argTypes.get(i) : null);\n\t\t\tif (argType == null) {\n\t\t\t\tif (paramType.isPrimitive()) {\n\t\t\t\t\treturn Integer.MAX_VALUE;\n\t\t\t\t}\n\t\t\t}\n\t\t\telse {\n\t\t\t\tClass<?> paramTypeClazz = paramType.getType();\n\t\t\t\tif (!ClassUtils.isAssignable(paramTypeClazz, argType.getType())) {\n\t\t\t\t\treturn Integer.MAX_VALUE;\n\t\t\t\t}\n\t\t\t\tif (paramTypeClazz.isPrimitive()) {\n\t\t\t\t\tparamTypeClazz = Object.class;\n\t\t\t\t}\n\t\t\t\tClass<?> superClass = argType.getType().getSuperclass();\n\t\t\t\twhile (superClass != null) {\n\t\t\t\t\tif (paramTypeClazz.equals(superClass)) {\n\t\t\t\t\t\tresult = result + 2;\n\t\t\t\t\t\tsuperClass = null;\n\t\t\t\t\t}\n\t\t\t\t\telse if (ClassUtils.isAssignable(paramTypeClazz, superClass)) {\n\t\t\t\t\t\tresult = result + 2;\n\t\t\t\t\t\tsuperClass = superClass.getSuperclass();\n\t\t\t\t\t}\n\t\t\t\t\telse {\n\t\t\t\t\t\tsuperClass = null;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tif (paramTypeClazz.isInterface()) {\n\t\t\t\t\tresult = result + 1;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn result;\n\t}"
+  },
+  "org.springframework.expression.spel.support.ReflectionHelper#isCloseMatch()": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 526
+    },
+    "return": "boolean",
+    "signature": "public boolean isCloseMatch()",
+    "source_code": "\t\tpublic boolean isCloseMatch() {\n\t\t\treturn (this.kind == ArgumentsMatchKind.CLOSE);\n\t\t}"
+  },
+  "org.springframework.expression.spel.support.ReflectionHelper#isExactMatch()": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 522
+    },
+    "return": "boolean",
+    "signature": "public boolean isExactMatch()",
+    "source_code": "\t\tpublic boolean isExactMatch() {\n\t\t\treturn (this.kind == ArgumentsMatchKind.EXACT);\n\t\t}"
+  },
+  "org.springframework.expression.spel.support.ReflectionHelper#isMatchRequiringConversion()": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 530
+    },
+    "return": "boolean",
+    "signature": "public boolean isMatchRequiringConversion()",
+    "source_code": "\t\tpublic boolean isMatchRequiringConversion() {\n\t\t\treturn (this.kind == ArgumentsMatchKind.REQUIRES_CONVERSION);\n\t\t}"
+  },
+  "org.springframework.expression.spel.support.ReflectionHelper#setupArgumentsForVarargsInvocation(requiredParameterTypes,args)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Package up the supplied {@code args} so that they correctly match what is\n\t * expected in {@code requiredParameterTypes}.\n\t * <p>For example, if {@code requiredParameterTypes} is {@code (int, String[])}\n\t * because the second parameter was declared as {@code String...}, then if\n\t * {@code args} is {@code [1, \"a\", \"b\"]} it must be repackaged as\n\t * {@code [1, new String[] {\"a\", \"b\"}]} in order to match the expected types.\n\t * @param requiredParameterTypes the types of the parameters for the invocation\n\t * @param args the arguments to be set up for the invocation\n\t * @return a repackaged array of arguments where any varargs setup has been performed\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "requiredParameterTypes",
+      "args"
+    ],
+    "position": {
+      "column": 1,
+      "line": 459
+    },
+    "return": "Object[]",
+    "signature": "public Object[] setupArgumentsForVarargsInvocation(Class<?>[] requiredParameterTypes, Object... args)",
+    "source_code": "\tpublic static Object[] setupArgumentsForVarargsInvocation(Class<?>[] requiredParameterTypes, Object... args) {\n\t\tAssert.notEmpty(requiredParameterTypes, \"Required parameter types array must not be empty\");\n\n\t\tint parameterCount = requiredParameterTypes.length;\n\t\tClass<?> lastRequiredParameterType = requiredParameterTypes[parameterCount - 1];\n\t\tAssert.isTrue(lastRequiredParameterType.isArray(),\n\t\t\t\t\"The last required parameter type must be an array to support varargs invocation\");\n\n\t\tint argumentCount = args.length;\n\t\tObject lastArgument = (argumentCount > 0 ? args[argumentCount - 1] : null);\n\n\t\t// Check if repackaging is needed...\n\t\tif (parameterCount != argumentCount || !lastRequiredParameterType.isInstance(lastArgument)) {\n\t\t\t// Create an array for the leading arguments plus the varargs array argument.\n\t\t\tObject[] newArgs = new Object[parameterCount];\n\t\t\t// Copy all leading arguments to the new array, omitting the varargs array argument.\n\t\t\tSystem.arraycopy(args, 0, newArgs, 0, newArgs.length - 1);\n\n\t\t\t// Now sort out the final argument, which is the varargs one. Before entering this method,\n\t\t\t// the arguments should have been converted to the box form of the required type.\n\t\t\tint varargsArraySize = 0;  // zero size array if nothing to pass as the varargs parameter\n\t\t\tif (argumentCount >= parameterCount) {\n\t\t\t\tvarargsArraySize = argumentCount - (parameterCount - 1);\n\t\t\t}\n\t\t\tClass<?> componentType = lastRequiredParameterType.componentType();\n\t\t\tObject varargsArray = Array.newInstance(componentType, varargsArraySize);\n\t\t\tfor (int i = 0; i < varargsArraySize; i++) {\n\t\t\t\tArray.set(varargsArray, i, args[parameterCount - 1 + i]);\n\t\t\t}\n\t\t\t// Finally, add the varargs array to the new arguments array.\n\t\t\tnewArgs[newArgs.length - 1] = varargsArray;\n\t\t\treturn newArgs;\n\t\t}\n\n\t\treturn args;\n\t}"
+  },
+  "org.springframework.expression.spel.support.ReflectionHelper#toString()": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 535
+    },
+    "return": "String",
+    "signature": "public String toString()",
+    "source_code": "\t\tpublic String toString() {\n\t\t\treturn \"ArgumentsMatchInfo: \" + this.kind;\n\t\t}"
+  },
+  "org.springframework.messaging.rsocket.<unknown>#metadata(metadata,mimeType)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "metadata",
+      "mimeType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 152
+    },
+    "return": "RequestSpec",
+    "signature": "public RequestSpec metadata(Object metadata, MimeType mimeType)",
+    "source_code": "\t\tpublic RequestSpec metadata(Object metadata, MimeType mimeType) {\n\t\t\tthis.metadataEncoder.metadata(metadata, mimeType);\n\t\t\treturn this;\n\t\t}"
+  },
+  "org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "/**\n * Default builder for {@link MockMultipartHttpServletRequest}.\n *\n * @author Rossen Stoyanchev\n * @author Arjen Poutsma\n * @author Stephane Nicoll\n * @since 3.2\n */",
+    "kind": "class",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 50
+    },
+    "signature": "public class MockMultipartHttpServletRequestBuilder",
+    "source_code": "public class MockMultipartHttpServletRequestBuilder extends MockHttpServletRequestBuilder {\n\n\tprivate final List<MockMultipartFile> files = new ArrayList<>();\n\n\tprivate final MultiValueMap<String, Part> parts = new LinkedMultiValueMap<>();\n\n\n\t/**\n\t * Package-private constructor. Use static factory methods in\n\t * {@link MockMvcRequestBuilders}.\n\t * <p>For other ways to initialize a {@code MockMultipartHttpServletRequest},\n\t * see {@link #with(RequestPostProcessor)} and the\n\t * {@link RequestPostProcessor} extension point.\n\t * @param httpMethod the HTTP method (GET, POST, etc.)\n\t */\n\tMockMultipartHttpServletRequestBuilder(HttpMethod httpMethod) {\n\t\tsuper(httpMethod);\n\t\tsuper.contentType(MediaType.MULTIPART_FORM_DATA);\n\t}\n\n\t/**\n\t * Variant of {@link #MockMultipartHttpServletRequestBuilder(HttpMethod)}\n\t * that defaults to {@link HttpMethod#POST}.\n\t */\n\tMockMultipartHttpServletRequestBuilder() {\n\t\tthis(HttpMethod.POST);\n\t}\n\n\n\t/**\n\t * Add a new {@link MockMultipartFile} with the given content.\n\t * @param name the name of the file\n\t * @param content the content of the file\n\t */\n\tpublic MockMultipartHttpServletRequestBuilder file(String name, byte[] content) {\n\t\tthis.files.add(new MockMultipartFile(name, content));\n\t\treturn this;\n\t}\n\n\t/**\n\t * Add the given {@link MockMultipartFile}.\n\t * @param file the multipart file\n\t */\n\tpublic MockMultipartHttpServletRequestBuilder file(MockMultipartFile file) {\n\t\tthis.files.add(file);\n\t\treturn this;\n\t}\n\n\t/**\n\t * Add {@link Part} components to the request.\n\t * @param parts one or more parts to add\n\t * @since 5.0\n\t */\n\tpublic MockMultipartHttpServletRequestBuilder part(Part... parts) {\n\t\tAssert.notEmpty(parts, \"'parts' must not be empty\");\n\t\tfor (Part part : parts) {\n\t\t\tthis.parts.add(part.getName(), part);\n\t\t}\n\t\treturn this;\n\t}\n\n\t@Override\n\tpublic Object merge(@Nullable Object parent) {\n\t\tif (parent == null) {\n\t\t\treturn this;\n\t\t}\n\t\tif (parent instanceof MockHttpServletRequestBuilder) {\n\t\t\tsuper.merge(parent);\n\t\t\tif (parent instanceof MockMultipartHttpServletRequestBuilder parentBuilder) {\n\t\t\t\tthis.files.addAll(parentBuilder.files);\n\t\t\t\tparentBuilder.parts.keySet().forEach(name ->\n\t\t\t\t\t\tthis.parts.putIfAbsent(name, parentBuilder.parts.get(name)));\n\t\t\t}\n\t\t}\n\t\telse {\n\t\t\tthrow new IllegalArgumentException(\"Cannot merge with [\" + parent.getClass().getName() + \"]\");\n\t\t}\n\t\treturn this;\n\t}\n\n\t/**\n\t * Create a new {@link MockMultipartHttpServletRequest} based on the\n\t * supplied {@code ServletContext} and the {@code MockMultipartFiles}\n\t * added to this builder.\n\t */\n\t@Override\n\tprotected final MockHttpServletRequest createServletRequest(ServletContext servletContext) {\n\t\tMockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest(servletContext);\n\t\tCharset defaultCharset = (request.getCharacterEncoding() != null ?\n\t\t\t\tCharset.forName(request.getCharacterEncoding()) : StandardCharsets.UTF_8);\n\n\t\tthis.files.forEach(request::addFile);\n\t\tthis.parts.values().stream().flatMap(Collection::stream).forEach(part -> {\n\t\t\trequest.addPart(part);\n\t\t\ttry {\n\t\t\t\tString name = part.getName();\n\t\t\t\tString filename = part.getSubmittedFileName();\n\t\t\t\tInputStream is = part.getInputStream();\n\t\t\t\tif (filename != null) {\n\t\t\t\t\trequest.addFile(new MockMultipartFile(name, filename, part.getContentType(), is));\n\t\t\t\t}\n\t\t\t\telse {\n\t\t\t\t\tInputStreamReader reader = new InputStreamReader(is, getCharsetOrDefault(part, defaultCharset));\n\t\t\t\t\tString value = FileCopyUtils.copyToString(reader);\n\t\t\t\t\trequest.addParameter(part.getName(), value);\n\t\t\t\t}\n\t\t\t}\n\t\t\tcatch (IOException ex) {\n\t\t\t\tthrow new IllegalStateException(\"Failed to read content for part \" + part.getName(), ex);\n\t\t\t}\n\t\t});\n\n\t\treturn request;\n\t}\n\n\tprivate Charset getCharsetOrDefault(Part part, Charset defaultCharset) {\n\t\tif (part.getContentType() != null) {\n\t\t\tMediaType mediaType = MediaType.parseMediaType(part.getContentType());\n\t\t\tif (mediaType.getCharset() != null) {\n\t\t\t\treturn mediaType.getCharset();\n\t\t\t}\n\t\t}\n\t\treturn defaultCharset;\n\t}\n\n}"
+  },
+  "org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder#createServletRequest(servletContext)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Create a new {@link MockMultipartHttpServletRequest} based on the\n\t * supplied {@code ServletContext} and the {@code MockMultipartFiles}\n\t * added to this builder.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "servletContext"
+    ],
+    "position": {
+      "column": 1,
+      "line": 136
+    },
+    "return": "MockHttpServletRequest",
+    "signature": "protected MockHttpServletRequest createServletRequest(ServletContext servletContext)",
+    "source_code": "\tprotected final MockHttpServletRequest createServletRequest(ServletContext servletContext) {\n\t\tMockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest(servletContext);\n\t\tCharset defaultCharset = (request.getCharacterEncoding() != null ?\n\t\t\t\tCharset.forName(request.getCharacterEncoding()) : StandardCharsets.UTF_8);\n\n\t\tthis.files.forEach(request::addFile);\n\t\tthis.parts.values().stream().flatMap(Collection::stream).forEach(part -> {\n\t\t\trequest.addPart(part);\n\t\t\ttry {\n\t\t\t\tString name = part.getName();\n\t\t\t\tString filename = part.getSubmittedFileName();\n\t\t\t\tInputStream is = part.getInputStream();\n\t\t\t\tif (filename != null) {\n\t\t\t\t\trequest.addFile(new MockMultipartFile(name, filename, part.getContentType(), is));\n\t\t\t\t}\n\t\t\t\telse {\n\t\t\t\t\tInputStreamReader reader = new InputStreamReader(is, getCharsetOrDefault(part, defaultCharset));\n\t\t\t\t\tString value = FileCopyUtils.copyToString(reader);\n\t\t\t\t\trequest.addParameter(part.getName(), value);\n\t\t\t\t}\n\t\t\t}\n\t\t\tcatch (IOException ex) {\n\t\t\t\tthrow new IllegalStateException(\"Failed to read content for part \" + part.getName(), ex);\n\t\t\t}\n\t\t});\n\n\t\treturn request;\n\t}"
+  },
+  "org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder#file(file)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Add the given {@link MockMultipartFile}.\n\t * @param file the multipart file\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "file"
+    ],
+    "position": {
+      "column": 1,
+      "line": 93
+    },
+    "return": "MockMultipartHttpServletRequestBuilder",
+    "signature": "public MockMultipartHttpServletRequestBuilder file(MockMultipartFile file)",
+    "source_code": "\tpublic MockMultipartHttpServletRequestBuilder file(MockMultipartFile file) {\n\t\tthis.files.add(file);\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder#file(name,content)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Add a new {@link MockMultipartFile} with the given content.\n\t * @param name the name of the file\n\t * @param content the content of the file\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "name",
+      "content"
+    ],
+    "position": {
+      "column": 1,
+      "line": 84
+    },
+    "return": "MockMultipartHttpServletRequestBuilder",
+    "signature": "public MockMultipartHttpServletRequestBuilder file(String name, byte[] content)",
+    "source_code": "\tpublic MockMultipartHttpServletRequestBuilder file(String name, byte[] content) {\n\t\tthis.files.add(new MockMultipartFile(name, content));\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder#merge(parent)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "parent"
+    ],
+    "position": {
+      "column": 1,
+      "line": 112
+    },
+    "return": "Object",
+    "signature": "public Object merge(@Nullable Object parent)",
+    "source_code": "\tpublic Object merge(@Nullable Object parent) {\n\t\tif (parent == null) {\n\t\t\treturn this;\n\t\t}\n\t\tif (parent instanceof MockHttpServletRequestBuilder) {\n\t\t\tsuper.merge(parent);\n\t\t\tif (parent instanceof MockMultipartHttpServletRequestBuilder parentBuilder) {\n\t\t\t\tthis.files.addAll(parentBuilder.files);\n\t\t\t\tparentBuilder.parts.keySet().forEach(name ->\n\t\t\t\t\t\tthis.parts.putIfAbsent(name, parentBuilder.parts.get(name)));\n\t\t\t}\n\t\t}\n\t\telse {\n\t\t\tthrow new IllegalArgumentException(\"Cannot merge with [\" + parent.getClass().getName() + \"]\");\n\t\t}\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder#part(parts)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Add {@link Part} components to the request.\n\t * @param parts one or more parts to add\n\t * @since 5.0\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "parts"
+    ],
+    "position": {
+      "column": 1,
+      "line": 103
+    },
+    "return": "MockMultipartHttpServletRequestBuilder",
+    "signature": "public MockMultipartHttpServletRequestBuilder part(Part... parts)",
+    "source_code": "\tpublic MockMultipartHttpServletRequestBuilder part(Part... parts) {\n\t\tAssert.notEmpty(parts, \"'parts' must not be empty\");\n\t\tfor (Part part : parts) {\n\t\t\tthis.parts.add(part.getName(), part);\n\t\t}\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.validation.beanvalidation.MethodValidationAdapter#getViolation()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 546
+    },
+    "return": "ConstraintViolation<Object>",
+    "signature": "public ConstraintViolation<Object> getViolation()",
+    "source_code": "\t\tpublic ConstraintViolation<Object> getViolation() {\n\t\t\treturn this.violation;\n\t\t}"
+  },
+  "org.springframework.validation.method.ParameterValidationResult#unwrap(error,sourceType)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Unwrap the source behind the given error. For Jakarta Bean validation the\n\t * source is a {@link jakarta.validation.ConstraintViolation}.\n\t * @param sourceType the expected source type\n\t * @return the source object of the given type\n\t * @since 6.2\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "error",
+      "sourceType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 197
+    },
+    "return": "T",
+    "signature": "public T unwrap(MessageSourceResolvable error, Class<T> sourceType)",
+    "source_code": "\tpublic <T> T unwrap(MessageSourceResolvable error, Class<T> sourceType) {\n\t\treturn (T) this.sourceLookup.apply(error, sourceType);\n\t}"
+  },
+  "org.springframework.web.reactive.function.client.support.WebClientAdapter#forClient(webClient)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Create a {@link WebClientAdapter} for the given {@code WebClient} instance.\n\t * @param webClient the client to use\n\t * @return the created adapter instance\n\t * @deprecated in favor of {@link #create(WebClient)} aligning with other adapter\n\t * implementations; to be removed in 6.2.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "webClient"
+    ],
+    "position": {
+      "column": 1,
+      "line": 166
+    },
+    "return": "WebClientAdapter",
+    "signature": "public WebClientAdapter forClient(WebClient webClient)",
+    "source_code": "\tpublic static WebClientAdapter forClient(WebClient webClient) {\n\t\treturn new WebClientAdapter(webClient);\n\t}"
+  },
+  "org.springframework.web.service.invoker.HttpServiceProxyFactory#blockTimeout(blockTimeout)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t\t/**\n\t\t * Configure how long to block for the response of an HTTP service method\n\t\t * with a synchronous (blocking) method signature.\n\t\t * <p>By default this is not set, in which case the behavior depends on\n\t\t * connection and request timeout settings of the underlying HTTP client.\n\t\t * We recommend configuring timeout values directly on the underlying HTTP\n\t\t * client, which provides more control over such settings.\n\t\t * @param blockTimeout the timeout value\n\t\t * @return this same builder instance\n\t\t * @deprecated in favor of setting the same directly on the {@link HttpExchangeAdapter}\n\t\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "blockTimeout"
+    ],
+    "position": {
+      "column": 1,
+      "line": 237
+    },
+    "return": "Builder",
+    "signature": "public Builder blockTimeout(@Nullable Duration blockTimeout)",
+    "source_code": "\t\tpublic Builder blockTimeout(@Nullable Duration blockTimeout) {\n\t\t\tif (this.exchangeAdapter instanceof AbstractReactorHttpExchangeAdapter settable) {\n\t\t\t\tsettable.setBlockTimeout(blockTimeout);\n\t\t\t}\n\t\t\treturn this;\n\t\t}"
+  },
+  "org.springframework.web.service.invoker.HttpServiceProxyFactory#builder(clientAdapter)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return a builder that's initialized with the given client.\n\t * @deprecated in favor of {@link #builderFor(HttpExchangeAdapter)};\n\t * to be removed in 6.2.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "clientAdapter"
+    ],
+    "position": {
+      "column": 1,
+      "line": 122
+    },
+    "return": "Builder",
+    "signature": "public Builder builder(HttpClientAdapter clientAdapter)",
+    "source_code": "\tpublic static Builder builder(HttpClientAdapter clientAdapter) {\n\t\treturn new Builder().exchangeAdapter(clientAdapter.asReactorExchangeAdapter());\n\t}"
+  },
+  "org.springframework.web.service.invoker.HttpServiceProxyFactory#clientAdapter(clientAdapter)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t\t/**\n\t\t * Provide the HTTP client to perform requests through.\n\t\t * @param clientAdapter a client adapted to {@link HttpClientAdapter}\n\t\t * @return this same builder instance\n\t\t * @deprecated in favor of {@link #exchangeAdapter(HttpExchangeAdapter)};\n\t\t * to be removed in 6.2\n\t\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "clientAdapter"
+    ],
+    "position": {
+      "column": 1,
+      "line": 173
+    },
+    "return": "Builder",
+    "signature": "public Builder clientAdapter(HttpClientAdapter clientAdapter)",
+    "source_code": "\t\tpublic Builder clientAdapter(HttpClientAdapter clientAdapter) {\n\t\t\tthis.exchangeAdapter = clientAdapter.asReactorExchangeAdapter();\n\t\t\treturn this;\n\t\t}"
+  },
+  "org.springframework.web.service.invoker.HttpServiceProxyFactory#reactiveAdapterRegistry(registry)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t\t/**\n\t\t * Set the {@link ReactiveAdapterRegistry} to use to support different\n\t\t * asynchronous types for HTTP service method return values.\n\t\t * <p>By default this is {@link ReactiveAdapterRegistry#getSharedInstance()}.\n\t\t * @return this same builder instance\n\t\t * @deprecated in favor of setting the same directly on the {@link HttpExchangeAdapter}\n\t\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "registry"
+    ],
+    "position": {
+      "column": 1,
+      "line": 218
+    },
+    "return": "Builder",
+    "signature": "public Builder reactiveAdapterRegistry(ReactiveAdapterRegistry registry)",
+    "source_code": "\t\tpublic Builder reactiveAdapterRegistry(ReactiveAdapterRegistry registry) {\n\t\t\tif (this.exchangeAdapter instanceof AbstractReactorHttpExchangeAdapter settable) {\n\t\t\t\tsettable.setReactiveAdapterRegistry(registry);\n\t\t\t}\n\t\t\treturn this;\n\t\t}"
+  },
+  "org.springframework.web.servlet.function.<unknown>#build()": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 215
+    },
+    "return": "EntityResponse<T>",
+    "signature": "public EntityResponse<T> build()",
+    "source_code": "\tpublic EntityResponse<T> build() {\n\t\tif (this.entity instanceof CompletionStage completionStage) {\n\t\t\treturn new CompletionStageEntityResponse(this.status, this.headers, this.cookies,\n\t\t\t\t\tcompletionStage, this.entityType);\n\t\t}\n\t\telse if (DefaultAsyncServerResponse.reactiveStreamsPresent) {\n\t\t\tReactiveAdapter adapter = ReactiveAdapterRegistry.getSharedInstance().getAdapter(this.entity.getClass());\n\t\t\tif (adapter != null) {\n\t\t\t\tPublisher<T> publisher = adapter.toPublisher(this.entity);\n\t\t\t\treturn new PublisherEntityResponse(this.status, this.headers, this.cookies, publisher, this.entityType);\n\t\t\t}\n\t\t}\n\t\treturn new DefaultEntityResponse<>(this.status, this.headers, this.cookies, this.entity, this.entityType);\n\t}"
+  }
+}

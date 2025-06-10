@@ -1,0 +1,708 @@
+{
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "/**\n * Extension of {@link AbstractMethodMessageHandler} for reactive, non-blocking\n * handling of messages via {@link MessageMapping @MessageMapping} methods.\n * By default such methods are detected in {@code @Controller} Spring beans but\n * that can be changed via {@link #setHandlerPredicate(Predicate)}.\n *\n * <p>Payloads for incoming messages are decoded through the configured\n * {@link #setDecoders(List)} decoders, with the help of\n * {@link PayloadMethodArgumentResolver}.\n *\n * <p>There is no default handling for return values but\n * {@link #setReturnValueHandlerConfigurer} can be used to configure custom\n * return value handlers. Sub-classes may also override\n * {@link #initReturnValueHandlers()} to set up default return value handlers.\n *\n * @author Rossen Stoyanchev\n * @since 5.2\n * @see AbstractEncoderMethodReturnValueHandler\n */",
+    "kind": "class",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 82
+    },
+    "signature": "public class MessageMappingMessageHandler",
+    "source_code": "public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<CompositeMessageCondition>"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#createExceptionMethodResolverFor(beanType)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "beanType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 322
+    },
+    "return": "AbstractExceptionHandlerMethodResolver",
+    "signature": "protected AbstractExceptionHandlerMethodResolver createExceptionMethodResolverFor(Class<?> beanType)",
+    "source_code": "\tprotected AbstractExceptionHandlerMethodResolver createExceptionMethodResolverFor(Class<?> beanType) {\n\t\treturn new AnnotationExceptionHandlerMethodResolver(beanType);\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#getConversionService()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return the configured ConversionService.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 219
+    },
+    "return": "ConversionService",
+    "signature": "public ConversionService getConversionService()",
+    "source_code": "\tpublic ConversionService getConversionService() {\n\t\treturn this.conversionService;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#getDestination(message)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "message"
+    ],
+    "position": {
+      "column": 1,
+      "line": 307
+    },
+    "return": "String",
+    "signature": "protected String getDestination(Message<?> message)",
+    "source_code": "\tprotected String getDestination(Message<?> message) {\n\t\treturn (String) message.getHeaders().get(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER);\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#getDirectLookupMappings(mapping)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "mapping"
+    ],
+    "position": {
+      "column": 1,
+      "line": 296
+    },
+    "return": "Set<String>",
+    "signature": "protected Set<String> getDirectLookupMappings(CompositeMessageCondition mapping)",
+    "source_code": "\tprotected Set<String> getDirectLookupMappings(CompositeMessageCondition mapping) {\n\t\tSet<String> result = new LinkedHashSet<>();\n\t\tfor (String pattern : mapping.getCondition(DestinationPatternsMessageCondition.class).getPatterns()) {\n\t\t\tif (!this.pathMatcher.isPattern(pattern)) {\n\t\t\t\tresult.add(pattern);\n\t\t\t}\n\t\t}\n\t\treturn result;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#getMappingComparator(message)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "message"
+    ],
+    "position": {
+      "column": 1,
+      "line": 317
+    },
+    "return": "Comparator<CompositeMessageCondition>",
+    "signature": "protected Comparator<CompositeMessageCondition> getMappingComparator(Message<?> message)",
+    "source_code": "\tprotected Comparator<CompositeMessageCondition> getMappingComparator(Message<?> message) {\n\t\treturn (info1, info2) -> info1.compareTo(info2, message);\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#getMappingForMethod(method,handlerType)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "method",
+      "handlerType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 269
+    },
+    "return": "CompositeMessageCondition",
+    "signature": "protected CompositeMessageCondition getMappingForMethod(Method method, Class<?> handlerType)",
+    "source_code": "\tprotected CompositeMessageCondition getMappingForMethod(Method method, Class<?> handlerType) {\n\t\tCompositeMessageCondition methodCondition = getCondition(method);\n\t\tif (methodCondition != null) {\n\t\t\tCompositeMessageCondition typeCondition = getCondition(handlerType);\n\t\t\tif (typeCondition != null) {\n\t\t\t\treturn typeCondition.combine(methodCondition);\n\t\t\t}\n\t\t}\n\t\treturn methodCondition;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#getMatchingMapping(mapping,message)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "mapping",
+      "message"
+    ],
+    "position": {
+      "column": 1,
+      "line": 312
+    },
+    "return": "CompositeMessageCondition",
+    "signature": "protected CompositeMessageCondition getMatchingMapping(CompositeMessageCondition mapping, Message<?> message)",
+    "source_code": "\tprotected CompositeMessageCondition getMatchingMapping(CompositeMessageCondition mapping, Message<?> message) {\n\t\treturn mapping.getMatchingCondition(message);\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#getPathMatcher()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return the PathMatcher implementation to use for matching destinations.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 202
+    },
+    "return": "PathMatcher",
+    "signature": "public PathMatcher getPathMatcher()",
+    "source_code": "\tpublic PathMatcher getPathMatcher() {\n\t\treturn this.pathMatcher;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#getValidator()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return the configured Validator instance.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 185
+    },
+    "return": "Validator",
+    "signature": "public Validator getValidator()",
+    "source_code": "\tpublic Validator getValidator() {\n\t\treturn this.validator;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#handleMatch(mapping,handlerMethod,message)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "mapping",
+      "handlerMethod",
+      "message"
+    ],
+    "position": {
+      "column": 1,
+      "line": 327
+    },
+    "return": "Mono<Void>",
+    "signature": "protected Mono<Void> handleMatch(CompositeMessageCondition mapping, HandlerMethod handlerMethod, Message<?> message)",
+    "source_code": "\tprotected Mono<Void> handleMatch(CompositeMessageCondition mapping, HandlerMethod handlerMethod, Message<?> message) {\n\t\tSet<String> patterns = mapping.getCondition(DestinationPatternsMessageCondition.class).getPatterns();\n\t\tif (!CollectionUtils.isEmpty(patterns)) {\n\t\t\tString pattern = patterns.iterator().next();\n\t\t\tString destination = getDestination(message);\n\t\t\tAssert.state(destination != null, \"Missing destination header\");\n\t\t\tMap<String, String> vars = getPathMatcher().extractUriTemplateVariables(pattern, destination);\n\t\t\tif (!CollectionUtils.isEmpty(vars)) {\n\t\t\t\tMessageHeaderAccessor mha = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);\n\t\t\t\tAssert.state(mha != null && mha.isMutable(), \"Mutable MessageHeaderAccessor required\");\n\t\t\t\tmha.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);\n\t\t\t}\n\t\t}\n\t\treturn super.handleMatch(mapping, handlerMethod, message);\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#setAutoDetectDisabled()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Disable auto-detection of {@code @MessageMapping} methods, e.g. in\n\t * {@code @Controller}s, by setting {@link #setHandlerPredicate(Predicate)\n\t * setHandlerPredicate(null)}.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 154
+    },
+    "return": "void",
+    "signature": "public void setAutoDetectDisabled()",
+    "source_code": "\tpublic void setAutoDetectDisabled() {\n\t\tthis.handlerPredicate = null;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#setConversionService(conversionService)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Configure a {@link ConversionService} to use for type conversion of\n\t * String based values, e.g. in destination variables or headers.\n\t * <p>By default {@link DefaultFormattingConversionService} is used.\n\t * @param conversionService the conversion service to use\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "conversionService"
+    ],
+    "position": {
+      "column": 1,
+      "line": 212
+    },
+    "return": "void",
+    "signature": "public void setConversionService(ConversionService conversionService)",
+    "source_code": "\tpublic void setConversionService(ConversionService conversionService) {\n\t\tthis.conversionService = conversionService;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#setDecoders(decoders)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Configure the decoders to use for incoming payloads.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "decoders"
+    ],
+    "position": {
+      "column": 1,
+      "line": 161
+    },
+    "return": "void",
+    "signature": "public void setDecoders(List<? extends Decoder<?>> decoders)",
+    "source_code": "\tpublic void setDecoders(List<? extends Decoder<?>> decoders) {\n\t\tthis.decoders.addAll(decoders);\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#setEmbeddedValueResolver(resolver)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "resolver"
+    ],
+    "position": {
+      "column": 1,
+      "line": 224
+    },
+    "return": "void",
+    "signature": "public void setEmbeddedValueResolver(StringValueResolver resolver)",
+    "source_code": "\tpublic void setEmbeddedValueResolver(StringValueResolver resolver) {\n\t\tthis.valueResolver = resolver;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#setHandlerPredicate(handlerPredicate)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Configure the predicate to use for selecting which Spring beans to check\n\t * for {@code @MessageMapping} methods. When set to {@code null},\n\t * auto-detection is turned off which is what\n\t * {@link #setAutoDetectDisabled()} does internally.\n\t * <p>The predicate used by default selects {@code @Controller} classes.\n\t * @see #setHandlers(List)\n\t * @see #setAutoDetectDisabled()\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "handlerPredicate"
+    ],
+    "position": {
+      "column": 1,
+      "line": 137
+    },
+    "return": "void",
+    "signature": "public void setHandlerPredicate(@Nullable Predicate<Class<?>> handlerPredicate)",
+    "source_code": "\tpublic void setHandlerPredicate(@Nullable Predicate<Class<?>> handlerPredicate) {\n\t\tthis.handlerPredicate = handlerPredicate;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#setHandlers(handlers)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Manually configure handlers to check for {@code @MessageMapping} methods.\n\t * <p><strong>Note:</strong> the given handlers are not required to be\n\t * annotated with {@code @Controller}. Consider also using\n\t * {@link #setAutoDetectDisabled()} if the intent is to use these handlers\n\t * instead of, and not in addition to {@code @Controller} classes. Or\n\t * alternatively use {@link #setHandlerPredicate(Predicate)} to select a\n\t * different set of beans based on a different criteria.\n\t * @param handlers the handlers to register\n\t * @see #setAutoDetectDisabled()\n\t * @see #setHandlerPredicate(Predicate)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "handlers"
+    ],
+    "position": {
+      "column": 1,
+      "line": 120
+    },
+    "return": "void",
+    "signature": "public void setHandlers(List<Object> handlers)",
+    "source_code": "\tpublic void setHandlers(List<Object> handlers) {\n\t\tfor (Object handler : handlers) {\n\t\t\tdetectHandlerMethods(handler);\n\t\t}\n\t\t// Disable auto-detection..\n\t\tthis.handlerPredicate = null;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#setPathMatcher(pathMatcher)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Set the PathMatcher implementation to use for matching destinations\n\t * against configured destination patterns.\n\t * <p>By default, {@link AntPathMatcher} is used with separator set to \".\".\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "pathMatcher"
+    ],
+    "position": {
+      "column": 1,
+      "line": 194
+    },
+    "return": "void",
+    "signature": "public void setPathMatcher(PathMatcher pathMatcher)",
+    "source_code": "\tpublic void setPathMatcher(PathMatcher pathMatcher) {\n\t\tAssert.notNull(pathMatcher, \"PathMatcher must not be null\");\n\t\tthis.pathMatcher = pathMatcher;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.MessageMappingMessageHandler#setValidator(validator)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Set the Validator instance used for validating {@code @Payload} arguments.\n\t * @see org.springframework.validation.annotation.Validated\n\t * @see PayloadMethodArgumentResolver\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "validator"
+    ],
+    "position": {
+      "column": 1,
+      "line": 177
+    },
+    "return": "void",
+    "signature": "public void setValidator(@Nullable Validator validator)",
+    "source_code": "\tpublic void setValidator(@Nullable Validator validator) {\n\t\tthis.validator = validator;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "/**\n * Extension of {@link AbstractMethodMessageHandler} for reactive, non-blocking\n * handling of messages via {@link MessageMapping @MessageMapping} methods.\n * By default such methods are detected in {@code @Controller} Spring beans but\n * that can be changed via {@link #setHandlerPredicate(Predicate)}.\n *\n * <p>Payloads for incoming messages are decoded through the configured\n * {@link #setDecoders(List)} decoders, with the help of\n * {@link PayloadMethodArgumentResolver}.\n *\n * <p>There is no default handling for return values but\n * {@link #setReturnValueHandlerConfigurer} can be used to configure custom\n * return value handlers. Sub-classes may also override\n * {@link #initReturnValueHandlers()} to set up default return value handlers.\n *\n * @author Rossen Stoyanchev\n * @since 5.2\n * @see AbstractEncoderMethodReturnValueHandler\n */",
+    "kind": "class",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 81
+    },
+    "signature": "public class MessageMappingMessageHandler",
+    "source_code": "public class MessageMappingMessageHandler extends AbstractMethodMessageHandler<CompositeMessageCondition>"
+  },
+  "org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler#createExceptionMethodResolverFor(beanType)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "beanType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 316
+    },
+    "return": "AbstractExceptionHandlerMethodResolver",
+    "signature": "protected AbstractExceptionHandlerMethodResolver createExceptionMethodResolverFor(Class<?> beanType)",
+    "source_code": "\tprotected AbstractExceptionHandlerMethodResolver createExceptionMethodResolverFor(Class<?> beanType) {\n\t\treturn new AnnotationExceptionHandlerMethodResolver(beanType);\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler#getConversionService()": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return the configured ConversionService.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 218
+    },
+    "return": "ConversionService",
+    "signature": "public ConversionService getConversionService()",
+    "source_code": "\tpublic ConversionService getConversionService() {\n\t\treturn this.conversionService;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler#getDestination(message)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "message"
+    ],
+    "position": {
+      "column": 1,
+      "line": 301
+    },
+    "return": "String",
+    "signature": "protected String getDestination(Message<?> message)",
+    "source_code": "\tprotected String getDestination(Message<?> message) {\n\t\treturn (String) message.getHeaders().get(DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER);\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler#getDirectLookupMappings(mapping)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "mapping"
+    ],
+    "position": {
+      "column": 1,
+      "line": 290
+    },
+    "return": "Set<String>",
+    "signature": "protected Set<String> getDirectLookupMappings(CompositeMessageCondition mapping)",
+    "source_code": "\tprotected Set<String> getDirectLookupMappings(CompositeMessageCondition mapping) {\n\t\tSet<String> result = new LinkedHashSet<>();\n\t\tfor (String pattern : mapping.getCondition(DestinationPatternsMessageCondition.class).getPatterns()) {\n\t\t\tif (!this.pathMatcher.isPattern(pattern)) {\n\t\t\t\tresult.add(pattern);\n\t\t\t}\n\t\t}\n\t\treturn result;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler#getMappingComparator(message)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "message"
+    ],
+    "position": {
+      "column": 1,
+      "line": 311
+    },
+    "return": "Comparator<CompositeMessageCondition>",
+    "signature": "protected Comparator<CompositeMessageCondition> getMappingComparator(Message<?> message)",
+    "source_code": "\tprotected Comparator<CompositeMessageCondition> getMappingComparator(Message<?> message) {\n\t\treturn (info1, info2) -> info1.compareTo(info2, message);\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler#getMappingForMethod(method,handlerType)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "method",
+      "handlerType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 263
+    },
+    "return": "CompositeMessageCondition",
+    "signature": "protected CompositeMessageCondition getMappingForMethod(Method method, Class<?> handlerType)",
+    "source_code": "\tprotected CompositeMessageCondition getMappingForMethod(Method method, Class<?> handlerType) {\n\t\tCompositeMessageCondition methodCondition = getCondition(method);\n\t\tif (methodCondition != null) {\n\t\t\tCompositeMessageCondition typeCondition = getCondition(handlerType);\n\t\t\tif (typeCondition != null) {\n\t\t\t\treturn typeCondition.combine(methodCondition);\n\t\t\t}\n\t\t}\n\t\treturn methodCondition;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler#getMatchingMapping(mapping,message)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "mapping",
+      "message"
+    ],
+    "position": {
+      "column": 1,
+      "line": 306
+    },
+    "return": "CompositeMessageCondition",
+    "signature": "protected CompositeMessageCondition getMatchingMapping(CompositeMessageCondition mapping, Message<?> message)",
+    "source_code": "\tprotected CompositeMessageCondition getMatchingMapping(CompositeMessageCondition mapping, Message<?> message) {\n\t\treturn mapping.getMatchingCondition(message);\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler#getPathMatcher()": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return the PathMatcher implementation to use for matching destinations.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 201
+    },
+    "return": "PathMatcher",
+    "signature": "public PathMatcher getPathMatcher()",
+    "source_code": "\tpublic PathMatcher getPathMatcher() {\n\t\treturn this.pathMatcher;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler#getValidator()": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return the configured Validator instance.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 184
+    },
+    "return": "Validator",
+    "signature": "public Validator getValidator()",
+    "source_code": "\tpublic Validator getValidator() {\n\t\treturn this.validator;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler#handleMatch(mapping,handlerMethod,message)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "mapping",
+      "handlerMethod",
+      "message"
+    ],
+    "position": {
+      "column": 1,
+      "line": 321
+    },
+    "return": "Mono<Void>",
+    "signature": "protected Mono<Void> handleMatch(CompositeMessageCondition mapping, HandlerMethod handlerMethod, Message<?> message)",
+    "source_code": "\tprotected Mono<Void> handleMatch(CompositeMessageCondition mapping, HandlerMethod handlerMethod, Message<?> message) {\n\t\tSet<String> patterns = mapping.getCondition(DestinationPatternsMessageCondition.class).getPatterns();\n\t\tif (!CollectionUtils.isEmpty(patterns)) {\n\t\t\tString pattern = patterns.iterator().next();\n\t\t\tString destination = getDestination(message);\n\t\t\tMap<String, String> vars = getPathMatcher().extractUriTemplateVariables(pattern, destination);\n\t\t\tif (!CollectionUtils.isEmpty(vars)) {\n\t\t\t\tMessageHeaderAccessor mha = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);\n\t\t\t\tAssert.state(mha != null && mha.isMutable(), \"Mutable MessageHeaderAccessor required\");\n\t\t\t\tmha.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);\n\t\t\t}\n\t\t}\n\t\treturn super.handleMatch(mapping, handlerMethod, message);\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler#setAutoDetectDisabled()": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Disable auto-detection of {@code @MessageMapping} methods, e.g. in\n\t * {@code @Controller}s, by setting {@link #setHandlerPredicate(Predicate)\n\t * setHandlerPredicate(null)}.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 153
+    },
+    "return": "void",
+    "signature": "public void setAutoDetectDisabled()",
+    "source_code": "\tpublic void setAutoDetectDisabled() {\n\t\tthis.handlerPredicate = null;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler#setConversionService(conversionService)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Configure a {@link ConversionService} to use for type conversion of\n\t * String based values, e.g. in destination variables or headers.\n\t * <p>By default {@link DefaultFormattingConversionService} is used.\n\t * @param conversionService the conversion service to use\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "conversionService"
+    ],
+    "position": {
+      "column": 1,
+      "line": 211
+    },
+    "return": "void",
+    "signature": "public void setConversionService(ConversionService conversionService)",
+    "source_code": "\tpublic void setConversionService(ConversionService conversionService) {\n\t\tthis.conversionService = conversionService;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler#setDecoders(decoders)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Configure the decoders to use for incoming payloads.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "decoders"
+    ],
+    "position": {
+      "column": 1,
+      "line": 160
+    },
+    "return": "void",
+    "signature": "public void setDecoders(List<? extends Decoder<?>> decoders)",
+    "source_code": "\tpublic void setDecoders(List<? extends Decoder<?>> decoders) {\n\t\tthis.decoders.addAll(decoders);\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler#setEmbeddedValueResolver(resolver)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "resolver"
+    ],
+    "position": {
+      "column": 1,
+      "line": 223
+    },
+    "return": "void",
+    "signature": "public void setEmbeddedValueResolver(StringValueResolver resolver)",
+    "source_code": "\tpublic void setEmbeddedValueResolver(StringValueResolver resolver) {\n\t\tthis.valueResolver = resolver;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler#setHandlerPredicate(handlerPredicate)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Configure the predicate to use for selecting which Spring beans to check\n\t * for {@code @MessageMapping} methods. When set to {@code null},\n\t * auto-detection is turned off which is what\n\t * {@link #setAutoDetectDisabled()} does internally.\n\t * <p>The predicate used by default selects {@code @Controller} classes.\n\t * @see #setHandlers(List)\n\t * @see #setAutoDetectDisabled()\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "handlerPredicate"
+    ],
+    "position": {
+      "column": 1,
+      "line": 136
+    },
+    "return": "void",
+    "signature": "public void setHandlerPredicate(@Nullable Predicate<Class<?>> handlerPredicate)",
+    "source_code": "\tpublic void setHandlerPredicate(@Nullable Predicate<Class<?>> handlerPredicate) {\n\t\tthis.handlerPredicate = handlerPredicate;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler#setHandlers(handlers)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Manually configure handlers to check for {@code @MessageMapping} methods.\n\t * <p><strong>Note:</strong> the given handlers are not required to be\n\t * annotated with {@code @Controller}. Consider also using\n\t * {@link #setAutoDetectDisabled()} if the intent is to use these handlers\n\t * instead of, and not in addition to {@code @Controller} classes. Or\n\t * alternatively use {@link #setHandlerPredicate(Predicate)} to select a\n\t * different set of beans based on a different criteria.\n\t * @param handlers the handlers to register\n\t * @see #setAutoDetectDisabled()\n\t * @see #setHandlerPredicate(Predicate)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "handlers"
+    ],
+    "position": {
+      "column": 1,
+      "line": 119
+    },
+    "return": "void",
+    "signature": "public void setHandlers(List<Object> handlers)",
+    "source_code": "\tpublic void setHandlers(List<Object> handlers) {\n\t\tfor (Object handler : handlers) {\n\t\t\tdetectHandlerMethods(handler);\n\t\t}\n\t\t// Disable auto-detection..\n\t\tthis.handlerPredicate = null;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler#setPathMatcher(pathMatcher)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Set the PathMatcher implementation to use for matching destinations\n\t * against configured destination patterns.\n\t * <p>By default, {@link AntPathMatcher} is used with separator set to \".\".\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "pathMatcher"
+    ],
+    "position": {
+      "column": 1,
+      "line": 193
+    },
+    "return": "void",
+    "signature": "public void setPathMatcher(PathMatcher pathMatcher)",
+    "source_code": "\tpublic void setPathMatcher(PathMatcher pathMatcher) {\n\t\tAssert.notNull(pathMatcher, \"PathMatcher must not be null\");\n\t\tthis.pathMatcher = pathMatcher;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.support.reactive.MessageMappingMessageHandler#setValidator(validator)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Set the Validator instance used for validating {@code @Payload} arguments.\n\t * @see org.springframework.validation.annotation.Validated\n\t * @see PayloadMethodArgumentResolver\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "validator"
+    ],
+    "position": {
+      "column": 1,
+      "line": 176
+    },
+    "return": "void",
+    "signature": "public void setValidator(@Nullable Validator validator)",
+    "source_code": "\tpublic void setValidator(@Nullable Validator validator) {\n\t\tthis.validator = validator;\n\t}"
+  }
+}

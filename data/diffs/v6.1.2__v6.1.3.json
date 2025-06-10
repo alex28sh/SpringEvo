@@ -1,0 +1,915 @@
+{
+  "org.springframework.aot.hint.AbstractTypeReference#compareTo(other)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "other"
+    ],
+    "position": {
+      "column": 1,
+      "line": 83
+    },
+    "return": "int",
+    "signature": "public int compareTo(TypeReference other)",
+    "source_code": "\tpublic int compareTo(TypeReference other) {\n\t\treturn this.getCanonicalName().compareToIgnoreCase(other.getCanonicalName());\n\t}"
+  },
+  "org.springframework.beans.<unknown>#getWriteMethodFallback(valueType)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "valueType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 162
+    },
+    "return": "Method",
+    "signature": "public Method getWriteMethodFallback(@Nullable Class<?> valueType)",
+    "source_code": "\tpublic Method getWriteMethodFallback(@Nullable Class<?> valueType) {\n\t\tif (this.ambiguousWriteMethods != null) {\n\t\t\tfor (Method method : this.ambiguousWriteMethods) {\n\t\t\t\tClass<?> paramType = method.getParameterTypes()[0];\n\t\t\t\tif (valueType != null ? paramType.isAssignableFrom(valueType) : !paramType.isPrimitive()) {\n\t\t\t\t\treturn method;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn null;\n\t}"
+  },
+  "org.springframework.beans.AbstractNestablePropertyAccessor#setValueFallbackIfPossible(value)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1067
+    },
+    "return": "boolean",
+    "signature": "public boolean setValueFallbackIfPossible(@Nullable Object value)",
+    "source_code": "\t\tpublic boolean setValueFallbackIfPossible(@Nullable Object value) {\n\t\t\treturn false;\n\t\t}"
+  },
+  "org.springframework.cache.interceptor.IGNORE_REACTIVESTREAMS_PROPERTY_NAME": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * System property that instructs Spring's caching infrastructure to ignore the\n\t * presence of Reactive Streams, in particular Reactor's {@link Mono}/{@link Flux}\n\t * in {@link org.springframework.cache.annotation.Cacheable} method return type\n\t * declarations.\n\t * <p>By default, as of 6.1, Reactive Streams Publishers such as Reactor's\n\t * {@link Mono}/{@link Flux} will be specifically processed for asynchronous\n\t * caching of their produced values rather than trying to cache the returned\n\t * {@code Publisher} instances themselves.\n\t * <p>Switch this flag to \"true\" in order to ignore Reactive Streams Publishers and\n\t * process them as regular return values through synchronous caching, restoring 6.0\n\t * behavior. Note that this is not recommended and only works in very limited\n\t * scenarios, e.g. with manual {@code Mono.cache()}/{@code Flux.cache()} calls.\n\t * @since 6.1.3\n\t * @see org.reactivestreams.Publisher\n\t */",
+    "kind": "field",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 114
+    },
+    "signature": "public String IGNORE_REACTIVESTREAMS_PROPERTY_NAME",
+    "source_code": "\tpublic static final String IGNORE_REACTIVESTREAMS_PROPERTY_NAME = \"spring.cache.reactivestreams.ignore\";",
+    "type": "String"
+  },
+  "org.springframework.context.annotation.CommonAnnotationBeanPostProcessor#processInjection(bean)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * <em>Native</em> processing method for direct calls with an arbitrary target\n\t * instance, resolving all of its fields and methods which are annotated with\n\t * one of the supported 'resource' annotation types.\n\t * @param bean the target instance to process\n\t * @throws BeanCreationException if resource injection failed\n\t * @since 6.1.3\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "bean"
+    ],
+    "position": {
+      "column": 1,
+      "line": 382
+    },
+    "return": "void",
+    "signature": "public void processInjection(Object bean)",
+    "source_code": "\tpublic void processInjection(Object bean) throws BeanCreationException {\n\t\tClass<?> clazz = bean.getClass();\n\t\tInjectionMetadata metadata = findResourceMetadata(clazz.getName(), clazz, null);\n\t\ttry {\n\t\t\tmetadata.inject(bean, null, null);\n\t\t}\n\t\tcatch (BeanCreationException ex) {\n\t\t\tthrow ex;\n\t\t}\n\t\tcatch (Throwable ex) {\n\t\t\tthrow new BeanCreationException(\n\t\t\t\t\t\"Injection of resource dependencies failed for class [\" + clazz + \"]\", ex);\n\t\t}\n\t}"
+  },
+  "org.springframework.context.annotation.ComponentScanBeanDefinitionParser": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "/**\n * Parser for the {@code <context:component-scan/>} element.\n *\n * @author Mark Fisher\n * @author Ramnivas Laddad\n * @author Juergen Hoeller\n * @since 2.5\n */",
+    "kind": "class",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 55
+    },
+    "signature": "public class ComponentScanBeanDefinitionParser",
+    "source_code": "public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {\n\n\tprivate static final String BASE_PACKAGE_ATTRIBUTE = \"base-package\";\n\n\tprivate static final String RESOURCE_PATTERN_ATTRIBUTE = \"resource-pattern\";\n\n\tprivate static final String USE_DEFAULT_FILTERS_ATTRIBUTE = \"use-default-filters\";\n\n\tprivate static final String ANNOTATION_CONFIG_ATTRIBUTE = \"annotation-config\";\n\n\tprivate static final String NAME_GENERATOR_ATTRIBUTE = \"name-generator\";\n\n\tprivate static final String SCOPE_RESOLVER_ATTRIBUTE = \"scope-resolver\";\n\n\tprivate static final String SCOPED_PROXY_ATTRIBUTE = \"scoped-proxy\";\n\n\tprivate static final String EXCLUDE_FILTER_ELEMENT = \"exclude-filter\";\n\n\tprivate static final String INCLUDE_FILTER_ELEMENT = \"include-filter\";\n\n\tprivate static final String FILTER_TYPE_ATTRIBUTE = \"type\";\n\n\tprivate static final String FILTER_EXPRESSION_ATTRIBUTE = \"expression\";\n\n\n\t@Override\n\t@Nullable\n\tpublic BeanDefinition parse(Element element, ParserContext parserContext) {\n\t\tString basePackage = element.getAttribute(BASE_PACKAGE_ATTRIBUTE);\n\t\tbasePackage = parserContext.getReaderContext().getEnvironment().resolvePlaceholders(basePackage);\n\t\tString[] basePackages = StringUtils.tokenizeToStringArray(basePackage,\n\t\t\t\tConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);\n\n\t\t// Actually scan for bean definitions and register them.\n\t\tClassPathBeanDefinitionScanner scanner = configureScanner(parserContext, element);\n\t\tSet<BeanDefinitionHolder> beanDefinitions = scanner.doScan(basePackages);\n\t\tregisterComponents(parserContext.getReaderContext(), beanDefinitions, element);\n\n\t\treturn null;\n\t}\n\n\tprotected ClassPathBeanDefinitionScanner configureScanner(ParserContext parserContext, Element element) {\n\t\tboolean useDefaultFilters = true;\n\t\tif (element.hasAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE)) {\n\t\t\tuseDefaultFilters = Boolean.parseBoolean(element.getAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE));\n\t\t}\n\n\t\t// Delegate bean definition registration to scanner class.\n\t\tClassPathBeanDefinitionScanner scanner = createScanner(parserContext.getReaderContext(), useDefaultFilters);\n\t\tscanner.setBeanDefinitionDefaults(parserContext.getDelegate().getBeanDefinitionDefaults());\n\t\tscanner.setAutowireCandidatePatterns(parserContext.getDelegate().getAutowireCandidatePatterns());\n\n\t\tif (element.hasAttribute(RESOURCE_PATTERN_ATTRIBUTE)) {\n\t\t\tscanner.setResourcePattern(element.getAttribute(RESOURCE_PATTERN_ATTRIBUTE));\n\t\t}\n\n\t\ttry {\n\t\t\tparseBeanNameGenerator(element, scanner);\n\t\t}\n\t\tcatch (Exception ex) {\n\t\t\tparserContext.getReaderContext().error(ex.getMessage(), parserContext.extractSource(element), ex.getCause());\n\t\t}\n\n\t\ttry {\n\t\t\tparseScope(element, scanner);\n\t\t}\n\t\tcatch (Exception ex) {\n\t\t\tparserContext.getReaderContext().error(ex.getMessage(), parserContext.extractSource(element), ex.getCause());\n\t\t}\n\n\t\tparseTypeFilters(element, scanner, parserContext);\n\n\t\treturn scanner;\n\t}\n\n\tprotected ClassPathBeanDefinitionScanner createScanner(XmlReaderContext readerContext, boolean useDefaultFilters) {\n\t\treturn new ClassPathBeanDefinitionScanner(readerContext.getRegistry(), useDefaultFilters,\n\t\t\t\treaderContext.getEnvironment(), readerContext.getResourceLoader());\n\t}\n\n\tprotected void registerComponents(\n\t\t\tXmlReaderContext readerContext, Set<BeanDefinitionHolder> beanDefinitions, Element element) {\n\n\t\tObject source = readerContext.extractSource(element);\n\t\tCompositeComponentDefinition compositeDef = new CompositeComponentDefinition(element.getTagName(), source);\n\n\t\tfor (BeanDefinitionHolder beanDefHolder : beanDefinitions) {\n\t\t\tcompositeDef.addNestedComponent(new BeanComponentDefinition(beanDefHolder));\n\t\t}\n\n\t\t// Register annotation config processors, if necessary.\n\t\tboolean annotationConfig = true;\n\t\tif (element.hasAttribute(ANNOTATION_CONFIG_ATTRIBUTE)) {\n\t\t\tannotationConfig = Boolean.parseBoolean(element.getAttribute(ANNOTATION_CONFIG_ATTRIBUTE));\n\t\t}\n\t\tif (annotationConfig) {\n\t\t\tSet<BeanDefinitionHolder> processorDefinitions =\n\t\t\t\t\tAnnotationConfigUtils.registerAnnotationConfigProcessors(readerContext.getRegistry(), source);\n\t\t\tfor (BeanDefinitionHolder processorDefinition : processorDefinitions) {\n\t\t\t\tcompositeDef.addNestedComponent(new BeanComponentDefinition(processorDefinition));\n\t\t\t}\n\t\t}\n\n\t\treaderContext.fireComponentRegistered(compositeDef);\n\t}\n\n\tprotected void parseBeanNameGenerator(Element element, ClassPathBeanDefinitionScanner scanner) {\n\t\tif (element.hasAttribute(NAME_GENERATOR_ATTRIBUTE)) {\n\t\t\tBeanNameGenerator beanNameGenerator = (BeanNameGenerator) instantiateUserDefinedStrategy(\n\t\t\t\t\telement.getAttribute(NAME_GENERATOR_ATTRIBUTE), BeanNameGenerator.class,\n\t\t\t\t\tscanner.getResourceLoader().getClassLoader());\n\t\t\tscanner.setBeanNameGenerator(beanNameGenerator);\n\t\t}\n\t}\n\n\tprotected void parseScope(Element element, ClassPathBeanDefinitionScanner scanner) {\n\t\t// Register ScopeMetadataResolver if class name provided.\n\t\tif (element.hasAttribute(SCOPE_RESOLVER_ATTRIBUTE)) {\n\t\t\tif (element.hasAttribute(SCOPED_PROXY_ATTRIBUTE)) {\n\t\t\t\tthrow new IllegalArgumentException(\n\t\t\t\t\t\t\"Cannot define both 'scope-resolver' and 'scoped-proxy' on <component-scan> tag\");\n\t\t\t}\n\t\t\tScopeMetadataResolver scopeMetadataResolver = (ScopeMetadataResolver) instantiateUserDefinedStrategy(\n\t\t\t\t\telement.getAttribute(SCOPE_RESOLVER_ATTRIBUTE), ScopeMetadataResolver.class,\n\t\t\t\t\tscanner.getResourceLoader().getClassLoader());\n\t\t\tscanner.setScopeMetadataResolver(scopeMetadataResolver);\n\t\t}\n\n\t\tif (element.hasAttribute(SCOPED_PROXY_ATTRIBUTE)) {\n\t\t\tString mode = element.getAttribute(SCOPED_PROXY_ATTRIBUTE);\n\t\t\tswitch (mode) {\n\t\t\t\tcase \"targetClass\" -> scanner.setScopedProxyMode(ScopedProxyMode.TARGET_CLASS);\n\t\t\t\tcase \"interfaces\" -> scanner.setScopedProxyMode(ScopedProxyMode.INTERFACES);\n\t\t\t\tcase \"no\" -> scanner.setScopedProxyMode(ScopedProxyMode.NO);\n\t\t\t\tdefault -> throw new IllegalArgumentException(\"scoped-proxy only supports 'no', 'interfaces' and 'targetClass'\");\n\t\t\t}\n\t\t}\n\t}\n\n\tprotected void parseTypeFilters(Element element, ClassPathBeanDefinitionScanner scanner, ParserContext parserContext) {\n\t\t// Parse exclude and include filter elements.\n\t\tClassLoader classLoader = scanner.getResourceLoader().getClassLoader();\n\t\tNodeList nodeList = element.getChildNodes();\n\t\tfor (int i = 0; i < nodeList.getLength(); i++) {\n\t\t\tNode node = nodeList.item(i);\n\t\t\tif (node.getNodeType() == Node.ELEMENT_NODE) {\n\t\t\t\tString localName = parserContext.getDelegate().getLocalName(node);\n\t\t\t\ttry {\n\t\t\t\t\tif (INCLUDE_FILTER_ELEMENT.equals(localName)) {\n\t\t\t\t\t\tTypeFilter typeFilter = createTypeFilter((Element) node, classLoader, parserContext);\n\t\t\t\t\t\tscanner.addIncludeFilter(typeFilter);\n\t\t\t\t\t}\n\t\t\t\t\telse if (EXCLUDE_FILTER_ELEMENT.equals(localName)) {\n\t\t\t\t\t\tTypeFilter typeFilter = createTypeFilter((Element) node, classLoader, parserContext);\n\t\t\t\t\t\tscanner.addExcludeFilter(typeFilter);\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tcatch (ClassNotFoundException ex) {\n\t\t\t\t\tparserContext.getReaderContext().warning(\n\t\t\t\t\t\t\t\"Ignoring non-present type filter class: \" + ex, parserContext.extractSource(element));\n\t\t\t\t}\n\t\t\t\tcatch (Exception ex) {\n\t\t\t\t\tparserContext.getReaderContext().error(\n\t\t\t\t\t\t\tex.getMessage(), parserContext.extractSource(element), ex.getCause());\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n\n\t@SuppressWarnings(\"unchecked\")\n\tprotected TypeFilter createTypeFilter(Element element, @Nullable ClassLoader classLoader,\n\t\t\tParserContext parserContext) throws ClassNotFoundException {\n\n\t\tString filterType = element.getAttribute(FILTER_TYPE_ATTRIBUTE);\n\t\tString expression = element.getAttribute(FILTER_EXPRESSION_ATTRIBUTE);\n\t\texpression = parserContext.getReaderContext().getEnvironment().resolvePlaceholders(expression);\n\t\tswitch (filterType) {\n\t\t\tcase \"annotation\" -> {\n\t\t\t\treturn new AnnotationTypeFilter((Class<Annotation>) ClassUtils.forName(expression, classLoader));\n\t\t\t}\n\t\t\tcase \"assignable\" -> {\n\t\t\t\treturn new AssignableTypeFilter(ClassUtils.forName(expression, classLoader));\n\t\t\t}\n\t\t\tcase \"aspectj\" -> {\n\t\t\t\treturn new AspectJTypeFilter(expression, classLoader);\n\t\t\t}\n\t\t\tcase \"regex\" -> {\n\t\t\t\treturn new RegexPatternTypeFilter(Pattern.compile(expression));\n\t\t\t}\n\t\t\tcase \"custom\" -> {\n\t\t\t\tClass<?> filterClass = ClassUtils.forName(expression, classLoader);\n\t\t\t\tif (!TypeFilter.class.isAssignableFrom(filterClass)) {\n\t\t\t\t\tthrow new IllegalArgumentException(\n\t\t\t\t\t\t\t\"Class is not assignable to [\" + TypeFilter.class.getName() + \"]: \" + expression);\n\t\t\t\t}\n\t\t\t\treturn (TypeFilter) BeanUtils.instantiateClass(filterClass);\n\t\t\t}\n\t\t\tdefault -> throw new IllegalArgumentException(\"Unsupported filter type: \" + filterType);\n\t\t}\n\t}\n\n\t@SuppressWarnings(\"unchecked\")\n\tprivate Object instantiateUserDefinedStrategy(\n\t\t\tString className, Class<?> strategyType, @Nullable ClassLoader classLoader) {\n\n\t\tObject result;\n\t\ttry {\n\t\t\tresult = ReflectionUtils.accessibleConstructor(ClassUtils.forName(className, classLoader)).newInstance();\n\t\t}\n\t\tcatch (ClassNotFoundException ex) {\n\t\t\tthrow new IllegalArgumentException(\"Class [\" + className + \"] for strategy [\" +\n\t\t\t\t\tstrategyType.getName() + \"] not found\", ex);\n\t\t}\n\t\tcatch (Throwable ex) {\n\t\t\tthrow new IllegalArgumentException(\"Unable to instantiate class [\" + className + \"] for strategy [\" +\n\t\t\t\t\tstrategyType.getName() + \"]: a zero-argument constructor is required\", ex);\n\t\t}\n\n\t\tif (!strategyType.isAssignableFrom(result.getClass())) {\n\t\t\tthrow new IllegalArgumentException(\"Provided class name must be an implementation of \" + strategyType);\n\t\t}\n\t\treturn result;\n\t}\n\n}"
+  },
+  "org.springframework.context.annotation.ComponentScanBeanDefinitionParser#configureScanner(parserContext,element)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "parserContext",
+      "element"
+    ],
+    "position": {
+      "column": 1,
+      "line": 96
+    },
+    "return": "ClassPathBeanDefinitionScanner",
+    "signature": "protected ClassPathBeanDefinitionScanner configureScanner(ParserContext parserContext, Element element)",
+    "source_code": "\tprotected ClassPathBeanDefinitionScanner configureScanner(ParserContext parserContext, Element element) {\n\t\tboolean useDefaultFilters = true;\n\t\tif (element.hasAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE)) {\n\t\t\tuseDefaultFilters = Boolean.parseBoolean(element.getAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE));\n\t\t}\n\n\t\t// Delegate bean definition registration to scanner class.\n\t\tClassPathBeanDefinitionScanner scanner = createScanner(parserContext.getReaderContext(), useDefaultFilters);\n\t\tscanner.setBeanDefinitionDefaults(parserContext.getDelegate().getBeanDefinitionDefaults());\n\t\tscanner.setAutowireCandidatePatterns(parserContext.getDelegate().getAutowireCandidatePatterns());\n\n\t\tif (element.hasAttribute(RESOURCE_PATTERN_ATTRIBUTE)) {\n\t\t\tscanner.setResourcePattern(element.getAttribute(RESOURCE_PATTERN_ATTRIBUTE));\n\t\t}\n\n\t\ttry {\n\t\t\tparseBeanNameGenerator(element, scanner);\n\t\t}\n\t\tcatch (Exception ex) {\n\t\t\tparserContext.getReaderContext().error(ex.getMessage(), parserContext.extractSource(element), ex.getCause());\n\t\t}\n\n\t\ttry {\n\t\t\tparseScope(element, scanner);\n\t\t}\n\t\tcatch (Exception ex) {\n\t\t\tparserContext.getReaderContext().error(ex.getMessage(), parserContext.extractSource(element), ex.getCause());\n\t\t}\n\n\t\tparseTypeFilters(element, scanner, parserContext);\n\n\t\treturn scanner;\n\t}"
+  },
+  "org.springframework.context.annotation.ComponentScanBeanDefinitionParser#createScanner(readerContext,useDefaultFilters)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "readerContext",
+      "useDefaultFilters"
+    ],
+    "position": {
+      "column": 1,
+      "line": 130
+    },
+    "return": "ClassPathBeanDefinitionScanner",
+    "signature": "protected ClassPathBeanDefinitionScanner createScanner(XmlReaderContext readerContext, boolean useDefaultFilters)",
+    "source_code": "\tprotected ClassPathBeanDefinitionScanner createScanner(XmlReaderContext readerContext, boolean useDefaultFilters) {\n\t\treturn new ClassPathBeanDefinitionScanner(readerContext.getRegistry(), useDefaultFilters,\n\t\t\t\treaderContext.getEnvironment(), readerContext.getResourceLoader());\n\t}"
+  },
+  "org.springframework.context.annotation.ComponentScanBeanDefinitionParser#createTypeFilter(element,classLoader,parserContext)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "element",
+      "classLoader",
+      "parserContext"
+    ],
+    "position": {
+      "column": 1,
+      "line": 225
+    },
+    "return": "TypeFilter",
+    "signature": "protected TypeFilter createTypeFilter(Element element, @Nullable ClassLoader classLoader,\n\t\t\tParserContext parserContext)",
+    "source_code": "\tprotected TypeFilter createTypeFilter(Element element, @Nullable ClassLoader classLoader,"
+  },
+  "org.springframework.context.annotation.ComponentScanBeanDefinitionParser#parse(element,parserContext)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "element",
+      "parserContext"
+    ],
+    "position": {
+      "column": 1,
+      "line": 82
+    },
+    "return": "BeanDefinition",
+    "signature": "public BeanDefinition parse(Element element, ParserContext parserContext)",
+    "source_code": "\tpublic BeanDefinition parse(Element element, ParserContext parserContext) {\n\t\tString basePackage = element.getAttribute(BASE_PACKAGE_ATTRIBUTE);\n\t\tbasePackage = parserContext.getReaderContext().getEnvironment().resolvePlaceholders(basePackage);\n\t\tString[] basePackages = StringUtils.tokenizeToStringArray(basePackage,\n\t\t\t\tConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);\n\n\t\t// Actually scan for bean definitions and register them.\n\t\tClassPathBeanDefinitionScanner scanner = configureScanner(parserContext, element);\n\t\tSet<BeanDefinitionHolder> beanDefinitions = scanner.doScan(basePackages);\n\t\tregisterComponents(parserContext.getReaderContext(), beanDefinitions, element);\n\n\t\treturn null;\n\t}"
+  },
+  "org.springframework.context.annotation.ComponentScanBeanDefinitionParser#parseBeanNameGenerator(element,scanner)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "element",
+      "scanner"
+    ],
+    "position": {
+      "column": 1,
+      "line": 161
+    },
+    "return": "void",
+    "signature": "protected void parseBeanNameGenerator(Element element, ClassPathBeanDefinitionScanner scanner)",
+    "source_code": "\tprotected void parseBeanNameGenerator(Element element, ClassPathBeanDefinitionScanner scanner) {\n\t\tif (element.hasAttribute(NAME_GENERATOR_ATTRIBUTE)) {\n\t\t\tBeanNameGenerator beanNameGenerator = (BeanNameGenerator) instantiateUserDefinedStrategy(\n\t\t\t\t\telement.getAttribute(NAME_GENERATOR_ATTRIBUTE), BeanNameGenerator.class,\n\t\t\t\t\tscanner.getResourceLoader().getClassLoader());\n\t\t\tscanner.setBeanNameGenerator(beanNameGenerator);\n\t\t}\n\t}"
+  },
+  "org.springframework.context.annotation.ComponentScanBeanDefinitionParser#parseScope(element,scanner)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "element",
+      "scanner"
+    ],
+    "position": {
+      "column": 1,
+      "line": 170
+    },
+    "return": "void",
+    "signature": "protected void parseScope(Element element, ClassPathBeanDefinitionScanner scanner)",
+    "source_code": "\tprotected void parseScope(Element element, ClassPathBeanDefinitionScanner scanner) {\n\t\t// Register ScopeMetadataResolver if class name provided.\n\t\tif (element.hasAttribute(SCOPE_RESOLVER_ATTRIBUTE)) {\n\t\t\tif (element.hasAttribute(SCOPED_PROXY_ATTRIBUTE)) {\n\t\t\t\tthrow new IllegalArgumentException(\n\t\t\t\t\t\t\"Cannot define both 'scope-resolver' and 'scoped-proxy' on <component-scan> tag\");\n\t\t\t}\n\t\t\tScopeMetadataResolver scopeMetadataResolver = (ScopeMetadataResolver) instantiateUserDefinedStrategy(\n\t\t\t\t\telement.getAttribute(SCOPE_RESOLVER_ATTRIBUTE), ScopeMetadataResolver.class,\n\t\t\t\t\tscanner.getResourceLoader().getClassLoader());\n\t\t\tscanner.setScopeMetadataResolver(scopeMetadataResolver);\n\t\t}\n\n\t\tif (element.hasAttribute(SCOPED_PROXY_ATTRIBUTE)) {\n\t\t\tString mode = element.getAttribute(SCOPED_PROXY_ATTRIBUTE);\n\t\t\tswitch (mode) {\n\t\t\t\tcase \"targetClass\" -> scanner.setScopedProxyMode(ScopedProxyMode.TARGET_CLASS);\n\t\t\t\tcase \"interfaces\" -> scanner.setScopedProxyMode(ScopedProxyMode.INTERFACES);\n\t\t\t\tcase \"no\" -> scanner.setScopedProxyMode(ScopedProxyMode.NO);\n\t\t\t\tdefault -> throw new IllegalArgumentException(\"scoped-proxy only supports 'no', 'interfaces' and 'targetClass'\");\n\t\t\t}\n\t\t}\n\t}"
+  },
+  "org.springframework.context.annotation.ComponentScanBeanDefinitionParser#parseTypeFilters(element,scanner,parserContext)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "element",
+      "scanner",
+      "parserContext"
+    ],
+    "position": {
+      "column": 1,
+      "line": 194
+    },
+    "return": "void",
+    "signature": "protected void parseTypeFilters(Element element, ClassPathBeanDefinitionScanner scanner, ParserContext parserContext)",
+    "source_code": "\tprotected void parseTypeFilters(Element element, ClassPathBeanDefinitionScanner scanner, ParserContext parserContext) {\n\t\t// Parse exclude and include filter elements.\n\t\tClassLoader classLoader = scanner.getResourceLoader().getClassLoader();\n\t\tNodeList nodeList = element.getChildNodes();\n\t\tfor (int i = 0; i < nodeList.getLength(); i++) {\n\t\t\tNode node = nodeList.item(i);\n\t\t\tif (node.getNodeType() == Node.ELEMENT_NODE) {\n\t\t\t\tString localName = parserContext.getDelegate().getLocalName(node);\n\t\t\t\ttry {\n\t\t\t\t\tif (INCLUDE_FILTER_ELEMENT.equals(localName)) {\n\t\t\t\t\t\tTypeFilter typeFilter = createTypeFilter((Element) node, classLoader, parserContext);\n\t\t\t\t\t\tscanner.addIncludeFilter(typeFilter);\n\t\t\t\t\t}\n\t\t\t\t\telse if (EXCLUDE_FILTER_ELEMENT.equals(localName)) {\n\t\t\t\t\t\tTypeFilter typeFilter = createTypeFilter((Element) node, classLoader, parserContext);\n\t\t\t\t\t\tscanner.addExcludeFilter(typeFilter);\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tcatch (ClassNotFoundException ex) {\n\t\t\t\t\tparserContext.getReaderContext().warning(\n\t\t\t\t\t\t\t\"Ignoring non-present type filter class: \" + ex, parserContext.extractSource(element));\n\t\t\t\t}\n\t\t\t\tcatch (Exception ex) {\n\t\t\t\t\tparserContext.getReaderContext().error(\n\t\t\t\t\t\t\tex.getMessage(), parserContext.extractSource(element), ex.getCause());\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}"
+  },
+  "org.springframework.context.annotation.ComponentScanBeanDefinitionParser#registerComponents(readerContext,beanDefinitions,element)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "readerContext",
+      "beanDefinitions",
+      "element"
+    ],
+    "position": {
+      "column": 1,
+      "line": 135
+    },
+    "return": "void",
+    "signature": "protected void registerComponents(XmlReaderContext readerContext, Set<BeanDefinitionHolder> beanDefinitions, Element element)",
+    "source_code": "\tprotected void registerComponents("
+  },
+  "org.springframework.http.client.<unknown>#map(b)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "b"
+    ],
+    "position": {
+      "column": 1,
+      "line": 198
+    },
+    "return": "ByteBuffer",
+    "signature": "public ByteBuffer map(int b)",
+    "source_code": "\t\tpublic ByteBuffer map(int b) {\n\t\t\tByteBuffer byteBuffer = ByteBuffer.allocate(1);\n\t\t\tbyteBuffer.put((byte) b);\n\t\t\tbyteBuffer.flip();\n\t\t\treturn byteBuffer;\n\t\t}"
+  },
+  "org.springframework.http.client.<unknown>#map(b,off,len)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "b",
+      "off",
+      "len"
+    ],
+    "position": {
+      "column": 1,
+      "line": 206
+    },
+    "return": "ByteBuffer",
+    "signature": "public ByteBuffer map(byte[] b, int off, int len)",
+    "source_code": "\t\tpublic ByteBuffer map(byte[] b, int off, int len) {\n\t\t\tByteBuffer byteBuffer = ByteBuffer.allocate(len);\n\t\t\tbyteBuffer.put(b, off, len);\n\t\t\tbyteBuffer.flip();\n\t\t\treturn byteBuffer;\n\t\t}"
+  },
+  "org.springframework.scheduling.config.ExecutorBeanDefinitionParser": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "/**\n * Parser for the 'executor' element of the 'task' namespace.\n *\n * @author Mark Fisher\n * @author Juergen Hoeller\n * @since 3.0\n */",
+    "kind": "class",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 34
+    },
+    "signature": "public class ExecutorBeanDefinitionParser",
+    "source_code": "public class ExecutorBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {\n\n\t@Override\n\tprotected String getBeanClassName(Element element) {\n\t\treturn \"org.springframework.scheduling.config.TaskExecutorFactoryBean\";\n\t}\n\n\t@Override\n\tprotected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {\n\t\tString keepAliveSeconds = element.getAttribute(\"keep-alive\");\n\t\tif (StringUtils.hasText(keepAliveSeconds)) {\n\t\t\tbuilder.addPropertyValue(\"keepAliveSeconds\", keepAliveSeconds);\n\t\t}\n\t\tString queueCapacity = element.getAttribute(\"queue-capacity\");\n\t\tif (StringUtils.hasText(queueCapacity)) {\n\t\t\tbuilder.addPropertyValue(\"queueCapacity\", queueCapacity);\n\t\t}\n\t\tconfigureRejectionPolicy(element, builder);\n\t\tString poolSize = element.getAttribute(\"pool-size\");\n\t\tif (StringUtils.hasText(poolSize)) {\n\t\t\tbuilder.addPropertyValue(\"poolSize\", poolSize);\n\t\t}\n\t}\n\n\tprivate void configureRejectionPolicy(Element element, BeanDefinitionBuilder builder) {\n\t\tString rejectionPolicy = element.getAttribute(\"rejection-policy\");\n\t\tif (!StringUtils.hasText(rejectionPolicy)) {\n\t\t\treturn;\n\t\t}\n\t\tString prefix = \"java.util.concurrent.ThreadPoolExecutor.\";\n\t\tString policyClassName = switch (rejectionPolicy) {\n\t\t\tcase \"ABORT\" -> prefix + \"AbortPolicy\";\n\t\t\tcase \"CALLER_RUNS\" -> prefix + \"CallerRunsPolicy\";\n\t\t\tcase \"DISCARD\" -> prefix + \"DiscardPolicy\";\n\t\t\tcase \"DISCARD_OLDEST\" -> prefix + \"DiscardOldestPolicy\";\n\t\t\tdefault -> rejectionPolicy;\n\t\t};\n\t\tbuilder.addPropertyValue(\"rejectedExecutionHandler\", new RootBeanDefinition(policyClassName));\n\t}\n\n}"
+  },
+  "org.springframework.scheduling.config.ExecutorBeanDefinitionParser#doParse(element,parserContext,builder)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "element",
+      "parserContext",
+      "builder"
+    ],
+    "position": {
+      "column": 1,
+      "line": 42
+    },
+    "return": "void",
+    "signature": "protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder)",
+    "source_code": "\tprotected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {\n\t\tString keepAliveSeconds = element.getAttribute(\"keep-alive\");\n\t\tif (StringUtils.hasText(keepAliveSeconds)) {\n\t\t\tbuilder.addPropertyValue(\"keepAliveSeconds\", keepAliveSeconds);\n\t\t}\n\t\tString queueCapacity = element.getAttribute(\"queue-capacity\");\n\t\tif (StringUtils.hasText(queueCapacity)) {\n\t\t\tbuilder.addPropertyValue(\"queueCapacity\", queueCapacity);\n\t\t}\n\t\tconfigureRejectionPolicy(element, builder);\n\t\tString poolSize = element.getAttribute(\"pool-size\");\n\t\tif (StringUtils.hasText(poolSize)) {\n\t\t\tbuilder.addPropertyValue(\"poolSize\", poolSize);\n\t\t}\n\t}"
+  },
+  "org.springframework.scheduling.config.ExecutorBeanDefinitionParser#getBeanClassName(element)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "element"
+    ],
+    "position": {
+      "column": 1,
+      "line": 37
+    },
+    "return": "String",
+    "signature": "protected String getBeanClassName(Element element)",
+    "source_code": "\tprotected String getBeanClassName(Element element) {\n\t\treturn \"org.springframework.scheduling.config.TaskExecutorFactoryBean\";\n\t}"
+  },
+  "org.springframework.scheduling.support.CronTrigger#determineLatestTimestamp(triggerContext)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "triggerContext"
+    ],
+    "position": {
+      "column": 1,
+      "line": 239
+    },
+    "return": "Instant",
+    "signature": "protected Instant determineLatestTimestamp(TriggerContext triggerContext)",
+    "source_code": "\t\t\tprotected Instant determineLatestTimestamp(TriggerContext triggerContext) {\n\t\t\t\tInstant scheduled = triggerContext.lastScheduledExecution();\n\t\t\t\treturn (scheduled != null ? scheduled : super.determineLatestTimestamp(triggerContext));\n\t\t\t}"
+  },
+  "org.springframework.scheduling.support.CronTrigger#forFixedExecution(expression)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Create a {@link CronTrigger} for fixed execution, to be rescheduled\n\t * after every task based on the last scheduled time.\n\t * <p>This variant makes up for missed trigger firings if the associated task\n\t * has taken too long, scheduling a task for every original trigger firing.\n\t * Such follow-up tasks may execute late but will never be skipped.\n\t * <p>Immediate versus late execution in case of long-running tasks may\n\t * be scheduler-dependent but the guarantee to never skip a task is portable.\n\t * @param expression a space-separated list of time fields, following cron\n\t * expression conventions\n\t * @since 6.1.3\n\t * @see #resumeFixedExecution\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "expression"
+    ],
+    "position": {
+      "column": 1,
+      "line": 212
+    },
+    "return": "CronTrigger",
+    "signature": "public CronTrigger forFixedExecution(String expression)",
+    "source_code": "\tpublic static CronTrigger forFixedExecution(String expression) {\n\t\treturn new CronTrigger(expression) {\n\t\t\t@Override\n\t\t\tprotected Instant determineLatestTimestamp(TriggerContext triggerContext) {\n\t\t\t\tInstant scheduled = triggerContext.lastScheduledExecution();\n\t\t\t\treturn (scheduled != null ? scheduled : super.determineInitialTimestamp(triggerContext));\n\t\t\t}\n\t\t};\n\t}"
+  },
+  "org.springframework.scheduling.support.CronTrigger#forLenientExecution(expression)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Create a {@link CronTrigger} for lenient execution, to be rescheduled\n\t * after every task based on the completion time.\n\t * <p>This variant does not make up for missed trigger firings if the\n\t * associated task has taken too long. As a consequence, original trigger\n\t * firings may be skipped if the previous task is still running.\n\t * <p>This is equivalent to the regular {@link CronTrigger} constructor.\n\t * Note that lenient execution is scheduler-dependent: it may skip trigger\n\t * firings with long-running tasks on a thread pool while executing at\n\t * {@link #forFixedExecution}-like precision with new threads per task.\n\t * @param expression a space-separated list of time fields, following cron\n\t * expression conventions\n\t * @since 6.1.3\n\t * @see #resumeLenientExecution\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "expression"
+    ],
+    "position": {
+      "column": 1,
+      "line": 171
+    },
+    "return": "CronTrigger",
+    "signature": "public CronTrigger forLenientExecution(String expression)",
+    "source_code": "\tpublic static CronTrigger forLenientExecution(String expression) {\n\t\treturn new CronTrigger(expression);\n\t}"
+  },
+  "org.springframework.scheduling.support.CronTrigger#resumeFixedExecution(expression,resumptionTimestamp)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Create a {@link CronTrigger} for fixed execution, to be rescheduled\n\t * after every task based on the last scheduled time.\n\t * <p>This variant makes up for missed trigger firings if the associated task\n\t * has taken too long, scheduling a task for every original trigger firing.\n\t * Such follow-up tasks may execute late but will never be skipped.\n\t * @param expression a space-separated list of time fields, following cron\n\t * expression conventions\n\t * @param resumptionTimestamp the timestamp to resume from (the last-known\n\t * scheduled timestamp), with every trigger in-between immediately firing\n\t * to make up for every execution that would have happened in the meantime\n\t * @since 6.1.3\n\t * @see #forFixedExecution\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "expression",
+      "resumptionTimestamp"
+    ],
+    "position": {
+      "column": 1,
+      "line": 236
+    },
+    "return": "CronTrigger",
+    "signature": "public CronTrigger resumeFixedExecution(String expression, Instant resumptionTimestamp)",
+    "source_code": "\tpublic static CronTrigger resumeFixedExecution(String expression, Instant resumptionTimestamp) {\n\t\treturn new CronTrigger(expression) {\n\t\t\t@Override\n\t\t\tprotected Instant determineLatestTimestamp(TriggerContext triggerContext) {\n\t\t\t\tInstant scheduled = triggerContext.lastScheduledExecution();\n\t\t\t\treturn (scheduled != null ? scheduled : super.determineLatestTimestamp(triggerContext));\n\t\t\t}\n\t\t\t@Override\n\t\t\tInstant determineInitialTimestamp(TriggerContext triggerContext) {\n\t\t\t\treturn resumptionTimestamp;\n\t\t\t}\n\t\t};\n\t}"
+  },
+  "org.springframework.scheduling.support.CronTrigger#resumeLenientExecution(expression,resumptionTimestamp)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Create a {@link CronTrigger} for lenient execution, to be rescheduled\n\t * after every task based on the completion time.\n\t * <p>This variant does not make up for missed trigger firings if the\n\t * associated task has taken too long. As a consequence, original trigger\n\t * firings may be skipped if the previous task is still running.\n\t * @param expression a space-separated list of time fields, following cron\n\t * expression conventions\n\t * @param resumptionTimestamp the timestamp to resume from (the last-known\n\t * completion timestamp), with the new trigger calculated from there and\n\t * possibly immediately firing (but only once, every subsequent calculation\n\t * will start from the completion time of that first resumed trigger)\n\t * @since 6.1.3\n\t * @see #forLenientExecution\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "expression",
+      "resumptionTimestamp"
+    ],
+    "position": {
+      "column": 1,
+      "line": 190
+    },
+    "return": "CronTrigger",
+    "signature": "public CronTrigger resumeLenientExecution(String expression, Instant resumptionTimestamp)",
+    "source_code": "\tpublic static CronTrigger resumeLenientExecution(String expression, Instant resumptionTimestamp) {\n\t\treturn new CronTrigger(expression) {\n\t\t\t@Override\n\t\t\tInstant determineInitialTimestamp(TriggerContext triggerContext) {\n\t\t\t\treturn resumptionTimestamp;\n\t\t\t}\n\t\t};\n\t}"
+  },
+  "org.springframework.web.context.request.FacesRequestAttributes": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "/**\n * {@link RequestAttributes} adapter for a JSF {@link jakarta.faces.context.FacesContext}.\n * Used as default in a JSF environment, wrapping the current FacesContext.\n *\n * <p><b>NOTE:</b> In contrast to {@link ServletRequestAttributes}, this variant does\n * <i>not</i> support destruction callbacks for scoped attributes, neither for the\n * request scope nor for the session scope. If you rely on such implicit destruction\n * callbacks, consider defining a Spring {@link RequestContextListener} in your\n * {@code web.xml}.\n *\n * <p>Requires JSF 2.0 or higher, as of Spring 4.0.\n *\n * @author Juergen Hoeller\n * @since 2.5.2\n * @see jakarta.faces.context.FacesContext#getExternalContext()\n * @see jakarta.faces.context.ExternalContext#getRequestMap()\n * @see jakarta.faces.context.ExternalContext#getSessionMap()\n * @see RequestContextHolder#currentRequestAttributes()\n */",
+    "kind": "class",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 51
+    },
+    "signature": "public class FacesRequestAttributes",
+    "source_code": "public class FacesRequestAttributes implements RequestAttributes {\n\n\t/**\n\t * We'll create a lot of these objects, so we don't want a new logger every time.\n\t */\n\tprivate static final Log logger = LogFactory.getLog(FacesRequestAttributes.class);\n\n\tprivate final FacesContext facesContext;\n\n\n\t/**\n\t * Create a new FacesRequestAttributes adapter for the given FacesContext.\n\t * @param facesContext the current FacesContext\n\t * @see jakarta.faces.context.FacesContext#getCurrentInstance()\n\t */\n\tpublic FacesRequestAttributes(FacesContext facesContext) {\n\t\tAssert.notNull(facesContext, \"FacesContext must not be null\");\n\t\tthis.facesContext = facesContext;\n\t}\n\n\n\t/**\n\t * Return the JSF FacesContext that this adapter operates on.\n\t */\n\tprotected final FacesContext getFacesContext() {\n\t\treturn this.facesContext;\n\t}\n\n\t/**\n\t * Return the JSF ExternalContext that this adapter operates on.\n\t * @see jakarta.faces.context.FacesContext#getExternalContext()\n\t */\n\tprotected final ExternalContext getExternalContext() {\n\t\treturn getFacesContext().getExternalContext();\n\t}\n\n\t/**\n\t * Return the JSF attribute Map for the specified scope.\n\t * @param scope constant indicating request or session scope\n\t * @return the Map representation of the attributes in the specified scope\n\t * @see #SCOPE_REQUEST\n\t * @see #SCOPE_SESSION\n\t */\n\tprotected Map<String, Object> getAttributeMap(int scope) {\n\t\tif (scope == SCOPE_REQUEST) {\n\t\t\treturn getExternalContext().getRequestMap();\n\t\t}\n\t\telse {\n\t\t\treturn getExternalContext().getSessionMap();\n\t\t}\n\t}\n\n\n\t@Override\n\tpublic Object getAttribute(String name, int scope) {\n\t\treturn getAttributeMap(scope).get(name);\n\t}\n\n\t@Override\n\tpublic void setAttribute(String name, Object value, int scope) {\n\t\tgetAttributeMap(scope).put(name, value);\n\t}\n\n\t@Override\n\tpublic void removeAttribute(String name, int scope) {\n\t\tgetAttributeMap(scope).remove(name);\n\t}\n\n\t@Override\n\tpublic String[] getAttributeNames(int scope) {\n\t\treturn StringUtils.toStringArray(getAttributeMap(scope).keySet());\n\t}\n\n\t@Override\n\tpublic void registerDestructionCallback(String name, Runnable callback, int scope) {\n\t\tif (logger.isWarnEnabled()) {\n\t\t\tlogger.warn(\"Could not register destruction callback [\" + callback + \"] for attribute '\" + name +\n\t\t\t\t\t\"' because FacesRequestAttributes does not support such callbacks\");\n\t\t}\n\t}\n\n\t@Override\n\tpublic Object resolveReference(String key) {\n\t\treturn switch (key) {\n\t\t\tcase REFERENCE_REQUEST -> getExternalContext().getRequest();\n\t\t\tcase REFERENCE_SESSION -> getExternalContext().getSession(true);\n\t\t\tcase \"application\" -> getExternalContext().getContext();\n\t\t\tcase \"requestScope\" -> getExternalContext().getRequestMap();\n\t\t\tcase \"sessionScope\" -> getExternalContext().getSessionMap();\n\t\t\tcase \"applicationScope\" -> getExternalContext().getApplicationMap();\n\t\t\tcase \"facesContext\" -> getFacesContext();\n\t\t\tcase \"cookie\" -> getExternalContext().getRequestCookieMap();\n\t\t\tcase \"header\" -> getExternalContext().getRequestHeaderMap();\n\t\t\tcase \"headerValues\" -> getExternalContext().getRequestHeaderValuesMap();\n\t\t\tcase \"param\" -> getExternalContext().getRequestParameterMap();\n\t\t\tcase \"paramValues\" -> getExternalContext().getRequestParameterValuesMap();\n\t\t\tcase \"initParam\" -> getExternalContext().getInitParameterMap();\n\t\t\tcase \"view\" -> getFacesContext().getViewRoot();\n\t\t\tcase \"viewScope\" -> getFacesContext().getViewRoot().getViewMap();\n\t\t\tcase \"flash\" -> getExternalContext().getFlash();\n\t\t\tcase \"resource\" -> getFacesContext().getApplication().getResourceHandler();\n\t\t\tdefault -> null;\n\t\t};\n\t}\n\n\t@Override\n\tpublic String getSessionId() {\n\t\tObject session = getExternalContext().getSession(true);\n\t\ttry {\n\t\t\t// HttpSession has a getId() method.\n\t\t\tMethod getIdMethod = session.getClass().getMethod(\"getId\");\n\t\t\treturn String.valueOf(ReflectionUtils.invokeMethod(getIdMethod, session));\n\t\t}\n\t\tcatch (NoSuchMethodException ex) {\n\t\t\tthrow new IllegalStateException(\"Session object [\" + session + \"] does not have a getId() method\");\n\t\t}\n\t}\n\n\t@Override\n\tpublic Object getSessionMutex() {\n\t\t// Enforce presence of a session first to allow listeners to create the mutex attribute\n\t\tExternalContext externalContext = getExternalContext();\n\t\tObject session = externalContext.getSession(true);\n\t\tObject mutex = externalContext.getSessionMap().get(WebUtils.SESSION_MUTEX_ATTRIBUTE);\n\t\tif (mutex == null) {\n\t\t\tmutex = (session != null ? session : externalContext);\n\t\t}\n\t\treturn mutex;\n\t}\n\n}"
+  },
+  "org.springframework.web.context.request.FacesRequestAttributes#getAttribute(name,scope)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "name",
+      "scope"
+    ],
+    "position": {
+      "column": 1,
+      "line": 105
+    },
+    "return": "Object",
+    "signature": "public Object getAttribute(String name, int scope)",
+    "source_code": "\tpublic Object getAttribute(String name, int scope) {\n\t\treturn getAttributeMap(scope).get(name);\n\t}"
+  },
+  "org.springframework.web.context.request.FacesRequestAttributes#getAttributeMap(scope)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return the JSF attribute Map for the specified scope.\n\t * @param scope constant indicating request or session scope\n\t * @return the Map representation of the attributes in the specified scope\n\t * @see #SCOPE_REQUEST\n\t * @see #SCOPE_SESSION\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "scope"
+    ],
+    "position": {
+      "column": 1,
+      "line": 94
+    },
+    "return": "Object>",
+    "signature": "protected Object> getAttributeMap(int scope)",
+    "source_code": "\tprotected Map<String, Object> getAttributeMap(int scope) {\n\t\tif (scope == SCOPE_REQUEST) {\n\t\t\treturn getExternalContext().getRequestMap();\n\t\t}\n\t\telse {\n\t\t\treturn getExternalContext().getSessionMap();\n\t\t}\n\t}"
+  },
+  "org.springframework.web.context.request.FacesRequestAttributes#getAttributeNames(scope)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "scope"
+    ],
+    "position": {
+      "column": 1,
+      "line": 120
+    },
+    "return": "String[]",
+    "signature": "public String[] getAttributeNames(int scope)",
+    "source_code": "\tpublic String[] getAttributeNames(int scope) {\n\t\treturn StringUtils.toStringArray(getAttributeMap(scope).keySet());\n\t}"
+  },
+  "org.springframework.web.context.request.FacesRequestAttributes#getExternalContext()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return the JSF ExternalContext that this adapter operates on.\n\t * @see jakarta.faces.context.FacesContext#getExternalContext()\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 83
+    },
+    "return": "ExternalContext",
+    "signature": "protected ExternalContext getExternalContext()",
+    "source_code": "\tprotected final ExternalContext getExternalContext() {\n\t\treturn getFacesContext().getExternalContext();\n\t}"
+  },
+  "org.springframework.web.context.request.FacesRequestAttributes#getFacesContext()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return the JSF FacesContext that this adapter operates on.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 75
+    },
+    "return": "FacesContext",
+    "signature": "protected FacesContext getFacesContext()",
+    "source_code": "\tprotected final FacesContext getFacesContext() {\n\t\treturn this.facesContext;\n\t}"
+  },
+  "org.springframework.web.context.request.FacesRequestAttributes#getSessionId()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 157
+    },
+    "return": "String",
+    "signature": "public String getSessionId()",
+    "source_code": "\tpublic String getSessionId() {\n\t\tObject session = getExternalContext().getSession(true);\n\t\ttry {\n\t\t\t// HttpSession has a getId() method.\n\t\t\tMethod getIdMethod = session.getClass().getMethod(\"getId\");\n\t\t\treturn String.valueOf(ReflectionUtils.invokeMethod(getIdMethod, session));\n\t\t}\n\t\tcatch (NoSuchMethodException ex) {\n\t\t\tthrow new IllegalStateException(\"Session object [\" + session + \"] does not have a getId() method\");\n\t\t}\n\t}"
+  },
+  "org.springframework.web.context.request.FacesRequestAttributes#getSessionMutex()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 170
+    },
+    "return": "Object",
+    "signature": "public Object getSessionMutex()",
+    "source_code": "\tpublic Object getSessionMutex() {\n\t\t// Enforce presence of a session first to allow listeners to create the mutex attribute\n\t\tExternalContext externalContext = getExternalContext();\n\t\tObject session = externalContext.getSession(true);\n\t\tObject mutex = externalContext.getSessionMap().get(WebUtils.SESSION_MUTEX_ATTRIBUTE);\n\t\tif (mutex == null) {\n\t\t\tmutex = (session != null ? session : externalContext);\n\t\t}\n\t\treturn mutex;\n\t}"
+  },
+  "org.springframework.web.context.request.FacesRequestAttributes#registerDestructionCallback(name,callback,scope)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "name",
+      "callback",
+      "scope"
+    ],
+    "position": {
+      "column": 1,
+      "line": 125
+    },
+    "return": "void",
+    "signature": "public void registerDestructionCallback(String name, Runnable callback, int scope)",
+    "source_code": "\tpublic void registerDestructionCallback(String name, Runnable callback, int scope) {\n\t\tif (logger.isWarnEnabled()) {\n\t\t\tlogger.warn(\"Could not register destruction callback [\" + callback + \"] for attribute '\" + name +\n\t\t\t\t\t\"' because FacesRequestAttributes does not support such callbacks\");\n\t\t}\n\t}"
+  },
+  "org.springframework.web.context.request.FacesRequestAttributes#removeAttribute(name,scope)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "name",
+      "scope"
+    ],
+    "position": {
+      "column": 1,
+      "line": 115
+    },
+    "return": "void",
+    "signature": "public void removeAttribute(String name, int scope)",
+    "source_code": "\tpublic void removeAttribute(String name, int scope) {\n\t\tgetAttributeMap(scope).remove(name);\n\t}"
+  },
+  "org.springframework.web.context.request.FacesRequestAttributes#resolveReference(key)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "key"
+    ],
+    "position": {
+      "column": 1,
+      "line": 133
+    },
+    "return": "Object",
+    "signature": "public Object resolveReference(String key)",
+    "source_code": "\tpublic Object resolveReference(String key) {\n\t\treturn switch (key) {\n\t\t\tcase REFERENCE_REQUEST -> getExternalContext().getRequest();\n\t\t\tcase REFERENCE_SESSION -> getExternalContext().getSession(true);\n\t\t\tcase \"application\" -> getExternalContext().getContext();\n\t\t\tcase \"requestScope\" -> getExternalContext().getRequestMap();\n\t\t\tcase \"sessionScope\" -> getExternalContext().getSessionMap();\n\t\t\tcase \"applicationScope\" -> getExternalContext().getApplicationMap();\n\t\t\tcase \"facesContext\" -> getFacesContext();\n\t\t\tcase \"cookie\" -> getExternalContext().getRequestCookieMap();\n\t\t\tcase \"header\" -> getExternalContext().getRequestHeaderMap();\n\t\t\tcase \"headerValues\" -> getExternalContext().getRequestHeaderValuesMap();\n\t\t\tcase \"param\" -> getExternalContext().getRequestParameterMap();\n\t\t\tcase \"paramValues\" -> getExternalContext().getRequestParameterValuesMap();\n\t\t\tcase \"initParam\" -> getExternalContext().getInitParameterMap();\n\t\t\tcase \"view\" -> getFacesContext().getViewRoot();\n\t\t\tcase \"viewScope\" -> getFacesContext().getViewRoot().getViewMap();\n\t\t\tcase \"flash\" -> getExternalContext().getFlash();\n\t\t\tcase \"resource\" -> getFacesContext().getApplication().getResourceHandler();\n\t\t\tdefault -> null;\n\t\t};\n\t}"
+  },
+  "org.springframework.web.context.request.FacesRequestAttributes#setAttribute(name,value,scope)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "name",
+      "value",
+      "scope"
+    ],
+    "position": {
+      "column": 1,
+      "line": 110
+    },
+    "return": "void",
+    "signature": "public void setAttribute(String name, Object value, int scope)",
+    "source_code": "\tpublic void setAttribute(String name, Object value, int scope) {\n\t\tgetAttributeMap(scope).put(name, value);\n\t}"
+  },
+  "org.springframework.web.cors.CorsConfiguration#getAllowPrivateNetwork()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return the configured {@code allowPrivateNetwork} flag, or {@code null} if none.\n\t * @since 6.1.3\n\t * @see #setAllowPrivateNetwork(Boolean)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 494
+    },
+    "return": "Boolean",
+    "signature": "public Boolean getAllowPrivateNetwork()",
+    "source_code": "\tpublic Boolean getAllowPrivateNetwork() {\n\t\treturn this.allowPrivateNetwork;\n\t}"
+  },
+  "org.springframework.web.cors.CorsConfiguration#setAllowPrivateNetwork(allowPrivateNetwork)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Whether private network access is supported for user-agents restricting such access by default.\n\t * <p>Private network requests are requests whose target server's IP address is more private than\n\t * that from which the request initiator was fetched. For example, a request from a public website\n\t * (https://example.com) to a private website (https://router.local), or a request from a private\n\t * website to localhost.\n\t * <p>Setting this property has an impact on how {@link #setAllowedOrigins(List)\n\t * origins} and {@link #setAllowedOriginPatterns(List) originPatterns} are processed,\n\t * see related API documentation for more details.\n\t * <p>By default this is not set (i.e. private network access is not supported).\n\t * @since 6.1.3\n\t * @see <a href=\"https://wicg.github.io/private-network-access/\">Private network access specifications</a>\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "allowPrivateNetwork"
+    ],
+    "position": {
+      "column": 1,
+      "line": 484
+    },
+    "return": "void",
+    "signature": "public void setAllowPrivateNetwork(@Nullable Boolean allowPrivateNetwork)",
+    "source_code": "\tpublic void setAllowPrivateNetwork(@Nullable Boolean allowPrivateNetwork) {\n\t\tthis.allowPrivateNetwork = allowPrivateNetwork;\n\t}"
+  },
+  "org.springframework.web.cors.CorsConfiguration#validateAllowPrivateNetwork()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Validate that when {@link #setAllowPrivateNetwork allowPrivateNetwork} is {@code true},\n\t * {@link #setAllowedOrigins allowedOrigins} does not contain the special\n\t * value {@code \"*\"} since this is insecure.\n\t * @throws IllegalArgumentException if the validation fails\n\t * @since 6.1.3\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 587
+    },
+    "return": "void",
+    "signature": "public void validateAllowPrivateNetwork()",
+    "source_code": "\tpublic void validateAllowPrivateNetwork() {\n\t\tif (this.allowPrivateNetwork == Boolean.TRUE &&\n\t\t\t\tthis.allowedOrigins != null && this.allowedOrigins.contains(ALL)) {\n\n\t\t\tthrow new IllegalArgumentException(\n\t\t\t\t\t\"When allowPrivateNetwork is true, allowedOrigins cannot contain the special value \\\"*\\\" \" +\n\t\t\t\t\t\t\t\"as it is not recommended from a security perspective. \" +\n\t\t\t\t\t\t\t\"To allow private network access to a set of origins, list them explicitly \" +\n\t\t\t\t\t\t\t\"or consider using \\\"allowedOriginPatterns\\\" instead.\");\n\t\t}\n\t}"
+  },
+  "org.springframework.web.method.HandlerMethod#createWithValidateFlags()": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Re-create the HandlerMethod and initialize\n\t * {@link #shouldValidateArguments()} and {@link #shouldValidateReturnValue()}.\n\t * @since 6.1.3\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [],
+    "position": {
+      "column": 1,
+      "line": 315
+    },
+    "return": "HandlerMethod",
+    "signature": "public HandlerMethod createWithValidateFlags()",
+    "source_code": "\tpublic HandlerMethod createWithValidateFlags() {\n\t\treturn new HandlerMethod(this, null, true);\n\t}"
+  },
+  "org.springframework.web.socket.sockjs.client.SockJsClient#buildSockJsUrlInfo(url)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Create a new {@link SockJsUrlInfo} for the current client execution.\n\t * <p>The default implementation builds a {@code SockJsUrlInfo} which\n\t * calculates a random server id and session id if necessary.\n\t * @param url the target URL\n\t * @since 6.1.3\n\t * @see SockJsUrlInfo#SockJsUrlInfo(URI)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "url"
+    ],
+    "position": {
+      "column": 1,
+      "line": 267
+    },
+    "return": "SockJsUrlInfo",
+    "signature": "protected SockJsUrlInfo buildSockJsUrlInfo(URI url)",
+    "source_code": "\tprotected SockJsUrlInfo buildSockJsUrlInfo(URI url) {\n\t\treturn new SockJsUrlInfo(url);\n\t}"
+  },
+  "org.springframework.web.util.SCOPE_APPLICATION": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/** Constant identifying the application scope. */",
+    "kind": "field",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 57
+    },
+    "signature": "public String SCOPE_APPLICATION",
+    "source_code": "\tpublic static final String SCOPE_APPLICATION = \"application\";",
+    "type": "String"
+  },
+  "org.springframework.web.util.SCOPE_PAGE": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/** Constant identifying the page scope. */",
+    "kind": "field",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 48
+    },
+    "signature": "public String SCOPE_PAGE",
+    "source_code": "\tpublic static final String SCOPE_PAGE = \"page\";",
+    "type": "String"
+  },
+  "org.springframework.web.util.SCOPE_REQUEST": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/** Constant identifying the request scope. */",
+    "kind": "field",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 51
+    },
+    "signature": "public String SCOPE_REQUEST",
+    "source_code": "\tpublic static final String SCOPE_REQUEST = \"request\";",
+    "type": "String"
+  },
+  "org.springframework.web.util.SCOPE_SESSION": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/** Constant identifying the session scope. */",
+    "kind": "field",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 54
+    },
+    "signature": "public String SCOPE_SESSION",
+    "source_code": "\tpublic static final String SCOPE_SESSION = \"session\";",
+    "type": "String"
+  },
+  "org.springframework.web.util.TagUtils": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "/**\n * Utility class for tag library related code, exposing functionality\n * such as translating {@link String Strings} to web scopes.\n *\n * <p>\n * <ul>\n * <li>{@code page} will be transformed to\n * {@link jakarta.servlet.jsp.PageContext#PAGE_SCOPE PageContext.PAGE_SCOPE}\n * <li>{@code request} will be transformed to\n * {@link jakarta.servlet.jsp.PageContext#REQUEST_SCOPE PageContext.REQUEST_SCOPE}\n * <li>{@code session} will be transformed to\n * {@link jakarta.servlet.jsp.PageContext#SESSION_SCOPE PageContext.SESSION_SCOPE}\n * <li>{@code application} will be transformed to\n * {@link jakarta.servlet.jsp.PageContext#APPLICATION_SCOPE PageContext.APPLICATION_SCOPE}\n * </ul>\n *\n * @author Alef Arendsen\n * @author Rob Harrop\n * @author Juergen Hoeller\n * @author Rick Evans\n */",
+    "kind": "class",
+    "modifiers": [
+      "public"
+    ],
+    "position": {
+      "column": 1,
+      "line": 45
+    },
+    "signature": "public class TagUtils",
+    "source_code": "public abstract class TagUtils {\n\n\t/** Constant identifying the page scope. */\n\tpublic static final String SCOPE_PAGE = \"page\";\n\n\t/** Constant identifying the request scope. */\n\tpublic static final String SCOPE_REQUEST = \"request\";\n\n\t/** Constant identifying the session scope. */\n\tpublic static final String SCOPE_SESSION = \"session\";\n\n\t/** Constant identifying the application scope. */\n\tpublic static final String SCOPE_APPLICATION = \"application\";\n\n\n\t/**\n\t * Determines the scope for a given input {@code String}.\n\t * <p>If the {@code String} does not match 'request', 'session',\n\t * 'page' or 'application', the method will return {@link PageContext#PAGE_SCOPE}.\n\t * @param scope the {@code String} to inspect\n\t * @return the scope found, or {@link PageContext#PAGE_SCOPE} if no scope matched\n\t * @throws IllegalArgumentException if the supplied {@code scope} is {@code null}\n\t */\n\tpublic static int getScope(String scope) {\n\t\tAssert.notNull(scope, \"Scope to search for cannot be null\");\n\t\treturn switch (scope) {\n\t\t\tcase SCOPE_REQUEST -> PageContext.REQUEST_SCOPE;\n\t\t\tcase SCOPE_SESSION -> PageContext.SESSION_SCOPE;\n\t\t\tcase SCOPE_APPLICATION -> PageContext.APPLICATION_SCOPE;\n\t\t\tdefault -> PageContext.PAGE_SCOPE;\n\t\t};\n\t}\n\n\t/**\n\t * Determine whether the supplied {@link Tag} has any ancestor tag\n\t * of the supplied type.\n\t * @param tag the tag whose ancestors are to be checked\n\t * @param ancestorTagClass the ancestor {@link Class} being searched for\n\t * @return {@code true} if the supplied {@link Tag} has any ancestor tag\n\t * of the supplied type\n\t * @throws IllegalArgumentException if either of the supplied arguments is {@code null};\n\t * or if the supplied {@code ancestorTagClass} is not type-assignable to\n\t * the {@link Tag} class\n\t */\n\tpublic static boolean hasAncestorOfType(Tag tag, Class<?> ancestorTagClass) {\n\t\tAssert.notNull(tag, \"Tag cannot be null\");\n\t\tAssert.notNull(ancestorTagClass, \"Ancestor tag class cannot be null\");\n\t\tif (!Tag.class.isAssignableFrom(ancestorTagClass)) {\n\t\t\tthrow new IllegalArgumentException(\n\t\t\t\t\t\"Class '\" + ancestorTagClass.getName() + \"' is not a valid Tag type\");\n\t\t}\n\t\tTag ancestor = tag.getParent();\n\t\twhile (ancestor != null) {\n\t\t\tif (ancestorTagClass.isAssignableFrom(ancestor.getClass())) {\n\t\t\t\treturn true;\n\t\t\t}\n\t\t\tancestor = ancestor.getParent();\n\t\t}\n\t\treturn false;\n\t}\n\n\t/**\n\t * Determine whether the supplied {@link Tag} has any ancestor tag\n\t * of the supplied type, throwing an {@link IllegalStateException}\n\t * if not.\n\t * @param tag the tag whose ancestors are to be checked\n\t * @param ancestorTagClass the ancestor {@link Class} being searched for\n\t * @param tagName the name of the {@code tag}; for example '{@code option}'\n\t * @param ancestorTagName the name of the ancestor {@code tag}; for example '{@code select}'\n\t * @throws IllegalStateException if the supplied {@code tag} does not\n\t * have a tag of the supplied {@code parentTagClass} as an ancestor\n\t * @throws IllegalArgumentException if any of the supplied arguments is {@code null},\n\t * or in the case of the {@link String}-typed arguments, is composed wholly\n\t * of whitespace; or if the supplied {@code ancestorTagClass} is not\n\t * type-assignable to the {@link Tag} class\n\t * @see #hasAncestorOfType(jakarta.servlet.jsp.tagext.Tag, Class)\n\t */\n\tpublic static void assertHasAncestorOfType(Tag tag, Class<?> ancestorTagClass, String tagName,\n\t\t\tString ancestorTagName) {\n\n\t\tAssert.hasText(tagName, \"'tagName' must not be empty\");\n\t\tAssert.hasText(ancestorTagName, \"'ancestorTagName' must not be empty\");\n\t\tif (!TagUtils.hasAncestorOfType(tag, ancestorTagClass)) {\n\t\t\tthrow new IllegalStateException(\"The '\" + tagName +\n\t\t\t\t\t\"' tag can only be used inside a valid '\" + ancestorTagName + \"' tag.\");\n\t\t}\n\t}\n\n}"
+  },
+  "org.springframework.web.util.TagUtils#assertHasAncestorOfType(tag,ancestorTagClass,tagName,ancestorTagName)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Determine whether the supplied {@link Tag} has any ancestor tag\n\t * of the supplied type, throwing an {@link IllegalStateException}\n\t * if not.\n\t * @param tag the tag whose ancestors are to be checked\n\t * @param ancestorTagClass the ancestor {@link Class} being searched for\n\t * @param tagName the name of the {@code tag}; for example '{@code option}'\n\t * @param ancestorTagName the name of the ancestor {@code tag}; for example '{@code select}'\n\t * @throws IllegalStateException if the supplied {@code tag} does not\n\t * have a tag of the supplied {@code parentTagClass} as an ancestor\n\t * @throws IllegalArgumentException if any of the supplied arguments is {@code null},\n\t * or in the case of the {@link String}-typed arguments, is composed wholly\n\t * of whitespace; or if the supplied {@code ancestorTagClass} is not\n\t * type-assignable to the {@link Tag} class\n\t * @see #hasAncestorOfType(jakarta.servlet.jsp.tagext.Tag, Class)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "tag",
+      "ancestorTagClass",
+      "tagName",
+      "ancestorTagName"
+    ],
+    "position": {
+      "column": 1,
+      "line": 122
+    },
+    "return": "void",
+    "signature": "public void assertHasAncestorOfType(Tag tag, Class<?> ancestorTagClass, String tagName,\n\t\t\tString ancestorTagName)",
+    "source_code": "\tpublic static void assertHasAncestorOfType(Tag tag, Class<?> ancestorTagClass, String tagName,"
+  },
+  "org.springframework.web.util.TagUtils#getScope(scope)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Determines the scope for a given input {@code String}.\n\t * <p>If the {@code String} does not match 'request', 'session',\n\t * 'page' or 'application', the method will return {@link PageContext#PAGE_SCOPE}.\n\t * @param scope the {@code String} to inspect\n\t * @return the scope found, or {@link PageContext#PAGE_SCOPE} if no scope matched\n\t * @throws IllegalArgumentException if the supplied {@code scope} is {@code null}\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "scope"
+    ],
+    "position": {
+      "column": 1,
+      "line": 68
+    },
+    "return": "int",
+    "signature": "public int getScope(String scope)",
+    "source_code": "\tpublic static int getScope(String scope) {\n\t\tAssert.notNull(scope, \"Scope to search for cannot be null\");\n\t\treturn switch (scope) {\n\t\t\tcase SCOPE_REQUEST -> PageContext.REQUEST_SCOPE;\n\t\t\tcase SCOPE_SESSION -> PageContext.SESSION_SCOPE;\n\t\t\tcase SCOPE_APPLICATION -> PageContext.APPLICATION_SCOPE;\n\t\t\tdefault -> PageContext.PAGE_SCOPE;\n\t\t};\n\t}"
+  },
+  "org.springframework.web.util.TagUtils#hasAncestorOfType(tag,ancestorTagClass)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Determine whether the supplied {@link Tag} has any ancestor tag\n\t * of the supplied type.\n\t * @param tag the tag whose ancestors are to be checked\n\t * @param ancestorTagClass the ancestor {@link Class} being searched for\n\t * @return {@code true} if the supplied {@link Tag} has any ancestor tag\n\t * of the supplied type\n\t * @throws IllegalArgumentException if either of the supplied arguments is {@code null};\n\t * or if the supplied {@code ancestorTagClass} is not type-assignable to\n\t * the {@link Tag} class\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "tag",
+      "ancestorTagClass"
+    ],
+    "position": {
+      "column": 1,
+      "line": 89
+    },
+    "return": "boolean",
+    "signature": "public boolean hasAncestorOfType(Tag tag, Class<?> ancestorTagClass)",
+    "source_code": "\tpublic static boolean hasAncestorOfType(Tag tag, Class<?> ancestorTagClass) {\n\t\tAssert.notNull(tag, \"Tag cannot be null\");\n\t\tAssert.notNull(ancestorTagClass, \"Ancestor tag class cannot be null\");\n\t\tif (!Tag.class.isAssignableFrom(ancestorTagClass)) {\n\t\t\tthrow new IllegalArgumentException(\n\t\t\t\t\t\"Class '\" + ancestorTagClass.getName() + \"' is not a valid Tag type\");\n\t\t}\n\t\tTag ancestor = tag.getParent();\n\t\twhile (ancestor != null) {\n\t\t\tif (ancestorTagClass.isAssignableFrom(ancestor.getClass())) {\n\t\t\t\treturn true;\n\t\t\t}\n\t\t\tancestor = ancestor.getParent();\n\t\t}\n\t\treturn false;\n\t}"
+  }
+}
