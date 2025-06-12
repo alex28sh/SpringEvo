@@ -1,0 +1,317 @@
+{
+  "org.springframework.core.codec.<unknown>#decode(dataBuffer,elementType,mimeType,Map<String,hints)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "dataBuffer",
+      "elementType",
+      "mimeType",
+      "Map<String",
+      "hints"
+    ],
+    "position": {
+      "column": 1,
+      "line": 52
+    },
+    "return": "Buffer",
+    "signature": "public Buffer decode(DataBuffer dataBuffer, ResolvableType elementType,\n\t\t\t@Nullable MimeType mimeType, @Nullable Map<String, Object> hints)",
+    "source_code": "\tpublic Buffer decode(DataBuffer dataBuffer, ResolvableType elementType,\n\t\t\t@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {\n\n\t\tif (logger.isDebugEnabled()) {\n\t\t\tlogger.debug(Hints.getLogPrefix(hints) + \"Read \" + dataBuffer.readableByteCount() + \" bytes\");\n\t\t}\n\t\tif (dataBuffer instanceof Netty5DataBuffer netty5DataBuffer) {\n\t\t\treturn netty5DataBuffer.getNativeBuffer();\n\t\t}\n\t\tbyte[] bytes = new byte[dataBuffer.readableByteCount()];\n\t\tdataBuffer.read(bytes);\n\t\tBuffer buffer = DefaultBufferAllocators.preferredAllocator().copyOf(bytes);\n\t\tDataBufferUtils.release(dataBuffer);\n\t\treturn buffer;\n\t}"
+  },
+  "org.springframework.core.io.buffer.<unknown>#read(destination,offset,length)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "destination",
+      "offset",
+      "length"
+    ],
+    "position": {
+      "column": 1,
+      "line": 169
+    },
+    "return": "Netty5DataBuffer",
+    "signature": "public Netty5DataBuffer read(byte[] destination, int offset, int length)",
+    "source_code": "\tpublic Netty5DataBuffer read(byte[] destination, int offset, int length) {\n\t\tthis.buffer.readBytes(destination, offset, length);\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.core.io.buffer.<unknown>#slice(index,length)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * {@inheritDoc}\n\t * <p><strong>Note</strong> that due to the lack of a {@code slice} method\n\t * in Netty 5's {@link Buffer}, this implementation returns a copy that\n\t * does <strong>not</strong> share its contents with this buffer.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "index",
+      "length"
+    ],
+    "position": {
+      "column": 1,
+      "line": 271
+    },
+    "return": "DataBuffer",
+    "signature": "public DataBuffer slice(int index, int length)",
+    "source_code": "\tpublic DataBuffer slice(int index, int length) {\n\t\tBuffer copy = this.buffer.copy(index, length);\n\t\treturn new Netty5DataBuffer(copy, this.dataBufferFactory);\n\t}"
+  },
+  "org.springframework.core.io.buffer.<unknown>#write(source,offset,length)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "source",
+      "offset",
+      "length"
+    ],
+    "position": {
+      "column": 1,
+      "line": 187
+    },
+    "return": "Netty5DataBuffer",
+    "signature": "public Netty5DataBuffer write(byte[] source, int offset, int length)",
+    "source_code": "\tpublic Netty5DataBuffer write(byte[] source, int offset, int length) {\n\t\tthis.buffer.writeBytes(source, offset, length);\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.core.style.<unknown>#styleMapEntry(Map.Entry<?,entry)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Generate a styled version of the supplied {@link Map.Entry}.\n\t * @return a styled version of the supplied map entry\n\t * @since 6.0\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "Map.Entry<?",
+      "entry"
+    ],
+    "position": {
+      "column": 1,
+      "line": 151
+    },
+    "return": "String",
+    "signature": "protected String styleMapEntry(Map.Entry<?, ?> entry)",
+    "source_code": "\tprotected String styleMapEntry(Map.Entry<?, ?> entry) {\n\t\treturn style(entry.getKey()) + \" -> \" + style(entry.getValue());\n\t}"
+  },
+  "org.springframework.http.converter.<unknown>#read(clazz,inputMessage)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * This implementation simple delegates to {@link #readInternal(Class, HttpInputMessage)}.\n\t * Future implementations might add some default behavior, however.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "clazz",
+      "inputMessage"
+    ],
+    "position": {
+      "column": 1,
+      "line": 196
+    },
+    "return": "T",
+    "signature": "public T read(Class<? extends T> clazz, HttpInputMessage inputMessage)",
+    "source_code": "\tpublic final T read(Class<? extends T> clazz, HttpInputMessage inputMessage)\n\t\t\tthrows IOException, HttpMessageNotReadableException {\n\n\t\treturn readInternal(clazz, inputMessage);\n\t}"
+  },
+  "org.springframework.test.context.support.<unknown>#beforeOrAfterTestMethod(testContext,requiredMethodMode,requiredClassMode)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Perform the actual work for {@link #beforeTestMethod} and {@link #afterTestMethod}\n\t * by dirtying the context if appropriate (i.e., according to the required modes).\n\t * @param testContext the test context whose application context should\n\t * potentially be marked as dirty; never {@code null}\n\t * @param requiredMethodMode the method mode required for a context to\n\t * be marked dirty in the current phase; never {@code null}\n\t * @param requiredClassMode the class mode required for a context to\n\t * be marked dirty in the current phase; never {@code null}\n\t * @throws Exception allows any exception to propagate\n\t * @since 4.2\n\t * @see #dirtyContext\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "testContext",
+      "requiredMethodMode",
+      "requiredClassMode"
+    ],
+    "position": {
+      "column": 1,
+      "line": 87
+    },
+    "return": "void",
+    "signature": "protected void beforeOrAfterTestMethod(TestContext testContext, MethodMode requiredMethodMode,\n\t\t\tClassMode requiredClassMode)",
+    "source_code": "\tprotected void beforeOrAfterTestMethod(TestContext testContext, MethodMode requiredMethodMode,\n\t\t\tClassMode requiredClassMode) throws Exception {\n\n\t\tAssert.notNull(testContext, \"TestContext must not be null\");\n\t\tAssert.notNull(requiredMethodMode, \"requiredMethodMode must not be null\");\n\t\tAssert.notNull(requiredClassMode, \"requiredClassMode must not be null\");\n\n\t\tClass<?> testClass = testContext.getTestClass();\n\t\tMethod testMethod = testContext.getTestMethod();\n\t\tAssert.notNull(testClass, \"The test class of the supplied TestContext must not be null\");\n\t\tAssert.notNull(testMethod, \"The test method of the supplied TestContext must not be null\");\n\n\t\tDirtiesContext methodAnn = AnnotatedElementUtils.findMergedAnnotation(testMethod, DirtiesContext.class);\n\t\tDirtiesContext classAnn = TestContextAnnotationUtils.findMergedAnnotation(testClass, DirtiesContext.class);\n\t\tboolean methodAnnotated = (methodAnn != null);\n\t\tboolean classAnnotated = (classAnn != null);\n\t\tMethodMode methodMode = (methodAnnotated ? methodAnn.methodMode() : null);\n\t\tClassMode classMode = (classAnnotated ? classAnn.classMode() : null);\n\n\t\tif (logger.isTraceEnabled()) {\n\t\t\tlogger.trace(\"\"\"\n\t\t\t\t\t%s test method: context %s, class annotated with @DirtiesContext [%s] \\\n\t\t\t\t\twith mode [%s], method annotated with @DirtiesContext [%s] with mode [%s]\"\"\"\n\t\t\t\t\t\t.formatted(getPhase(requiredMethodMode), testContext, classAnnotated, classMode,\n\t\t\t\t\t\t\tmethodAnnotated, methodMode));\n\t\t}\n\t\telse if (logger.isDebugEnabled()) {\n\t\t\tlogger.debug(\"\"\"\n\t\t\t\t\t%s test method: class [%s], method [%s], class annotated with @DirtiesContext [%s] \\\n\t\t\t\t\twith mode [%s], method annotated with @DirtiesContext [%s] with mode [%s]\"\"\"\n\t\t\t\t\t\t.formatted(getPhase(requiredMethodMode), testClass.getSimpleName(),\n\t\t\t\t\t\t\ttestMethod.getName(), classAnnotated, classMode, methodAnnotated, methodMode));\n\t\t}\n\n\t\tif ((methodMode == requiredMethodMode) || (classMode == requiredClassMode)) {\n\t\t\tHierarchyMode hierarchyMode = (methodAnnotated ? methodAnn.hierarchyMode() : classAnn.hierarchyMode());\n\t\t\tdirtyContext(testContext, hierarchyMode);\n\t\t}\n\t}"
+  },
+  "org.springframework.test.context.support.<unknown>#dirtyContext(testContext,hierarchyMode)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Mark the {@linkplain ApplicationContext application context} of the supplied\n\t * {@linkplain TestContext test context} as\n\t * {@linkplain TestContext#markApplicationContextDirty(DirtiesContext.HierarchyMode) dirty}\n\t * and set {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE\n\t * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context to {@code true}.\n\t * @param testContext the test context whose application context should\n\t * be marked as dirty\n\t * @param hierarchyMode the context cache clearing mode to be applied if the\n\t * context is part of a hierarchy; may be {@code null}\n\t * @since 3.2.2\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "testContext",
+      "hierarchyMode"
+    ],
+    "position": {
+      "column": 1,
+      "line": 69
+    },
+    "return": "void",
+    "signature": "protected void dirtyContext(TestContext testContext, @Nullable HierarchyMode hierarchyMode)",
+    "source_code": "\tprotected void dirtyContext(TestContext testContext, @Nullable HierarchyMode hierarchyMode) {\n\t\ttestContext.markApplicationContextDirty(hierarchyMode);\n\t\ttestContext.setAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE, Boolean.TRUE);\n\t}"
+  },
+  "org.springframework.test.context.util.<unknown>#handleFailure(factoryType,factoryImplementationName,failure)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "factoryType",
+      "factoryImplementationName",
+      "failure"
+    ],
+    "position": {
+      "column": 1,
+      "line": 38
+    },
+    "return": "void",
+    "signature": "public void handleFailure(Class<?> factoryType, String factoryImplementationName, Throwable failure)",
+    "source_code": "\tpublic void handleFailure(Class<?> factoryType, String factoryImplementationName, Throwable failure) {\n\t\tThrowable ex = (failure instanceof InvocationTargetException ite ? ite.getTargetException() : failure);\n\t\tif (ex instanceof ClassNotFoundException || ex instanceof NoClassDefFoundError) {\n\t\t\tif (logger.isDebugEnabled()) {\n\t\t\t\tlogger.debug(\"\"\"\n\t\t\t\t\t\tSkipping candidate %1$s [%2$s] due to a missing dependency. \\\n\t\t\t\t\t\tSpecify custom %1$s classes or make the default %1$s classes \\\n\t\t\t\t\t\tand their required dependencies available. Offending class: [%3$s]\"\"\"\n\t\t\t\t\t\t\t.formatted(factoryType.getSimpleName(), factoryImplementationName, ex.getMessage()));\n\t\t\t}\n\t\t}\n\t\telse if (ex instanceof LinkageError) {\n\t\t\tif (logger.isDebugEnabled()) {\n\t\t\t\tlogger.debug(\"\"\"\n\t\t\t\t\t\tCould not load %1$s [%2$s]. Specify custom %1$s classes or make the default %1$s classes \\\n\t\t\t\t\t\tavailable.\"\"\".formatted(factoryType.getSimpleName(), factoryImplementationName), ex);\n\t\t\t}\n\t\t}\n\t\telse {\n\t\t\tif (ex instanceof RuntimeException runtimeException) {\n\t\t\t\tthrow runtimeException;\n\t\t\t}\n\t\t\tif (ex instanceof Error error) {\n\t\t\t\tthrow error;\n\t\t\t}\n\t\t\tthrow new IllegalStateException(\n\t\t\t\t\"Failed to load %s [%s]\".formatted(factoryType.getSimpleName(), factoryImplementationName), ex);\n\t\t}\n\t}"
+  },
+  "org.springframework.web.service.annotation.<unknown>#registerReflectionHints(hints,element)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "hints",
+      "element"
+    ],
+    "position": {
+      "column": 1,
+      "line": 44
+    },
+    "return": "void",
+    "signature": "public void registerReflectionHints(ReflectionHints hints, AnnotatedElement element)",
+    "source_code": "\tpublic void registerReflectionHints(ReflectionHints hints, AnnotatedElement element) {\n\t\tif (element instanceof Method method) {\n\t\t\tregisterMethodHints(hints, method);\n\t\t}\n\t}"
+  },
+  "org.springframework.web.service.invoker.<unknown>#addRequestValue(name,value,parameter,requestValues)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Add the given, single request value. This may be called multiples times\n\t * if the request value is multivalued.\n\t * <p>If the resolver was created with a {@link ConversionService}, the value\n\t * will have been converted to a String and may be cast down.\n\t * @param name the request value name\n\t * @param value the value\n\t * @param parameter the method parameter type, nested if Map, List/array, or Optional\n\t * @param requestValues builder to add the request value to\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "name",
+      "value",
+      "parameter",
+      "requestValues"
+    ],
+    "position": {
+      "column": 1,
+      "line": 210
+    },
+    "return": "void",
+    "signature": "protected void addRequestValue(String name, Object value, MethodParameter parameter, HttpRequestValues.Builder requestValues)",
+    "source_code": "\tprotected abstract void addRequestValue(\n\t\t\tString name, Object value, MethodParameter parameter, HttpRequestValues.Builder requestValues);\n\n\n\t/**\n\t * Info about a request value, typically extracted from a method parameter annotation.\n\t */\n\tprotected static class NamedValueInfo {\n\n\t\tprivate final String name;\n\n\t\tprivate final boolean required;\n\n\t\t@Nullable\n\t\tprivate final String defaultValue;\n\n\t\tprivate final String label;\n\n\t\tprivate final boolean multiValued;\n\n\t\t/**\n\t\t * Create an instance.\n\t\t * @param name the name to use, possibly empty if not specified\n\t\t * @param required whether it is marked as required\n\t\t * @param defaultValue fallback value, possibly {@link ValueConstants#DEFAULT_NONE}\n\t\t * @param label how it should appear in error messages, e.g. \"path variable\", \"request header\"\n\t\t */\n\t\tpublic NamedValueInfo(\n\t\t\t\tString name, boolean required, @Nullable String defaultValue, String label, boolean multiValued) {\n\n\t\t\tthis.name = name;\n\t\t\tthis.required = required;\n\t\t\tthis.defaultValue = defaultValue;\n\t\t\tthis.label = label;\n\t\t\tthis.multiValued = multiValued;\n\t\t}\n\n\t\tpublic NamedValueInfo update(String name, boolean required, @Nullable String defaultValue) {\n\t\t\treturn new NamedValueInfo(name, required, defaultValue, this.label, this.multiValued);\n\t\t}\n\n\t}"
+  },
+  "org.springframework.web.service.invoker.<unknown>#addRequestValue(name,value,requestValues)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Add the given, single request value. This may be called multiples times\n\t * if the request value is multivalued.\n\t * <p>If the resolver was created with a {@link ConversionService}, the value\n\t * will have been converted to a String and may be cast down.\n\t * @param name the request value name\n\t * @param value the value\n\t * @param requestValues builder to add the request value to\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "name",
+      "value",
+      "requestValues"
+    ],
+    "position": {
+      "column": 1,
+      "line": 205
+    },
+    "return": "void",
+    "signature": "protected void addRequestValue(String name, Object value, HttpRequestValues.Builder requestValues)",
+    "source_code": "\tprotected abstract void addRequestValue(String name, Object value, HttpRequestValues.Builder requestValues);"
+  },
+  "org.springframework.web.socket.sockjs.support.<unknown>#handleRequest(request,response,sockJsPath,wsHandler)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * This method determines the SockJS path and handles SockJS static URLs.\n\t * Session URLs and raw WebSocket requests are delegated to abstract methods.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "request",
+      "response",
+      "sockJsPath",
+      "wsHandler"
+    ],
+    "position": {
+      "column": 1,
+      "line": 376
+    },
+    "return": "void",
+    "signature": "public void handleRequest(ServerHttpRequest request, ServerHttpResponse response,\n\t\t\t@Nullable String sockJsPath, WebSocketHandler wsHandler)",
+    "source_code": "\tpublic final void handleRequest(ServerHttpRequest request, ServerHttpResponse response,\n\t\t\t@Nullable String sockJsPath, WebSocketHandler wsHandler) throws SockJsException {\n\n\t\tif (sockJsPath == null) {\n\t\t\tif (logger.isWarnEnabled()) {\n\t\t\t\tlogger.warn(LogFormatUtils.formatValue(\n\t\t\t\t\t\t\"Expected SockJS path. Failing request: \" + request.getURI(), -1, true));\n\t\t\t}\n\t\t\tresponse.setStatusCode(HttpStatus.NOT_FOUND);\n\t\t\treturn;\n\t\t}\n\n\t\ttry {\n\t\t\trequest.getHeaders();\n\t\t}\n\t\tcatch (InvalidMediaTypeException ex) {\n\t\t\t// As per SockJS protocol content-type can be ignored (it's always json)\n\t\t}\n\n\t\tString requestInfo = (logger.isDebugEnabled() ? request.getMethod() + \" \" + request.getURI() : null);\n\n\t\ttry {\n\t\t\tif (sockJsPath.isEmpty() || sockJsPath.equals(\"/\")) {\n\t\t\t\tif (requestInfo != null) {\n\t\t\t\t\tlogger.debug(\"Processing transport request: \" + requestInfo);\n\t\t\t\t}\n\t\t\t\tif (\"websocket\".equalsIgnoreCase(request.getHeaders().getUpgrade())) {\n\t\t\t\t\tresponse.setStatusCode(HttpStatus.BAD_REQUEST);\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\tresponse.getHeaders().setContentType(new MediaType(\"text\", \"plain\", StandardCharsets.UTF_8));\n\t\t\t\tresponse.getBody().write(\"Welcome to SockJS!\\n\".getBytes(StandardCharsets.UTF_8));\n\t\t\t}\n\n\t\t\telse if (sockJsPath.equals(\"/info\")) {\n\t\t\t\tif (requestInfo != null) {\n\t\t\t\t\tlogger.debug(\"Processing transport request: \" + requestInfo);\n\t\t\t\t}\n\t\t\t\tthis.infoHandler.handle(request, response);\n\t\t\t}\n\n\t\t\telse if (sockJsPath.matches(\"/iframe[0-9-.a-z_]*.html\")) {\n\t\t\t\tif (!getAllowedOrigins().isEmpty() && !getAllowedOrigins().contains(\"*\") ||\n\t\t\t\t\t\t!getAllowedOriginPatterns().isEmpty()) {\n\t\t\t\t\tif (requestInfo != null) {\n\t\t\t\t\t\tlogger.debug(\"Iframe support is disabled when an origin check is required. \" +\n\t\t\t\t\t\t\t\t\"Ignoring transport request: \" + requestInfo);\n\t\t\t\t\t}\n\t\t\t\t\tresponse.setStatusCode(HttpStatus.NOT_FOUND);\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\tif (getAllowedOrigins().isEmpty()) {\n\t\t\t\t\tresponse.getHeaders().add(XFRAME_OPTIONS_HEADER, \"SAMEORIGIN\");\n\t\t\t\t}\n\t\t\t\tif (requestInfo != null) {\n\t\t\t\t\tlogger.debug(\"Processing transport request: \" + requestInfo);\n\t\t\t\t}\n\t\t\t\tthis.iframeHandler.handle(request, response);\n\t\t\t}\n\n\t\t\telse if (sockJsPath.equals(\"/websocket\")) {\n\t\t\t\tif (isWebSocketEnabled()) {\n\t\t\t\t\tif (requestInfo != null) {\n\t\t\t\t\t\tlogger.debug(\"Processing transport request: \" + requestInfo);\n\t\t\t\t\t}\n\t\t\t\t\thandleRawWebSocketRequest(request, response, wsHandler);\n\t\t\t\t}\n\t\t\t\telse if (requestInfo != null) {\n\t\t\t\t\tlogger.debug(\"WebSocket disabled. Ignoring transport request: \" + requestInfo);\n\t\t\t\t}\n\t\t\t}\n\n\t\t\telse {\n\t\t\t\tString[] pathSegments = StringUtils.tokenizeToStringArray(sockJsPath.substring(1), \"/\");\n\t\t\t\tif (pathSegments.length != 3) {\n\t\t\t\t\tif (logger.isWarnEnabled()) {\n\t\t\t\t\t\tlogger.warn(LogFormatUtils.formatValue(\"Invalid SockJS path '\" + sockJsPath + \"' - \" +\n\t\t\t\t\t\t\t\t\"required to have 3 path segments\", -1, true));\n\t\t\t\t\t}\n\t\t\t\t\tif (requestInfo != null) {\n\t\t\t\t\t\tlogger.debug(\"Ignoring transport request: \" + requestInfo);\n\t\t\t\t\t}\n\t\t\t\t\tresponse.setStatusCode(HttpStatus.NOT_FOUND);\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\tString serverId = pathSegments[0];\n\t\t\t\tString sessionId = pathSegments[1];\n\t\t\t\tString transport = pathSegments[2];\n\n\t\t\t\tif (!isWebSocketEnabled() && transport.equals(\"websocket\")) {\n\t\t\t\t\tif (requestInfo != null) {\n\t\t\t\t\t\tlogger.debug(\"WebSocket disabled. Ignoring transport request: \" + requestInfo);\n\t\t\t\t\t}\n\t\t\t\t\tresponse.setStatusCode(HttpStatus.NOT_FOUND);\n\t\t\t\t\treturn;\n\t\t\t\t}\n\t\t\t\telse if (!validateRequest(serverId, sessionId, transport) || !validatePath(request)) {\n\t\t\t\t\tif (requestInfo != null) {\n\t\t\t\t\t\tlogger.debug(\"Ignoring transport request: \" + requestInfo);\n\t\t\t\t\t}\n\t\t\t\t\tresponse.setStatusCode(HttpStatus.NOT_FOUND);\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\tif (requestInfo != null) {\n\t\t\t\t\tlogger.debug(\"Processing transport request: \" + requestInfo);\n\t\t\t\t}\n\t\t\t\thandleTransportRequest(request, response, wsHandler, sessionId, transport);\n\t\t\t}\n\t\t\tresponse.close();\n\t\t}\n\t\tcatch (IOException ex) {\n\t\t\tthrow new SockJsException(\"Failed to write to the response\", null, ex);\n\t\t}\n\t}"
+  },
+  "org.springframework.web.socket.sockjs.transport.handler.<unknown>#createSession(sessionId,handler,Map<String,attributes)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "sessionId",
+      "handler",
+      "Map<String",
+      "attributes"
+    ],
+    "position": {
+      "column": 1,
+      "line": 97
+    },
+    "return": "StreamingSockJsSession",
+    "signature": "public StreamingSockJsSession createSession(String sessionId, WebSocketHandler handler, Map<String, Object> attributes)",
+    "source_code": "\tpublic StreamingSockJsSession createSession(\n\t\t\tString sessionId, WebSocketHandler handler, Map<String, Object> attributes) {\n\n\t\treturn new HtmlFileStreamingSockJsSession(sessionId, getServiceConfig(), handler, attributes);\n\t}"
+  },
+  "org.springframework.web.socket.sockjs.transport.handler.<unknown>#handleRequestInternal(request,response,sockJsSession)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "request",
+      "response",
+      "sockJsSession"
+    ],
+    "position": {
+      "column": 1,
+      "line": 104
+    },
+    "return": "void",
+    "signature": "public void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,\n\t\t\tAbstractHttpSockJsSession sockJsSession)",
+    "source_code": "\tpublic void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,\n\t\t\tAbstractHttpSockJsSession sockJsSession) throws SockJsException {\n\n\t\tString callback = getCallbackParam(request);\n\t\tif (!StringUtils.hasText(callback)) {\n\t\t\tresponse.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);\n\t\t\ttry {\n\t\t\t\tresponse.getBody().write(\"\\\"callback\\\" parameter required\".getBytes(StandardCharsets.UTF_8));\n\t\t\t}\n\t\t\tcatch (IOException ex) {\n\t\t\t\tsockJsSession.tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);\n\t\t\t\tthrow new SockJsTransportFailureException(\"Failed to write to response\", sockJsSession.getId(), ex);\n\t\t\t}\n\t\t\treturn;\n\t\t}\n\n\t\tsuper.handleRequestInternal(request, response, sockJsSession);\n\t}"
+  }
+}

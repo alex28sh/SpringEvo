@@ -1,0 +1,209 @@
+{
+  "org.springframework.beans.factory.support.<unknown>#findAllAnnotationsOnBean(beanName,annotationType,allowFactoryBeanInit)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "beanName",
+      "annotationType",
+      "allowFactoryBeanInit"
+    ],
+    "position": {
+      "column": 1,
+      "line": 767
+    },
+    "return": "Set<A>",
+    "signature": "public Set<A> findAllAnnotationsOnBean(String beanName, Class<A> annotationType, boolean allowFactoryBeanInit)",
+    "source_code": "\tpublic <A extends Annotation> Set<A> findAllAnnotationsOnBean(\n\t\t\tString beanName, Class<A> annotationType, boolean allowFactoryBeanInit)\n\t\t\tthrows NoSuchBeanDefinitionException {\n\n\t\tSet<A> annotations = new LinkedHashSet<>();\n\t\tClass<?> beanType = getType(beanName, allowFactoryBeanInit);\n\t\tif (beanType != null) {\n\t\t\tMergedAnnotations.from(beanType, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY)\n\t\t\t\t\t.stream(annotationType)\n\t\t\t\t\t.filter(MergedAnnotation::isPresent)\n\t\t\t\t\t.forEach(mergedAnnotation -> annotations.add(mergedAnnotation.synthesize()));\n\t\t}\n\t\tif (containsBeanDefinition(beanName)) {\n\t\t\tRootBeanDefinition bd = getMergedLocalBeanDefinition(beanName);\n\t\t\t// Check raw bean class, e.g. in case of a proxy.\n\t\t\tif (bd.hasBeanClass() && bd.getFactoryMethodName() == null) {\n\t\t\t\tClass<?> beanClass = bd.getBeanClass();\n\t\t\t\tif (beanClass != beanType) {\n\t\t\t\t\tMergedAnnotations.from(beanClass, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY)\n\t\t\t\t\t\t\t.stream(annotationType)\n\t\t\t\t\t\t\t.filter(MergedAnnotation::isPresent)\n\t\t\t\t\t\t\t.forEach(mergedAnnotation -> annotations.add(mergedAnnotation.synthesize()));\n\t\t\t\t}\n\t\t\t}\n\t\t\t// Check annotations declared on factory method, if any.\n\t\t\tMethod factoryMethod = bd.getResolvedFactoryMethod();\n\t\t\tif (factoryMethod != null) {\n\t\t\t\tMergedAnnotations.from(factoryMethod, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY)\n\t\t\t\t\t\t.stream(annotationType)\n\t\t\t\t\t\t.filter(MergedAnnotation::isPresent)\n\t\t\t\t\t\t.forEach(mergedAnnotation -> annotations.add(mergedAnnotation.synthesize()));\n\t\t\t}\n\t\t}\n\t\treturn annotations;\n\t}"
+  },
+  "org.springframework.context.support.<unknown>#findAllAnnotationsOnBean(beanName,annotationType,allowFactoryBeanInit)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "beanName",
+      "annotationType",
+      "allowFactoryBeanInit"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1322
+    },
+    "return": "Set<A>",
+    "signature": "public Set<A> findAllAnnotationsOnBean(String beanName, Class<A> annotationType, boolean allowFactoryBeanInit)",
+    "source_code": "\tpublic <A extends Annotation> Set<A> findAllAnnotationsOnBean(\n\t\t\tString beanName, Class<A> annotationType, boolean allowFactoryBeanInit)\n\t\t\tthrows NoSuchBeanDefinitionException {\n\n\t\tassertBeanFactoryActive();\n\t\treturn getBeanFactory().findAllAnnotationsOnBean(beanName, annotationType, allowFactoryBeanInit);\n\t}"
+  },
+  "org.springframework.core.codec.<unknown>#decode(dataBuffer,elementType,mimeType,Map<String,hints)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "dataBuffer",
+      "elementType",
+      "mimeType",
+      "Map<String",
+      "hints"
+    ],
+    "position": {
+      "column": 1,
+      "line": 52
+    },
+    "return": "ByteBuf",
+    "signature": "public ByteBuf decode(DataBuffer dataBuffer, ResolvableType elementType,\n\t\t\t@Nullable MimeType mimeType, @Nullable Map<String, Object> hints)",
+    "source_code": "\tpublic ByteBuf decode(DataBuffer dataBuffer, ResolvableType elementType,\n\t\t\t@Nullable MimeType mimeType, @Nullable Map<String, Object> hints) {\n\n\t\tif (logger.isDebugEnabled()) {\n\t\t\tlogger.debug(Hints.getLogPrefix(hints) + \"Read \" + dataBuffer.readableByteCount() + \" bytes\");\n\t\t}\n\t\tif (dataBuffer instanceof NettyDataBuffer nettyDataBuffer) {\n\t\t\treturn nettyDataBuffer.getNativeBuffer();\n\t\t}\n\t\tByteBuf byteBuf;\n\t\tbyte[] bytes = new byte[dataBuffer.readableByteCount()];\n\t\tdataBuffer.read(bytes);\n\t\tbyteBuf = Unpooled.wrappedBuffer(bytes);\n\t\tDataBufferUtils.release(dataBuffer);\n\t\treturn byteBuf;\n\t}"
+  },
+  "org.springframework.http.converter.<unknown>#readInternal(clazz,inputMessage)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Abstract template method that reads the actual object. Invoked from {@link #read}.\n\t * @param clazz the type of object to return\n\t * @param inputMessage the HTTP input message to read from\n\t * @return the converted object\n\t * @throws IOException in case of I/O errors\n\t * @throws HttpMessageNotReadableException in case of conversion errors\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "clazz",
+      "inputMessage"
+    ],
+    "position": {
+      "column": 1,
+      "line": 309
+    },
+    "return": "T",
+    "signature": "protected T readInternal(Class<? extends T> clazz, HttpInputMessage inputMessage)",
+    "source_code": "\tprotected abstract T readInternal(Class<? extends T> clazz, HttpInputMessage inputMessage)\n\t\t\tthrows IOException, HttpMessageNotReadableException;\n\n\t/**\n\t * Abstract template method that writes the actual body. Invoked from {@link #write}."
+  },
+  "org.springframework.messaging.rsocket.<unknown>#metadata(metadata,mimeType)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Add a metadata entry. If called more than once or in addition to route,\n\t * composite metadata must be in use.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "metadata",
+      "mimeType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 130
+    },
+    "return": "MetadataEncoder",
+    "signature": "public MetadataEncoder metadata(Object metadata, @Nullable MimeType mimeType)",
+    "source_code": "\tpublic MetadataEncoder metadata(Object metadata, @Nullable MimeType mimeType) {\n\t\tif (this.isComposite) {\n\t\t\tAssert.notNull(mimeType, \"MimeType is required for composite metadata entries.\");\n\t\t}\n\t\telse if (mimeType == null) {\n\t\t\tmimeType = this.metadataMimeType;\n\t\t}\n\t\telse if (!this.metadataMimeType.equals(mimeType)) {\n\t\t\tthrow new IllegalArgumentException(\n\t\t\t\t\t\"Mime type is optional when not using composite metadata, but it was provided \" +\n\t\t\t\t\t\t\t\"and does not match the connection metadata mime type '\" + this.metadataMimeType + \"'.\");\n\t\t}\n\t\tReactiveAdapter adapter = this.strategies.reactiveAdapterRegistry().getAdapter(metadata.getClass());\n\t\tif (adapter != null) {\n\t\t\tObject originalMetadata = metadata;\n\t\t\tAssert.isTrue(!adapter.isMultiValue(), () -> \"Expected single value: \" + originalMetadata);\n\t\t\tmetadata = Mono.from(adapter.toPublisher(metadata)).defaultIfEmpty(NO_VALUE);\n\t\t\tthis.hasAsyncValues = true;\n\t\t}\n\t\tthis.metadataEntries.add(new MetadataEntry(metadata, mimeType));\n\t\tassertMetadataEntryCount();\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.messaging.rsocket.<unknown>#metadataAndOrRoute(Map<Object,metadata,route,vars)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Add route and/or metadata, both optional.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "Map<Object",
+      "metadata",
+      "route",
+      "vars"
+    ],
+    "position": {
+      "column": 1,
+      "line": 157
+    },
+    "return": "MetadataEncoder",
+    "signature": "public MetadataEncoder metadataAndOrRoute(@Nullable Map<Object, MimeType> metadata,\n\t\t\t@Nullable String route, @Nullable Object[] vars)",
+    "source_code": "\tpublic MetadataEncoder metadataAndOrRoute(@Nullable Map<Object, MimeType> metadata,\n\t\t\t@Nullable String route, @Nullable Object[] vars) {\n\n\t\tif (route != null) {\n\t\t\tthis.route = expand(route, vars != null ? vars : new Object[0]);\n\t\t}\n\t\tif (!CollectionUtils.isEmpty(metadata)) {\n\t\t\tfor (Map.Entry<Object, MimeType> entry : metadata.entrySet()) {\n\t\t\t\tmetadata(entry.getKey(), entry.getValue());\n\t\t\t}\n\t\t}\n\t\tassertMetadataEntryCount();\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.messaging.rsocket.<unknown>#route(route,routeVars)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Set the route to a remote handler as described in\n\t * {@link RSocketRequester#route(String, Object...)}.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "route",
+      "routeVars"
+    ],
+    "position": {
+      "column": 1,
+      "line": 95
+    },
+    "return": "MetadataEncoder",
+    "signature": "public MetadataEncoder route(String route, Object... routeVars)",
+    "source_code": "\tpublic MetadataEncoder route(String route, Object... routeVars) {\n\t\tthis.route = expand(route, routeVars);\n\t\tassertMetadataEntryCount();\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.mock.web.<unknown>#setStatus(status,errorMessage)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "status",
+      "errorMessage"
+    ],
+    "position": {
+      "column": 1,
+      "line": 763
+    },
+    "return": "void",
+    "signature": "public void setStatus(int status, String errorMessage)",
+    "source_code": "\tpublic void setStatus(int status, String errorMessage) {\n\t\tif (!this.isCommitted()) {\n\t\t\tthis.status = status;\n\t\t\tthis.errorMessage = errorMessage;\n\t\t}\n\t}"
+  },
+  "org.springframework.web.reactive.result.method.annotation.<unknown>#handleError(exchange,ex)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "exchange",
+      "ex"
+    ],
+    "position": {
+      "column": 1,
+      "line": 258
+    },
+    "return": "Mono<HandlerResult>",
+    "signature": "public Mono<HandlerResult> handleError(ServerWebExchange exchange, Throwable ex)",
+    "source_code": "\tpublic Mono<HandlerResult> handleError(ServerWebExchange exchange, Throwable ex) {\n\t\treturn handleException(exchange, ex, null, null);\n\t}"
+  },
+  "org.springframework.web.servlet.function.<unknown>#setStatus(sc,sm)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "sc",
+      "sm"
+    ],
+    "position": {
+      "column": 1,
+      "line": 512
+    },
+    "return": "void",
+    "signature": "public void setStatus(int sc, String sm)",
+    "source_code": "\t\tpublic void setStatus(int sc, String sm) {\n\t\t\tthis.status = sc;\n\t\t}"
+  }
+}

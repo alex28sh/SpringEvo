@@ -1,0 +1,590 @@
+{
+  "org.springframework.dao.support.<unknown>#objectResult(results,requiredType)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return a unique result object from the given Collection.\n\t * Throws an exception if 0 or more than 1 result objects found,\n\t * of if the unique result object is not convertible to the\n\t * specified required type.\n\t * @param results the result Collection (can be {@code null}\n\t * but is not expected to contain {@code null} elements)\n\t * @return the unique result object\n\t * @throws IncorrectResultSizeDataAccessException if more than one\n\t * result object has been found in the given Collection\n\t * @throws EmptyResultDataAccessException if no result object\n\t * at all has been found in the given Collection\n\t * @throws TypeMismatchDataAccessException if the unique object does\n\t * not match the specified required type\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "results",
+      "requiredType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 164
+    },
+    "return": "T",
+    "signature": "public T objectResult(@Nullable Collection<?> results, @Nullable Class<T> requiredType)",
+    "source_code": "\tpublic static <T> T objectResult(@Nullable Collection<?> results, @Nullable Class<T> requiredType)\n\t\t\tthrows IncorrectResultSizeDataAccessException, TypeMismatchDataAccessException {\n\n\t\tObject result = requiredUniqueResult(results);\n\t\tif (requiredType != null && !requiredType.isInstance(result)) {\n\t\t\tif (String.class == requiredType) {\n\t\t\t\tresult = result.toString();\n\t\t\t}\n\t\t\telse if (Number.class.isAssignableFrom(requiredType) && result instanceof Number number) {\n\t\t\t\ttry {\n\t\t\t\t\tresult = NumberUtils.convertNumberToTargetClass(number, (Class<? extends Number>) requiredType);\n\t\t\t\t}\n\t\t\t\tcatch (IllegalArgumentException ex) {\n\t\t\t\t\tthrow new TypeMismatchDataAccessException(ex.getMessage());\n\t\t\t\t}\n\t\t\t}\n\t\t\telse {\n\t\t\t\tthrow new TypeMismatchDataAccessException(\n\t\t\t\t\t\t\"Result object is of type [\" + result.getClass().getName() +\n\t\t\t\t\t\t\"] and could not be converted to required type [\" + requiredType.getName() + \"]\");\n\t\t\t}\n\t\t}\n\t\treturn (T) result;\n\t}"
+  },
+  "org.springframework.jca.endpoint.<unknown>#createEndpoint(xaResource,timeout)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * The alternative JCA 1.6 version of {@code createEndpoint}.\n\t * <p>This implementation delegates to {@link #createEndpointInternal()},\n\t * ignoring the specified timeout. It is only here for JCA 1.6 compliance.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "xaResource",
+      "timeout"
+    ],
+    "position": {
+      "column": 1,
+      "line": 188
+    },
+    "return": "MessageEndpoint",
+    "signature": "public MessageEndpoint createEndpoint(XAResource xaResource, long timeout)",
+    "source_code": "\tpublic MessageEndpoint createEndpoint(XAResource xaResource, long timeout) throws UnavailableException {\n\t\tAbstractMessageEndpoint endpoint = createEndpointInternal();\n\t\tendpoint.initXAResource(xaResource);\n\t\treturn endpoint;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.<unknown>#resolveArgument(parameter,message)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Decode the content of the given message payload through a compatible\n\t * {@link Decoder}.\n\t *\n\t * <p>Validation is applied if the method argument is annotated with\n\t * {@code @jakarta.validation.Valid} or\n\t * {@link org.springframework.validation.annotation.Validated}. Validation\n\t * failure results in an {@link MethodArgumentNotValidException}.\n\t * @param parameter the target method argument that we are decoding to\n\t * @param message the message from which the content was extracted\n\t * @return a Mono with the result of argument resolution\n\t * @see #extractContent(MethodParameter, Message)\n\t * @see #getMimeType(Message)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "parameter",
+      "message"
+    ],
+    "position": {
+      "column": 1,
+      "line": 156
+    },
+    "return": "Mono<Object>",
+    "signature": "public Mono<Object> resolveArgument(MethodParameter parameter, Message<?> message)",
+    "source_code": "\tpublic final Mono<Object> resolveArgument(MethodParameter parameter, Message<?> message) {\n\n\t\tPayload ann = parameter.getParameterAnnotation(Payload.class);\n\t\tif (ann != null && StringUtils.hasText(ann.expression())) {\n\t\t\tthrow new IllegalStateException(\"@Payload SpEL expressions not supported by this resolver\");\n\t\t}\n\n\t\tMimeType mimeType = getMimeType(message);\n\t\tmimeType = mimeType != null ? mimeType : MimeTypeUtils.APPLICATION_OCTET_STREAM;\n\n\t\tFlux<DataBuffer> content = extractContent(parameter, message);\n\t\treturn decodeContent(parameter, message, ann == null || ann.required(), content, mimeType);\n\t}"
+  },
+  "org.springframework.transaction.interceptor.<unknown>#createTransactionIfNecessary(tm,txAttr,joinpointIdentification)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Create a transaction if necessary based on the given TransactionAttribute.\n\t * <p>Allows callers to perform custom TransactionAttribute lookups through\n\t * the TransactionAttributeSource.\n\t * @param txAttr the TransactionAttribute (may be {@code null})\n\t * @param joinpointIdentification the fully qualified method name\n\t * (used for monitoring and logging purposes)\n\t * @return a TransactionInfo object, whether a transaction was created.\n\t * The {@code hasTransaction()} method on TransactionInfo can be used to\n\t * tell if there was a transaction created.\n\t * @see #getTransactionAttributeSource()\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "tm",
+      "txAttr",
+      "joinpointIdentification"
+    ],
+    "position": {
+      "column": 1,
+      "line": 584
+    },
+    "return": "TransactionInfo",
+    "signature": "protected TransactionInfo createTransactionIfNecessary(@Nullable PlatformTransactionManager tm,\n\t\t\t@Nullable TransactionAttribute txAttr, final String joinpointIdentification)",
+    "source_code": "\tprotected TransactionInfo createTransactionIfNecessary(@Nullable PlatformTransactionManager tm,\n\t\t\t@Nullable TransactionAttribute txAttr, final String joinpointIdentification) {\n\n\t\t// If no name specified, apply method identification as transaction name.\n\t\tif (txAttr != null && txAttr.getName() == null) {\n\t\t\ttxAttr = new DelegatingTransactionAttribute(txAttr) {\n\t\t\t\t@Override\n\t\t\t\tpublic String getName() {\n\t\t\t\t\treturn joinpointIdentification;\n\t\t\t\t}\n\t\t\t};\n\t\t}\n\n\t\tTransactionStatus status = null;\n\t\tif (txAttr != null) {\n\t\t\tif (tm != null) {\n\t\t\t\tstatus = tm.getTransaction(txAttr);\n\t\t\t}\n\t\t\telse {\n\t\t\t\tif (logger.isDebugEnabled()) {\n\t\t\t\t\tlogger.debug(\"Skipping transactional joinpoint [\" + joinpointIdentification +\n\t\t\t\t\t\t\t\"] because no transaction manager has been configured\");\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn prepareTransactionInfo(tm, txAttr, joinpointIdentification, status);\n\t}"
+  },
+  "org.springframework.transaction.interceptor.<unknown>#evaluateTryFailure(retVal,txAttr,status)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "retVal",
+      "txAttr",
+      "status"
+    ],
+    "position": {
+      "column": 1,
+      "line": 868
+    },
+    "return": "Object",
+    "signature": "public Object evaluateTryFailure(Object retVal, TransactionAttribute txAttr, TransactionStatus status)",
+    "source_code": "\t\tpublic static Object evaluateTryFailure(Object retVal, TransactionAttribute txAttr, TransactionStatus status) {\n\t\t\treturn ((Try<?>) retVal).onFailure(ex -> {\n\t\t\t\tif (txAttr.rollbackOn(ex)) {\n\t\t\t\t\tstatus.setRollbackOnly();\n\t\t\t\t}\n\t\t\t});\n\t\t}"
+  },
+  "org.springframework.transaction.interceptor.<unknown>#invokeWithinTransaction(method,targetClass,invocation,txAttr,rtm)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "method",
+      "targetClass",
+      "invocation",
+      "txAttr",
+      "rtm"
+    ],
+    "position": {
+      "column": 1,
+      "line": 912
+    },
+    "return": "Object",
+    "signature": "public Object invokeWithinTransaction(Method method, @Nullable Class<?> targetClass,\n\t\t\t\tInvocationCallback invocation, @Nullable TransactionAttribute txAttr, ReactiveTransactionManager rtm)",
+    "source_code": "\t\tpublic Object invokeWithinTransaction(Method method, @Nullable Class<?> targetClass,\n\t\t\t\tInvocationCallback invocation, @Nullable TransactionAttribute txAttr, ReactiveTransactionManager rtm) {\n\n\t\t\tString joinpointIdentification = methodIdentification(method, targetClass, txAttr);\n\n\t\t\t// For Mono and suspending functions not returning kotlinx.coroutines.flow.Flow\n\t\t\tif (Mono.class.isAssignableFrom(method.getReturnType()) || (KotlinDetector.isSuspendingFunction(method) &&\n\t\t\t\t\t!COROUTINES_FLOW_CLASS_NAME.equals(new MethodParameter(method, -1).getParameterType().getName()))) {\n\n\t\t\t\treturn TransactionContextManager.currentContext().flatMap(context ->\n\t\t\t\t\t\tcreateTransactionIfNecessary(rtm, txAttr, joinpointIdentification).flatMap(it -> {\n\t\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\t\t// Need re-wrapping until we get hold of the exception through usingWhen.\n\t\t\t\t\t\t\t\treturn Mono.<Object, ReactiveTransactionInfo>usingWhen(\n\t\t\t\t\t\t\t\t\t\tMono.just(it),\n\t\t\t\t\t\t\t\t\t\ttxInfo -> {\n\t\t\t\t\t\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\t\t\t\t\t\treturn (Mono<?>) invocation.proceedWithInvocation();\n\t\t\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t\t\t\tcatch (Throwable ex) {\n\t\t\t\t\t\t\t\t\t\t\t\treturn Mono.error(ex);\n\t\t\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\t\t\t\tthis::commitTransactionAfterReturning,\n\t\t\t\t\t\t\t\t\t\t(txInfo, err) -> Mono.empty(),\n\t\t\t\t\t\t\t\t\t\tthis::rollbackTransactionOnCancel)\n\t\t\t\t\t\t\t\t\t\t.onErrorResume(ex ->\n\t\t\t\t\t\t\t\t\t\t\t\tcompleteTransactionAfterThrowing(it, ex).then(Mono.error(ex)));\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\tcatch (Throwable ex) {\n\t\t\t\t\t\t\t\t// target invocation exception\n\t\t\t\t\t\t\t\treturn completeTransactionAfterThrowing(it, ex).then(Mono.error(ex));\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t})).contextWrite(TransactionContextManager.getOrCreateContext())\n\t\t\t\t\t\t.contextWrite(TransactionContextManager.getOrCreateContextHolder());\n\t\t\t}\n\n\t\t\t// Any other reactive type, typically a Flux\n\t\t\treturn this.adapter.fromPublisher(TransactionContextManager.currentContext().flatMapMany(context ->\n\t\t\t\t\tcreateTransactionIfNecessary(rtm, txAttr, joinpointIdentification).flatMapMany(it -> {\n\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\t// Need re-wrapping until we get hold of the exception through usingWhen.\n\t\t\t\t\t\t\treturn Flux\n\t\t\t\t\t\t\t\t\t.usingWhen(\n\t\t\t\t\t\t\t\t\t\t\tMono.just(it),\n\t\t\t\t\t\t\t\t\t\t\ttxInfo -> {\n\t\t\t\t\t\t\t\t\t\t\t\ttry {\n\t\t\t\t\t\t\t\t\t\t\t\t\treturn this.adapter.toPublisher(invocation.proceedWithInvocation());\n\t\t\t\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t\t\t\t\tcatch (Throwable ex) {\n\t\t\t\t\t\t\t\t\t\t\t\t\treturn Mono.error(ex);\n\t\t\t\t\t\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\t\t\t\t\t},\n\t\t\t\t\t\t\t\t\t\t\tthis::commitTransactionAfterReturning,\n\t\t\t\t\t\t\t\t\t\t\t(txInfo, ex) -> Mono.empty(),\n\t\t\t\t\t\t\t\t\t\t\tthis::rollbackTransactionOnCancel)\n\t\t\t\t\t\t\t\t\t.onErrorResume(ex ->\n\t\t\t\t\t\t\t\t\t\t\tcompleteTransactionAfterThrowing(it, ex).then(Mono.error(ex)));\n\t\t\t\t\t\t}\n\t\t\t\t\t\tcatch (Throwable ex) {\n\t\t\t\t\t\t\t// target invocation exception\n\t\t\t\t\t\t\treturn completeTransactionAfterThrowing(it, ex).then(Mono.error(ex));\n\t\t\t\t\t\t}\n\t\t\t\t\t})).contextWrite(TransactionContextManager.getOrCreateContext())\n\t\t\t\t\t.contextWrite(TransactionContextManager.getOrCreateContextHolder()));\n\t\t}"
+  },
+  "org.springframework.transaction.interceptor.<unknown>#prepareTransactionInfo(tm,txAttr,joinpointIdentification,status)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Prepare a TransactionInfo for the given attribute and status object.\n\t * @param txAttr the TransactionAttribute (may be {@code null})\n\t * @param joinpointIdentification the fully qualified method name\n\t * (used for monitoring and logging purposes)\n\t * @param status the TransactionStatus for the current transaction\n\t * @return the prepared TransactionInfo object\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "tm",
+      "txAttr",
+      "joinpointIdentification",
+      "status"
+    ],
+    "position": {
+      "column": 1,
+      "line": 620
+    },
+    "return": "TransactionInfo",
+    "signature": "protected TransactionInfo prepareTransactionInfo(@Nullable PlatformTransactionManager tm,\n\t\t\t@Nullable TransactionAttribute txAttr, String joinpointIdentification,\n\t\t\t@Nullable TransactionStatus status)",
+    "source_code": "\tprotected TransactionInfo prepareTransactionInfo(@Nullable PlatformTransactionManager tm,\n\t\t\t@Nullable TransactionAttribute txAttr, String joinpointIdentification,\n\t\t\t@Nullable TransactionStatus status) {\n\n\t\tTransactionInfo txInfo = new TransactionInfo(tm, txAttr, joinpointIdentification);\n\t\tif (txAttr != null) {\n\t\t\t// We need a transaction for this method...\n\t\t\tif (logger.isTraceEnabled()) {\n\t\t\t\tlogger.trace(\"Getting transaction for [\" + txInfo.getJoinpointIdentification() + \"]\");\n\t\t\t}\n\t\t\t// The transaction manager will flag an error if an incompatible tx already exists.\n\t\t\ttxInfo.newTransactionStatus(status);\n\t\t}\n\t\telse {\n\t\t\t// The TransactionInfo.hasTransaction() method will return false. We created it only\n\t\t\t// to preserve the integrity of the ThreadLocal stack maintained in this class.\n\t\t\tif (logger.isTraceEnabled()) {\n\t\t\t\tlogger.trace(\"No need to create transaction for [\" + joinpointIdentification +\n\t\t\t\t\t\t\"]: This method is not transactional.\");\n\t\t\t}\n\t\t}\n\n\t\t// We always bind the TransactionInfo to the thread, even if we didn't create\n\t\t// a new transaction here. This guarantees that the TransactionInfo stack\n\t\t// will be managed correctly even if no transaction was created by this aspect.\n\t\ttxInfo.bindToThread();\n\t\treturn txInfo;\n\t}"
+  },
+  "org.springframework.transaction.jta.<unknown>#applyIsolationLevel(txObject,isolationLevel)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Apply the given transaction isolation level. The default implementation\n\t * will throw an exception for any level other than ISOLATION_DEFAULT.\n\t * <p>To be overridden in subclasses for specific JTA implementations,\n\t * as alternative to overriding the full {@link #doJtaBegin} method.\n\t * @param txObject the JtaTransactionObject containing the UserTransaction\n\t * @param isolationLevel isolation level taken from transaction definition\n\t * @throws InvalidIsolationLevelException if the given isolation level\n\t * cannot be applied\n\t * @throws SystemException if thrown by the JTA implementation\n\t * @see #doJtaBegin\n\t * @see JtaTransactionObject#getUserTransaction()\n\t * @see #getTransactionManager()\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "txObject",
+      "isolationLevel"
+    ],
+    "position": {
+      "column": 1,
+      "line": 894
+    },
+    "return": "void",
+    "signature": "protected void applyIsolationLevel(JtaTransactionObject txObject, int isolationLevel)",
+    "source_code": "\tprotected void applyIsolationLevel(JtaTransactionObject txObject, int isolationLevel)\n\t\t\tthrows InvalidIsolationLevelException, SystemException {\n\n\t\tif (!this.allowCustomIsolationLevels && isolationLevel != TransactionDefinition.ISOLATION_DEFAULT) {\n\t\t\tthrow new InvalidIsolationLevelException(\n\t\t\t\t\t\"JtaTransactionManager does not support custom isolation levels by default - \" +\n\t\t\t\t\t\"switch 'allowCustomIsolationLevels' to 'true'\");\n\t\t}\n\t}"
+  },
+  "org.springframework.transaction.jta.<unknown>#applyTimeout(txObject,timeout)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Apply the given transaction timeout. The default implementation will call\n\t * {@code UserTransaction.setTransactionTimeout} for a non-default timeout value.\n\t * @param txObject the JtaTransactionObject containing the UserTransaction\n\t * @param timeout the timeout value taken from transaction definition\n\t * @throws SystemException if thrown by the JTA implementation\n\t * @see #doJtaBegin\n\t * @see JtaTransactionObject#getUserTransaction()\n\t * @see jakarta.transaction.UserTransaction#setTransactionTimeout(int)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "txObject",
+      "timeout"
+    ],
+    "position": {
+      "column": 1,
+      "line": 914
+    },
+    "return": "void",
+    "signature": "protected void applyTimeout(JtaTransactionObject txObject, int timeout)",
+    "source_code": "\tprotected void applyTimeout(JtaTransactionObject txObject, int timeout) throws SystemException {\n\t\tif (timeout > TransactionDefinition.TIMEOUT_DEFAULT) {\n\t\t\ttxObject.getUserTransaction().setTransactionTimeout(timeout);\n\t\t\tif (timeout > 0) {\n\t\t\t\ttxObject.resetTransactionTimeout = true;\n\t\t\t}\n\t\t}\n\t}"
+  },
+  "org.springframework.transaction.jta.<unknown>#createTransaction(name,timeout)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "name",
+      "timeout"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1196
+    },
+    "return": "Transaction",
+    "signature": "public Transaction createTransaction(@Nullable String name, int timeout)",
+    "source_code": "\tpublic Transaction createTransaction(@Nullable String name, int timeout) throws NotSupportedException, SystemException {\n\t\tTransactionManager tm = getTransactionManager();\n\t\tAssert.state(tm != null, \"No JTA TransactionManager available\");\n\t\tif (timeout >= 0) {\n\t\t\ttm.setTransactionTimeout(timeout);\n\t\t}\n\t\ttm.begin();\n\t\treturn new ManagedTransactionAdapter(tm);\n\t}"
+  },
+  "org.springframework.transaction.jta.<unknown>#doBegin(transaction,definition)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "transaction",
+      "definition"
+    ],
+    "position": {
+      "column": 1,
+      "line": 837
+    },
+    "return": "void",
+    "signature": "protected void doBegin(Object transaction, TransactionDefinition definition)",
+    "source_code": "\tprotected void doBegin(Object transaction, TransactionDefinition definition) {\n\t\tJtaTransactionObject txObject = (JtaTransactionObject) transaction;\n\t\ttry {\n\t\t\tdoJtaBegin(txObject, definition);\n\t\t}\n\t\tcatch (NotSupportedException | UnsupportedOperationException ex) {\n\t\t\tthrow new NestedTransactionNotSupportedException(\n\t\t\t\t\t\"JTA implementation does not support nested transactions\", ex);\n\t\t}\n\t\tcatch (SystemException ex) {\n\t\t\tthrow new CannotCreateTransactionException(\"JTA failure on begin\", ex);\n\t\t}\n\t}"
+  },
+  "org.springframework.transaction.jta.<unknown>#registerAfterCompletionWithExistingTransaction(transaction,synchronizations)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "transaction",
+      "synchronizations"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1095
+    },
+    "return": "void",
+    "signature": "protected void registerAfterCompletionWithExistingTransaction(Object transaction, List<TransactionSynchronization> synchronizations)",
+    "source_code": "\tprotected void registerAfterCompletionWithExistingTransaction(\n\t\t\tObject transaction, List<TransactionSynchronization> synchronizations) {\n\n\t\tJtaTransactionObject txObject = (JtaTransactionObject) transaction;\n\t\tlogger.debug(\"Registering after-completion synchronization with existing JTA transaction\");\n\t\ttry {\n\t\t\tdoRegisterAfterCompletionWithJtaTransaction(txObject, synchronizations);\n\t\t}\n\t\tcatch (SystemException ex) {\n\t\t\tthrow new TransactionSystemException(\"JTA failure on registerSynchronization\", ex);\n\t\t}\n\t\tcatch (Exception ex) {\n\t\t\t// Note: JBoss throws plain RuntimeException with RollbackException as cause.\n\t\t\tif (ex instanceof RollbackException || ex.getCause() instanceof RollbackException) {\n\t\t\t\tlogger.debug(\"Participating in existing JTA transaction that has been marked for rollback: \" +\n\t\t\t\t\t\t\"cannot register Spring after-completion callbacks with outer JTA transaction - \" +\n\t\t\t\t\t\t\"immediately performing Spring after-completion callbacks with outcome status 'rollback'. \" +\n\t\t\t\t\t\t\"Original exception: \" + ex);\n\t\t\t\tinvokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_ROLLED_BACK);\n\t\t\t}\n\t\t\telse {\n\t\t\t\tlogger.debug(\"Participating in existing JTA transaction, but unexpected internal transaction \" +\n\t\t\t\t\t\t\"state encountered: cannot register Spring after-completion callbacks with outer JTA \" +\n\t\t\t\t\t\t\"transaction - processing Spring after-completion callbacks with outcome status 'unknown'\" +\n\t\t\t\t\t\t\"Original exception: \" + ex);\n\t\t\t\tinvokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_UNKNOWN);\n\t\t\t}\n\t\t}\n\t}"
+  },
+  "org.springframework.transaction.reactive.<unknown>#invokeAfterCompletion(synchronizations,completionStatus)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Actually invoke the {@code afterCompletion} methods of the\n\t * given Spring TransactionSynchronization objects.\n\t * @param synchronizations a List of TransactionSynchronization objects\n\t * @param completionStatus the completion status according to the\n\t * constants in the TransactionSynchronization interface\n\t * @see TransactionSynchronization#afterCompletion(int)\n\t * @see TransactionSynchronization#STATUS_COMMITTED\n\t * @see TransactionSynchronization#STATUS_ROLLED_BACK\n\t * @see TransactionSynchronization#STATUS_UNKNOWN\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "synchronizations",
+      "completionStatus"
+    ],
+    "position": {
+      "column": 1,
+      "line": 114
+    },
+    "return": "Mono<Void>",
+    "signature": "public Mono<Void> invokeAfterCompletion(Collection<TransactionSynchronization> synchronizations, int completionStatus)",
+    "source_code": "\tpublic static Mono<Void> invokeAfterCompletion(\n\t\t\tCollection<TransactionSynchronization> synchronizations, int completionStatus) {\n\n\t\treturn Flux.fromIterable(synchronizations).concatMap(it -> it.afterCompletion(completionStatus))\n\t\t\t\t.onErrorContinue((t, o) -> logger.debug(\"TransactionSynchronization.afterCompletion threw exception\", t)).then();\n\t}"
+  },
+  "org.springframework.transaction.reactive.<unknown>#triggerBeforeCommit(synchronizations,readOnly)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Actually invoke the {@code triggerBeforeCommit} methods of the\n\t * given Spring TransactionSynchronization objects.\n\t * @param synchronizations a List of TransactionSynchronization objects\n\t * @see TransactionSynchronization#beforeCommit(boolean)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "synchronizations",
+      "readOnly"
+    ],
+    "position": {
+      "column": 1,
+      "line": 75
+    },
+    "return": "Mono<Void>",
+    "signature": "public Mono<Void> triggerBeforeCommit(Collection<TransactionSynchronization> synchronizations, boolean readOnly)",
+    "source_code": "\tpublic static Mono<Void> triggerBeforeCommit(Collection<TransactionSynchronization> synchronizations, boolean readOnly) {\n\t\treturn Flux.fromIterable(synchronizations).concatMap(it -> it.beforeCommit(readOnly)).then();\n\t}"
+  },
+  "org.springframework.transaction.support.<unknown>#bindResource(key,value)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Bind the given resource for the given key to the current thread.\n\t * @param key the key to bind the value to (usually the resource factory)\n\t * @param value the value to bind (usually the active resource object)\n\t * @throws IllegalStateException if there is already a value bound to the thread\n\t * @see ResourceTransactionManager#getResourceFactory()\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "key",
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 167
+    },
+    "return": "void",
+    "signature": "public void bindResource(Object key, Object value)",
+    "source_code": "\tpublic static void bindResource(Object key, Object value) throws IllegalStateException {\n\t\tObject actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);\n\t\tAssert.notNull(value, \"Value must not be null\");\n\t\tMap<Object, Object> map = resources.get();\n\t\t// set ThreadLocal Map if none found\n\t\tif (map == null) {\n\t\t\tmap = new HashMap<>();\n\t\t\tresources.set(map);\n\t\t}\n\t\tObject oldValue = map.put(actualKey, value);\n\t\t// Transparently suppress a ResourceHolder that was marked as void...\n\t\tif (oldValue instanceof ResourceHolder resourceHolder && resourceHolder.isVoid()) {\n\t\t\toldValue = null;\n\t\t}\n\t\tif (oldValue != null) {\n\t\t\tthrow new IllegalStateException(\n\t\t\t\t\t\"Already value [\" + oldValue + \"] for key [\" + actualKey + \"] bound to thread\");\n\t\t}\n\t}"
+  },
+  "org.springframework.transaction.support.<unknown>#sameResourceFactory(tm,resourceFactory)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Check whether the given resource transaction manager refers to the given\n\t * (underlying) resource factory.\n\t * @see ResourceTransactionManager#getResourceFactory()\n\t * @see InfrastructureProxy#getWrappedObject()\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "tm",
+      "resourceFactory"
+    ],
+    "position": {
+      "column": 1,
+      "line": 53
+    },
+    "return": "boolean",
+    "signature": "public boolean sameResourceFactory(ResourceTransactionManager tm, Object resourceFactory)",
+    "source_code": "\tpublic static boolean sameResourceFactory(ResourceTransactionManager tm, Object resourceFactory) {\n\t\treturn unwrapResourceIfNecessary(tm.getResourceFactory()).equals(unwrapResourceIfNecessary(resourceFactory));\n\t}"
+  },
+  "org.springframework.validation.<unknown>#getBindingResult(Map<?,model,name)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Find the BindingResult for the given name in the given model.\n\t * @param model the model to search\n\t * @param name the name of the target object to find a BindingResult for\n\t * @return the BindingResult, or {@code null} if none found\n\t * @throws IllegalStateException if the attribute found is not of type BindingResult\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "Map<?",
+      "model",
+      "name"
+    ],
+    "position": {
+      "column": 1,
+      "line": 41
+    },
+    "return": "BindingResult",
+    "signature": "public BindingResult getBindingResult(Map<?, ?> model, String name)",
+    "source_code": "\tpublic static BindingResult getBindingResult(Map<?, ?> model, String name) {\n\t\tAssert.notNull(model, \"Model map must not be null\");\n\t\tAssert.notNull(name, \"Name must not be null\");\n\t\tObject attr = model.get(BindingResult.MODEL_KEY_PREFIX + name);\n\t\tif (attr == null) {\n\t\t\treturn null;\n\t\t}\n\t\tif (attr instanceof BindingResult bindingResult) {\n\t\t\treturn bindingResult;\n\t\t}\n\t\telse {\n\t\t\tthrow new IllegalStateException(\"BindingResult attribute is not of type BindingResult: \" + attr);\n\t\t}\n\t}"
+  },
+  "org.springframework.validation.<unknown>#getRequiredBindingResult(Map<?,model,name)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Find a required BindingResult for the given name in the given model.\n\t * @param model the model to search\n\t * @param name the name of the target object to find a BindingResult for\n\t * @return the BindingResult (never {@code null})\n\t * @throws IllegalStateException if no BindingResult found\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "Map<?",
+      "model",
+      "name"
+    ],
+    "position": {
+      "column": 1,
+      "line": 63
+    },
+    "return": "BindingResult",
+    "signature": "public BindingResult getRequiredBindingResult(Map<?, ?> model, String name)",
+    "source_code": "\tpublic static BindingResult getRequiredBindingResult(Map<?, ?> model, String name) {\n\t\tBindingResult bindingResult = getBindingResult(model, name);\n\t\tif (bindingResult == null) {\n\t\t\tthrow new IllegalStateException(\"No BindingResult attribute found for name '\" + name +\n\t\t\t\t\t\"'- have you exposed the correct model?\");\n\t\t}\n\t\treturn bindingResult;\n\t}"
+  },
+  "org.springframework.validation.<unknown>#invokeValidator(validator,target,errors)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Invoke the given {@link Validator} for the supplied object and\n\t * {@link Errors} instance.\n\t * @param validator the {@code Validator} to be invoked\n\t * @param target the object to bind the parameters to\n\t * @param errors the {@link Errors} instance that should store the errors\n\t * @throws IllegalArgumentException if either of the {@code Validator} or {@code Errors}\n\t * arguments is {@code null}, or if the supplied {@code Validator} does not\n\t * {@link Validator#supports(Class) support} the validation of the supplied object's type\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "validator",
+      "target",
+      "errors"
+    ],
+    "position": {
+      "column": 1,
+      "line": 55
+    },
+    "return": "void",
+    "signature": "public void invokeValidator(Validator validator, Object target, Errors errors)",
+    "source_code": "\tpublic static void invokeValidator(Validator validator, Object target, Errors errors) {\n\t\tinvokeValidator(validator, target, errors, (Object[]) null);\n\t}"
+  },
+  "org.springframework.validation.<unknown>#invokeValidator(validator,target,errors,validationHints)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Invoke the given {@link Validator}/{@link SmartValidator} for the supplied object and\n\t * {@link Errors} instance.\n\t * @param validator the {@code Validator} to be invoked\n\t * @param target the object to bind the parameters to\n\t * @param errors the {@link Errors} instance that should store the errors\n\t * @param validationHints one or more hint objects to be passed to the validation engine\n\t * @throws IllegalArgumentException if either of the {@code Validator} or {@code Errors}\n\t * arguments is {@code null}, or if the supplied {@code Validator} does not\n\t * {@link Validator#supports(Class) support} the validation of the supplied object's type\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "validator",
+      "target",
+      "errors",
+      "validationHints"
+    ],
+    "position": {
+      "column": 1,
+      "line": 70
+    },
+    "return": "void",
+    "signature": "public void invokeValidator(Validator validator, Object target, Errors errors, @Nullable Object... validationHints)",
+    "source_code": "\tpublic static void invokeValidator(\n\t\t\tValidator validator, Object target, Errors errors, @Nullable Object... validationHints) {\n\n\t\tAssert.notNull(validator, \"Validator must not be null\");\n\t\tAssert.notNull(target, \"Target object must not be null\");\n\t\tAssert.notNull(errors, \"Errors object must not be null\");\n\n\t\tif (logger.isDebugEnabled()) {\n\t\t\tlogger.debug(\"Invoking validator [\" + validator + \"]\");\n\t\t}\n\t\tif (!validator.supports(target.getClass())) {\n\t\t\tthrow new IllegalArgumentException(\n\t\t\t\t\t\"Validator [\" + validator.getClass() + \"] does not support [\" + target.getClass() + \"]\");\n\t\t}\n\n\t\tif (!ObjectUtils.isEmpty(validationHints) && validator instanceof SmartValidator smartValidator) {\n\t\t\tsmartValidator.validate(target, errors, validationHints);\n\t\t}\n\t\telse {\n\t\t\tvalidator.validate(target, errors);\n\t\t}\n\n\t\tif (logger.isDebugEnabled()) {\n\t\t\tif (errors.hasErrors()) {\n\t\t\t\tlogger.debug(\"Validator found \" + errors.getErrorCount() + \" errors\");\n\t\t\t}\n\t\t\telse {\n\t\t\t\tlogger.debug(\"Validator found no errors\");\n\t\t\t}\n\t\t}\n\t}"
+  },
+  "org.springframework.validation.<unknown>#rejectIfEmpty(errors,field,errorCode)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Reject the given field with the given error code if the value is empty.\n\t * <p>An 'empty' value in this context means either {@code null} or\n\t * the empty string \"\".\n\t * <p>The object whose field is being validated does not need to be passed\n\t * in because the {@link Errors} instance can resolve field values by itself\n\t * (it will usually hold an internal reference to the target object).\n\t * @param errors the {@code Errors} instance to register errors on\n\t * @param field the field name to check\n\t * @param errorCode the error code, interpretable as message key\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "errors",
+      "field",
+      "errorCode"
+    ],
+    "position": {
+      "column": 1,
+      "line": 114
+    },
+    "return": "void",
+    "signature": "public void rejectIfEmpty(Errors errors, String field, String errorCode)",
+    "source_code": "\tpublic static void rejectIfEmpty(Errors errors, String field, String errorCode) {\n\t\trejectIfEmpty(errors, field, errorCode, null, null);\n\t}"
+  },
+  "org.springframework.validation.<unknown>#rejectIfEmpty(errors,field,errorCode,defaultMessage)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Reject the given field with the given error code and default message\n\t * if the value is empty.\n\t * <p>An 'empty' value in this context means either {@code null} or\n\t * the empty string \"\".\n\t * <p>The object whose field is being validated does not need to be passed\n\t * in because the {@link Errors} instance can resolve field values by itself\n\t * (it will usually hold an internal reference to the target object).\n\t * @param errors the {@code Errors} instance to register errors on\n\t * @param field the field name to check\n\t * @param errorCode error code, interpretable as message key\n\t * @param defaultMessage fallback default message\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "errors",
+      "field",
+      "errorCode",
+      "defaultMessage"
+    ],
+    "position": {
+      "column": 1,
+      "line": 131
+    },
+    "return": "void",
+    "signature": "public void rejectIfEmpty(Errors errors, String field, String errorCode, String defaultMessage)",
+    "source_code": "\tpublic static void rejectIfEmpty(Errors errors, String field, String errorCode, String defaultMessage) {\n\t\trejectIfEmpty(errors, field, errorCode, null, defaultMessage);\n\t}"
+  },
+  "org.springframework.validation.<unknown>#rejectIfEmpty(errors,field,errorCode,errorArgs)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Reject the given field with the given error code and error arguments\n\t * if the value is empty.\n\t * <p>An 'empty' value in this context means either {@code null} or\n\t * the empty string \"\".\n\t * <p>The object whose field is being validated does not need to be passed\n\t * in because the {@link Errors} instance can resolve field values by itself\n\t * (it will usually hold an internal reference to the target object).\n\t * @param errors the {@code Errors} instance to register errors on\n\t * @param field the field name to check\n\t * @param errorCode the error code, interpretable as message key\n\t * @param errorArgs the error arguments, for argument binding via MessageFormat\n\t * (can be {@code null})\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "errors",
+      "field",
+      "errorCode",
+      "errorArgs"
+    ],
+    "position": {
+      "column": 1,
+      "line": 149
+    },
+    "return": "void",
+    "signature": "public void rejectIfEmpty(Errors errors, String field, String errorCode, Object[] errorArgs)",
+    "source_code": "\tpublic static void rejectIfEmpty(Errors errors, String field, String errorCode, Object[] errorArgs) {\n\t\trejectIfEmpty(errors, field, errorCode, errorArgs, null);\n\t}"
+  },
+  "org.springframework.validation.<unknown>#rejectIfEmpty(errors,field,errorCode,errorArgs,defaultMessage)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Reject the given field with the given error code, error arguments\n\t * and default message if the value is empty.\n\t * <p>An 'empty' value in this context means either {@code null} or\n\t * the empty string \"\".\n\t * <p>The object whose field is being validated does not need to be passed\n\t * in because the {@link Errors} instance can resolve field values by itself\n\t * (it will usually hold an internal reference to the target object).\n\t * @param errors the {@code Errors} instance to register errors on\n\t * @param field the field name to check\n\t * @param errorCode the error code, interpretable as message key\n\t * @param errorArgs the error arguments, for argument binding via MessageFormat\n\t * (can be {@code null})\n\t * @param defaultMessage fallback default message\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "errors",
+      "field",
+      "errorCode",
+      "errorArgs",
+      "defaultMessage"
+    ],
+    "position": {
+      "column": 1,
+      "line": 168
+    },
+    "return": "void",
+    "signature": "public void rejectIfEmpty(Errors errors, String field, String errorCode,\n\t\t\t@Nullable Object[] errorArgs, @Nullable String defaultMessage)",
+    "source_code": "\tpublic static void rejectIfEmpty(Errors errors, String field, String errorCode,\n\t\t\t@Nullable Object[] errorArgs, @Nullable String defaultMessage) {\n\n\t\tAssert.notNull(errors, \"Errors object must not be null\");\n\t\tObject value = errors.getFieldValue(field);\n\t\tif (value == null || !StringUtils.hasLength(value.toString())) {\n\t\t\terrors.rejectValue(field, errorCode, errorArgs, defaultMessage);\n\t\t}\n\t}"
+  },
+  "org.springframework.validation.<unknown>#rejectIfEmptyOrWhitespace(errors,field,errorCode)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Reject the given field with the given error code if the value is empty\n\t * or just contains whitespace.\n\t * <p>An 'empty' value in this context means either {@code null},\n\t * the empty string \"\", or consisting wholly of whitespace.\n\t * <p>The object whose field is being validated does not need to be passed\n\t * in because the {@link Errors} instance can resolve field values by itself\n\t * (it will usually hold an internal reference to the target object).\n\t * @param errors the {@code Errors} instance to register errors on\n\t * @param field the field name to check\n\t * @param errorCode the error code, interpretable as message key\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "errors",
+      "field",
+      "errorCode"
+    ],
+    "position": {
+      "column": 1,
+      "line": 190
+    },
+    "return": "void",
+    "signature": "public void rejectIfEmptyOrWhitespace(Errors errors, String field, String errorCode)",
+    "source_code": "\tpublic static void rejectIfEmptyOrWhitespace(Errors errors, String field, String errorCode) {\n\t\trejectIfEmptyOrWhitespace(errors, field, errorCode, null, null);\n\t}"
+  },
+  "org.springframework.validation.<unknown>#rejectIfEmptyOrWhitespace(errors,field,errorCode,defaultMessage)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Reject the given field with the given error code and default message\n\t * if the value is empty or just contains whitespace.\n\t * <p>An 'empty' value in this context means either {@code null},\n\t * the empty string \"\", or consisting wholly of whitespace.\n\t * <p>The object whose field is being validated does not need to be passed\n\t * in because the {@link Errors} instance can resolve field values by itself\n\t * (it will usually hold an internal reference to the target object).\n\t * @param errors the {@code Errors} instance to register errors on\n\t * @param field the field name to check\n\t * @param errorCode the error code, interpretable as message key\n\t * @param defaultMessage fallback default message\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "errors",
+      "field",
+      "errorCode",
+      "defaultMessage"
+    ],
+    "position": {
+      "column": 1,
+      "line": 207
+    },
+    "return": "void",
+    "signature": "public void rejectIfEmptyOrWhitespace(Errors errors, String field, String errorCode, String defaultMessage)",
+    "source_code": "\tpublic static void rejectIfEmptyOrWhitespace(\n\t\t\tErrors errors, String field, String errorCode, String defaultMessage) {\n\n\t\trejectIfEmptyOrWhitespace(errors, field, errorCode, null, defaultMessage);\n\t}"
+  },
+  "org.springframework.validation.<unknown>#rejectIfEmptyOrWhitespace(errors,field,errorCode,errorArgs)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Reject the given field with the given error code and error arguments\n\t * if the value is empty or just contains whitespace.\n\t * <p>An 'empty' value in this context means either {@code null},\n\t * the empty string \"\", or consisting wholly of whitespace.\n\t * <p>The object whose field is being validated does not need to be passed\n\t * in because the {@link Errors} instance can resolve field values by itself\n\t * (it will usually hold an internal reference to the target object).\n\t * @param errors the {@code Errors} instance to register errors on\n\t * @param field the field name to check\n\t * @param errorCode the error code, interpretable as message key\n\t * @param errorArgs the error arguments, for argument binding via MessageFormat\n\t * (can be {@code null})\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "errors",
+      "field",
+      "errorCode",
+      "errorArgs"
+    ],
+    "position": {
+      "column": 1,
+      "line": 227
+    },
+    "return": "void",
+    "signature": "public void rejectIfEmptyOrWhitespace(Errors errors, String field, String errorCode, @Nullable Object[] errorArgs)",
+    "source_code": "\tpublic static void rejectIfEmptyOrWhitespace(\n\t\t\tErrors errors, String field, String errorCode, @Nullable Object[] errorArgs) {\n\n\t\trejectIfEmptyOrWhitespace(errors, field, errorCode, errorArgs, null);\n\t}"
+  },
+  "org.springframework.validation.<unknown>#rejectIfEmptyOrWhitespace(errors,field,errorCode,errorArgs,defaultMessage)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Reject the given field with the given error code, error arguments\n\t * and default message if the value is empty or just contains whitespace.\n\t * <p>An 'empty' value in this context means either {@code null},\n\t * the empty string \"\", or consisting wholly of whitespace.\n\t * <p>The object whose field is being validated does not need to be passed\n\t * in because the {@link Errors} instance can resolve field values by itself\n\t * (it will usually hold an internal reference to the target object).\n\t * @param errors the {@code Errors} instance to register errors on\n\t * @param field the field name to check\n\t * @param errorCode the error code, interpretable as message key\n\t * @param errorArgs the error arguments, for argument binding via MessageFormat\n\t * (can be {@code null})\n\t * @param defaultMessage fallback default message\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "errors",
+      "field",
+      "errorCode",
+      "errorArgs",
+      "defaultMessage"
+    ],
+    "position": {
+      "column": 1,
+      "line": 248
+    },
+    "return": "void",
+    "signature": "public void rejectIfEmptyOrWhitespace(Errors errors, String field, String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage)",
+    "source_code": "\tpublic static void rejectIfEmptyOrWhitespace(\n\t\t\tErrors errors, String field, String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage) {\n\n\t\tAssert.notNull(errors, \"Errors object must not be null\");\n\t\tObject value = errors.getFieldValue(field);\n\t\tif (value == null ||!StringUtils.hasText(value.toString())) {\n\t\t\terrors.rejectValue(field, errorCode, errorArgs, defaultMessage);\n\t\t}\n\t}"
+  }
+}

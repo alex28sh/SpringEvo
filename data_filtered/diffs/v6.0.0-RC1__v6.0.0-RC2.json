@@ -1,0 +1,125 @@
+{
+  "org.springframework.aot.hint.<unknown>#registerComponentHints(hints,type)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "hints",
+      "type"
+    ],
+    "position": {
+      "column": 1,
+      "line": 155
+    },
+    "return": "void",
+    "signature": "public void registerComponentHints(ReflectionHints hints, Class<?> type)",
+    "source_code": "\t\tpublic static void registerComponentHints(ReflectionHints hints, Class<?> type) {\n\t\t\tKClass<?> kClass = JvmClassMappingKt.getKotlinClass(type);\n\t\t\tif (kClass.isData()) {\n\t\t\t\tfor (Method method : type.getMethods()) {\n\t\t\t\t\tString methodName = method.getName();\n\t\t\t\t\tif (methodName.startsWith(\"component\") || methodName.equals(\"copy\")) {\n\t\t\t\t\t\thints.registerMethod(method, ExecutableMode.INVOKE);\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}"
+  },
+  "org.springframework.core.io.buffer.<unknown>#read(destination,offset,length)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "destination",
+      "offset",
+      "length"
+    ],
+    "position": {
+      "column": 1,
+      "line": 261
+    },
+    "return": "DefaultDataBuffer",
+    "signature": "public DefaultDataBuffer read(byte[] destination, int offset, int length)",
+    "source_code": "\tpublic DefaultDataBuffer read(byte[] destination, int offset, int length) {\n\t\tAssert.notNull(destination, \"Byte array must not be null\");\n\t\tassertIndex(this.readPosition <= this.writePosition - length,\n\t\t\t\t\"readPosition %d and length %d should be smaller than writePosition %d\",\n\t\t\t\tthis.readPosition, length, this.writePosition);\n\n\t\tByteBuffer tmp = this.byteBuffer.duplicate();\n\t\tint limit = this.readPosition + length;\n\t\ttmp.clear().position(this.readPosition).limit(limit);\n\t\ttmp.get(destination, offset, length);\n\n\t\tthis.readPosition += length;\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.core.io.buffer.<unknown>#slice(index,length)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "index",
+      "length"
+    ],
+    "position": {
+      "column": 1,
+      "line": 335
+    },
+    "return": "DefaultDataBuffer",
+    "signature": "public DefaultDataBuffer slice(int index, int length)",
+    "source_code": "\tpublic DefaultDataBuffer slice(int index, int length) {\n\t\tcheckIndex(index, length);\n\t\tint oldPosition = this.byteBuffer.position();\n\t\ttry {\n\t\t\tthis.byteBuffer.position(index);\n\t\t\tByteBuffer slice = this.byteBuffer.slice();\n\t\t\tslice.limit(length);\n\t\t\treturn new SlicedDefaultDataBuffer(slice, this.dataBufferFactory, length);\n\t\t}\n\t\tfinally {\n\t\t\tthis.byteBuffer.position(oldPosition);\n\t\t}\n\t}"
+  },
+  "org.springframework.core.io.buffer.<unknown>#write(source,offset,length)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "source",
+      "offset",
+      "length"
+    ],
+    "position": {
+      "column": 1,
+      "line": 293
+    },
+    "return": "DefaultDataBuffer",
+    "signature": "public DefaultDataBuffer write(byte[] source, int offset, int length)",
+    "source_code": "\tpublic DefaultDataBuffer write(byte[] source, int offset, int length) {\n\t\tAssert.notNull(source, \"Byte array must not be null\");\n\t\tensureWritable(length);\n\n\t\tByteBuffer tmp = this.byteBuffer.duplicate();\n\t\tint limit = this.writePosition + length;\n\t\ttmp.clear().position(this.writePosition).limit(limit);\n\t\ttmp.put(source, offset, length);\n\n\t\tthis.writePosition += length;\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.http.converter.<unknown>#read(clazz,inputMessage)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "clazz",
+      "inputMessage"
+    ],
+    "position": {
+      "column": 1,
+      "line": 168
+    },
+    "return": "BufferedImage",
+    "signature": "public BufferedImage read(@Nullable Class<? extends BufferedImage> clazz, HttpInputMessage inputMessage)",
+    "source_code": "\tpublic BufferedImage read(@Nullable Class<? extends BufferedImage> clazz, HttpInputMessage inputMessage)\n\t\t\tthrows IOException, HttpMessageNotReadableException {\n\n\t\tImageInputStream imageInputStream = null;\n\t\tImageReader imageReader = null;\n\t\t// We cannot use try-with-resources here for the ImageInputStream, since we have\n\t\t// custom handling of the close() method in a finally-block.\n\t\ttry {\n\t\t\timageInputStream = createImageInputStream(inputMessage.getBody());\n\t\t\tMediaType contentType = inputMessage.getHeaders().getContentType();\n\t\t\tif (contentType == null) {\n\t\t\t\tthrow new HttpMessageNotReadableException(\"No Content-Type header\", inputMessage);\n\t\t\t}\n\t\t\tIterator<ImageReader> imageReaders = ImageIO.getImageReadersByMIMEType(contentType.toString());\n\t\t\tif (imageReaders.hasNext()) {\n\t\t\t\timageReader = imageReaders.next();\n\t\t\t\tImageReadParam irp = imageReader.getDefaultReadParam();\n\t\t\t\tprocess(irp);\n\t\t\t\timageReader.setInput(imageInputStream, true);\n\t\t\t\treturn imageReader.read(0, irp);\n\t\t\t}\n\t\t\telse {\n\t\t\t\tthrow new HttpMessageNotReadableException(\n\t\t\t\t\t\t\"Could not find javax.imageio.ImageReader for Content-Type [\" + contentType + \"]\",\n\t\t\t\t\t\tinputMessage);\n\t\t\t}\n\t\t}\n\t\tfinally {\n\t\t\tif (imageReader != null) {\n\t\t\t\timageReader.dispose();\n\t\t\t}\n\t\t\tif (imageInputStream != null) {\n\t\t\t\ttry {\n\t\t\t\t\timageInputStream.close();\n\t\t\t\t}\n\t\t\t\tcatch (IOException ex) {\n\t\t\t\t\t// ignore\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}"
+  },
+  "org.springframework.web.client.<unknown>#createResourceAccessException(url,method,ex)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "url",
+      "method",
+      "ex"
+    ],
+    "position": {
+      "column": 1,
+      "line": 887
+    },
+    "return": "ResourceAccessException",
+    "signature": "protected ResourceAccessException createResourceAccessException(URI url, HttpMethod method, IOException ex)",
+    "source_code": "\tprotected static ResourceAccessException createResourceAccessException(URI url, HttpMethod method, IOException ex) {\n\t\tString resource = url.toString();\n\t\tString query = url.getRawQuery();\n\t\tresource = (query != null ? resource.substring(0, resource.indexOf('?')) : resource);\n\t\tResourceAccessException exception = new ResourceAccessException(\"I/O error on \" + method.name() +\n\t\t\t\t\" request for \\\"\" + resource + \"\\\": \" + ex.getMessage(), ex);\n\t\treturn exception;\n\t}"
+  }
+}

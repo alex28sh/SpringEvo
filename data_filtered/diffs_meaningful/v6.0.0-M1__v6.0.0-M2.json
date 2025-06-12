@@ -1,0 +1,63 @@
+{
+  "org.springframework.core.<unknown>#getQualifiedAttributeName(enclosingClass,attributeName)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return an attribute name qualified by the given enclosing {@link Class}.\n\t * For example the attribute name '{@code foo}' qualified by {@link Class}\n\t * '{@code com.myapp.SomeClass}' would be '{@code com.myapp.SomeClass.foo}'\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "enclosingClass",
+      "attributeName"
+    ],
+    "position": {
+      "column": 1,
+      "line": 250
+    },
+    "return": "String",
+    "signature": "public String getQualifiedAttributeName(Class<?> enclosingClass, String attributeName)",
+    "source_code": "\tpublic static String getQualifiedAttributeName(Class<?> enclosingClass, String attributeName) {\n\t\tAssert.notNull(enclosingClass, \"'enclosingClass' must not be null\");\n\t\tAssert.notNull(attributeName, \"'attributeName' must not be null\");\n\t\treturn enclosingClass.getName() + '.' + attributeName;\n\t}"
+  },
+  "org.springframework.core.<unknown>#getVariableNameForReturnType(method,resolvedType,value)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Determine the conventional variable name for the return type of the given\n\t * method, taking the generic collection type, if any, into account, falling\n\t * back on the given return value if the method declaration is not specific\n\t * enough, e.g. {@code Object} return type or untyped collection.\n\t * <p>As of 5.0 this method supports reactive types:<br>\n\t * {@code Mono<com.myapp.Product>} becomes {@code \"productMono\"}<br>\n\t * {@code Flux<com.myapp.MyProduct>} becomes {@code \"myProductFlux\"}<br>\n\t * {@code Observable<com.myapp.MyProduct>} becomes {@code \"myProductObservable\"}<br>\n\t * @param method the method to generate a variable name for\n\t * @param resolvedType the resolved return type of the method\n\t * @param value the return value (may be {@code null} if not available)\n\t * @return the generated variable name\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "method",
+      "resolvedType",
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 168
+    },
+    "return": "String",
+    "signature": "public String getVariableNameForReturnType(Method method, Class<?> resolvedType, @Nullable Object value)",
+    "source_code": "\tpublic static String getVariableNameForReturnType(Method method, Class<?> resolvedType, @Nullable Object value) {\n\t\tAssert.notNull(method, \"Method must not be null\");\n\n\t\tif (Object.class == resolvedType) {\n\t\t\tif (value == null) {\n\t\t\t\tthrow new IllegalArgumentException(\n\t\t\t\t\t\t\"Cannot generate variable name for an Object return type with null value\");\n\t\t\t}\n\t\t\treturn getVariableName(value);\n\t\t}\n\n\t\tClass<?> valueClass;\n\t\tboolean pluralize = false;\n\t\tString reactiveSuffix = \"\";\n\n\t\tif (resolvedType.isArray()) {\n\t\t\tvalueClass = resolvedType.getComponentType();\n\t\t\tpluralize = true;\n\t\t}\n\t\telse if (Collection.class.isAssignableFrom(resolvedType)) {\n\t\t\tvalueClass = ResolvableType.forMethodReturnType(method).asCollection().resolveGeneric();\n\t\t\tif (valueClass == null) {\n\t\t\t\tif (!(value instanceof Collection<?> collection)) {\n\t\t\t\t\tthrow new IllegalArgumentException(\"Cannot generate variable name \" +\n\t\t\t\t\t\t\t\"for non-typed Collection return type and a non-Collection value\");\n\t\t\t\t}\n\t\t\t\tif (collection.isEmpty()) {\n\t\t\t\t\tthrow new IllegalArgumentException(\"Cannot generate variable name \" +\n\t\t\t\t\t\t\t\"for non-typed Collection return type and an empty Collection value\");\n\t\t\t\t}\n\t\t\t\tObject valueToCheck = peekAhead(collection);\n\t\t\t\tvalueClass = getClassForValue(valueToCheck);\n\t\t\t}\n\t\t\tpluralize = true;\n\t\t}\n\t\telse {\n\t\t\tvalueClass = resolvedType;\n\t\t\tReactiveAdapter adapter = ReactiveAdapterRegistry.getSharedInstance().getAdapter(valueClass);\n\t\t\tif (adapter != null && !adapter.getDescriptor().isNoValue()) {\n\t\t\t\treactiveSuffix = ClassUtils.getShortName(valueClass);\n\t\t\t\tvalueClass = ResolvableType.forMethodReturnType(method).getGeneric().toClass();\n\t\t\t}\n\t\t}\n\n\t\tString name = ClassUtils.getShortNameAsProperty(valueClass);\n\t\treturn (pluralize ? pluralize(name) : name + reactiveSuffix);\n\t}"
+  },
+  "org.springframework.core.<unknown>#getVariableNameForReturnType(method,value)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Determine the conventional variable name for the return type of the given\n\t * method, taking the generic collection type, if any, into account, falling\n\t * back on the given actual return value if the method declaration is not\n\t * specific enough, e.g. {@code Object} return type or untyped collection.\n\t * @param method the method to generate a variable name for\n\t * @param value the return value (may be {@code null} if not available)\n\t * @return the generated variable name\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "method",
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 150
+    },
+    "return": "String",
+    "signature": "public String getVariableNameForReturnType(Method method, @Nullable Object value)",
+    "source_code": "\tpublic static String getVariableNameForReturnType(Method method, @Nullable Object value) {\n\t\treturn getVariableNameForReturnType(method, method.getReturnType(), value);\n\t}"
+  }
+}

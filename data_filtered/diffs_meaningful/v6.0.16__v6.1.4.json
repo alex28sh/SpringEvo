@@ -1,0 +1,1671 @@
+{
+  "org.springframework.aop.interceptor.<unknown>#invokeUnderTrace(invocation,logger)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Writes a log message before the invocation based on the value of {@code enterMessage}.\n\t * If the invocation succeeds, then a log message is written on exit based on the value\n\t * {@code exitMessage}. If an exception occurs during invocation, then a message is\n\t * written based on the value of {@code exceptionMessage}.\n\t * @see #setEnterMessage\n\t * @see #setExitMessage\n\t * @see #setExceptionMessage\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "invocation",
+      "logger"
+    ],
+    "position": {
+      "column": 1,
+      "line": 254
+    },
+    "return": "Object",
+    "signature": "protected Object invokeUnderTrace(MethodInvocation invocation, Log logger)",
+    "source_code": "\tprotected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {\n\t\tString name = ClassUtils.getQualifiedMethodName(invocation.getMethod());\n\t\tStopWatch stopWatch = new StopWatch(name);\n\t\tObject returnValue = null;\n\t\tboolean exitThroughException = false;\n\t\ttry {\n\t\t\tstopWatch.start(name);\n\t\t\twriteToLog(logger,\n\t\t\t\t\treplacePlaceholders(this.enterMessage, invocation, null, null, -1));\n\t\t\treturnValue = invocation.proceed();\n\t\t\treturn returnValue;\n\t\t}\n\t\tcatch (Throwable ex) {\n\t\t\tif (stopWatch.isRunning()) {\n\t\t\t\tstopWatch.stop();\n\t\t\t}\n\t\t\texitThroughException = true;\n\t\t\twriteToLog(logger, replacePlaceholders(\n\t\t\t\t\tthis.exceptionMessage, invocation, null, ex, stopWatch.getTotalTimeMillis()), ex);\n\t\t\tthrow ex;\n\t\t}\n\t\tfinally {\n\t\t\tif (!exitThroughException) {\n\t\t\t\tif (stopWatch.isRunning()) {\n\t\t\t\t\tstopWatch.stop();\n\t\t\t\t}\n\t\t\t\twriteToLog(logger, replacePlaceholders(\n\t\t\t\t\t\tthis.exitMessage, invocation, returnValue, null, stopWatch.getTotalTimeMillis()));\n\t\t\t}\n\t\t}\n\t}"
+  },
+  "org.springframework.aop.scope.<unknown>#generateInstanceSupplierCode(generationContext,beanRegistrationCode,allowDirectSupplierShortcut)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "generationContext",
+      "beanRegistrationCode",
+      "allowDirectSupplierShortcut"
+    ],
+    "position": {
+      "column": 1,
+      "line": 140
+    },
+    "return": "CodeBlock",
+    "signature": "public CodeBlock generateInstanceSupplierCode(GenerationContext generationContext,\n\t\t\t\tBeanRegistrationCode beanRegistrationCode, boolean allowDirectSupplierShortcut)",
+    "source_code": "\t\tpublic CodeBlock generateInstanceSupplierCode(GenerationContext generationContext,\n\t\t\t\tBeanRegistrationCode beanRegistrationCode, boolean allowDirectSupplierShortcut) {\n\n\t\t\tGeneratedMethod generatedMethod = beanRegistrationCode.getMethods()\n\t\t\t\t\t.add(\"getScopedProxyInstance\", method -> {\n\t\t\t\t\t\tmethod.addJavadoc(\n\t\t\t\t\t\t\t\t\"Create the scoped proxy bean instance for '$L'.\",\n\t\t\t\t\t\t\t\tthis.registeredBean.getBeanName());\n\t\t\t\t\t\tmethod.addModifiers(Modifier.PRIVATE, Modifier.STATIC);\n\t\t\t\t\t\tmethod.returns(ScopedProxyFactoryBean.class);\n\t\t\t\t\t\tmethod.addParameter(RegisteredBean.class,\n\t\t\t\t\t\t\t\tREGISTERED_BEAN_PARAMETER_NAME);\n\t\t\t\t\t\tmethod.addStatement(\"$T factory = new $T()\",\n\t\t\t\t\t\t\t\tScopedProxyFactoryBean.class,\n\t\t\t\t\t\t\t\tScopedProxyFactoryBean.class);\n\t\t\t\t\t\tmethod.addStatement(\"factory.setTargetBeanName($S)\",\n\t\t\t\t\t\t\t\tthis.targetBeanName);\n\t\t\t\t\t\tmethod.addStatement(\n\t\t\t\t\t\t\t\t\"factory.setBeanFactory($L.getBeanFactory())\",\n\t\t\t\t\t\t\t\tREGISTERED_BEAN_PARAMETER_NAME);\n\t\t\t\t\t\tmethod.addStatement(\"return factory\");\n\t\t\t\t\t});\n\t\t\treturn CodeBlock.of(\"$T.of($L)\", InstanceSupplier.class,\n\t\t\t\t\tgeneratedMethod.toMethodReference().toCodeBlock());\n\t\t}"
+  },
+  "org.springframework.aop.scope.<unknown>#generateInstanceSupplierCode(generationContext,beanRegistrationCode,constructorOrFactoryMethod,allowDirectSupplierShortcut)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "generationContext",
+      "beanRegistrationCode",
+      "constructorOrFactoryMethod",
+      "allowDirectSupplierShortcut"
+    ],
+    "position": {
+      "column": 1,
+      "line": 141
+    },
+    "return": "CodeBlock",
+    "signature": "public CodeBlock generateInstanceSupplierCode(GenerationContext generationContext,\n\t\t\t\tBeanRegistrationCode beanRegistrationCode,\n\t\t\t\tExecutable constructorOrFactoryMethod,\n\t\t\t\tboolean allowDirectSupplierShortcut)",
+    "source_code": "\t\tpublic CodeBlock generateInstanceSupplierCode(GenerationContext generationContext,\n\t\t\t\tBeanRegistrationCode beanRegistrationCode,\n\t\t\t\tExecutable constructorOrFactoryMethod,\n\t\t\t\tboolean allowDirectSupplierShortcut) {\n\n\t\t\tGeneratedMethod generatedMethod = beanRegistrationCode.getMethods()\n\t\t\t\t\t.add(\"getScopedProxyInstance\", method -> {\n\t\t\t\t\t\tmethod.addJavadoc(\n\t\t\t\t\t\t\t\t\"Create the scoped proxy bean instance for '$L'.\",\n\t\t\t\t\t\t\t\tthis.registeredBean.getBeanName());\n\t\t\t\t\t\tmethod.addModifiers(Modifier.PRIVATE, Modifier.STATIC);\n\t\t\t\t\t\tmethod.returns(ScopedProxyFactoryBean.class);\n\t\t\t\t\t\tmethod.addParameter(RegisteredBean.class,\n\t\t\t\t\t\t\t\tREGISTERED_BEAN_PARAMETER_NAME);\n\t\t\t\t\t\tmethod.addStatement(\"$T factory = new $T()\",\n\t\t\t\t\t\t\t\tScopedProxyFactoryBean.class,\n\t\t\t\t\t\t\t\tScopedProxyFactoryBean.class);\n\t\t\t\t\t\tmethod.addStatement(\"factory.setTargetBeanName($S)\",\n\t\t\t\t\t\t\t\tthis.targetBeanName);\n\t\t\t\t\t\tmethod.addStatement(\n\t\t\t\t\t\t\t\t\"factory.setBeanFactory($L.getBeanFactory())\",\n\t\t\t\t\t\t\t\tREGISTERED_BEAN_PARAMETER_NAME);\n\t\t\t\t\t\tmethod.addStatement(\"return factory\");\n\t\t\t\t\t});\n\t\t\treturn CodeBlock.of(\"$T.of($L)\", InstanceSupplier.class,\n\t\t\t\t\tgeneratedMethod.toMethodReference().toCodeBlock());\n\t\t}"
+  },
+  "org.springframework.aot.generate.<unknown>#generateCollectionOf(valueCodeGenerator,collection,collectionType)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "valueCodeGenerator",
+      "collection",
+      "collectionType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 112
+    },
+    "return": "CodeBlock",
+    "signature": "protected CodeBlock generateCollectionOf(ValueCodeGenerator valueCodeGenerator,\n\t\t\t\tCollection<?> collection, Class<?> collectionType)",
+    "source_code": "\t\tprotected final CodeBlock generateCollectionOf(ValueCodeGenerator valueCodeGenerator,\n\t\t\t\tCollection<?> collection, Class<?> collectionType) {\n\t\t\tBuilder code = CodeBlock.builder();\n\t\t\tcode.add(\"$T.of(\", collectionType);\n\t\t\tIterator<?> iterator = collection.iterator();\n\t\t\twhile (iterator.hasNext()) {\n\t\t\t\tObject element = iterator.next();\n\t\t\t\tcode.add(\"$L\", valueCodeGenerator.generateCode(element));\n\t\t\t\tif (iterator.hasNext()) {\n\t\t\t\t\tcode.add(\", \");\n\t\t\t\t}\n\t\t\t}\n\t\t\tcode.add(\")\");\n\t\t\treturn code.build();\n\t\t}"
+  },
+  "org.springframework.beans.factory.aot.<unknown>#generateCode(valueCodeGenerator,value)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "valueCodeGenerator",
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 196
+    },
+    "return": "CodeBlock",
+    "signature": "public CodeBlock generateCode(ValueCodeGenerator valueCodeGenerator, Object value)",
+    "source_code": "\t\tpublic CodeBlock generateCode(ValueCodeGenerator valueCodeGenerator, Object value) {\n\t\t\tif (value instanceof TypedStringValue typedStringValue) {\n\t\t\t\treturn generateTypeStringValueCode(valueCodeGenerator, typedStringValue);\n\t\t\t}\n\t\t\treturn null;\n\t\t}"
+  },
+  "org.springframework.beans.factory.aot.<unknown>#getTarget(registeredBean,constructorOrFactoryMethod)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "registeredBean",
+      "constructorOrFactoryMethod"
+    ],
+    "position": {
+      "column": 1,
+      "line": 69
+    },
+    "return": "ClassName",
+    "signature": "public ClassName getTarget(RegisteredBean registeredBean,\n\t\t\tExecutable constructorOrFactoryMethod)",
+    "source_code": "\tpublic ClassName getTarget(RegisteredBean registeredBean,\n\t\t\tExecutable constructorOrFactoryMethod) {\n\n\t\tClass<?> target = extractDeclaringClass(registeredBean.getBeanType(), constructorOrFactoryMethod);\n\t\twhile (target.getName().startsWith(\"java.\") && registeredBean.isInnerBean()) {\n\t\t\tRegisteredBean parent = registeredBean.getParent();\n\t\t\tAssert.state(parent != null, \"No parent available for inner bean\");\n\t\t\ttarget = parent.getBeanClass();\n\t\t}\n\t\treturn ClassName.get(target);\n\t}"
+  },
+  "org.springframework.cache.caffeine.<unknown>#adaptCaffeineCache(name,com.github.benmanes.caffeine.cache.Cache<Object,cache)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Adapt the given new native Caffeine Cache instance to Spring's {@link Cache}\n\t * abstraction for the specified cache name.\n\t * @param name the name of the cache\n\t * @param cache the native Caffeine Cache instance\n\t * @return the Spring CaffeineCache adapter (or a decorator thereof)\n\t * @since 5.2.8\n\t * @see CaffeineCache#CaffeineCache(String, com.github.benmanes.caffeine.cache.Cache, boolean)\n\t * @see #isAllowNullValues()\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "name",
+      "com.github.benmanes.caffeine.cache.Cache<Object",
+      "cache"
+    ],
+    "position": {
+      "column": 1,
+      "line": 316
+    },
+    "return": "Cache",
+    "signature": "protected Cache adaptCaffeineCache(String name, com.github.benmanes.caffeine.cache.Cache<Object, Object> cache)",
+    "source_code": "\tprotected Cache adaptCaffeineCache(String name, com.github.benmanes.caffeine.cache.Cache<Object, Object> cache) {\n\t\treturn new CaffeineCache(name, cache, isAllowNullValues());\n\t}"
+  },
+  "org.springframework.cache.caffeine.<unknown>#registerCustomCache(name,com.github.benmanes.caffeine.cache.Cache<Object,cache)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Register the given native Caffeine Cache instance with this cache manager,\n\t * adapting it to Spring's cache API for exposure through {@link #getCache}.\n\t * Any number of such custom caches may be registered side by side.\n\t * <p>This allows for custom settings per cache (as opposed to all caches\n\t * sharing the common settings in the cache manager's configuration) and\n\t * is typically used with the Caffeine builder API:\n\t * {@code registerCustomCache(\"myCache\", Caffeine.newBuilder().maximumSize(10).build())}\n\t * <p>Note that any other caches, whether statically specified through\n\t * {@link #setCacheNames} or dynamically built on demand, still operate\n\t * with the common settings in the cache manager's configuration.\n \t * @param name the name of the cache\n\t * @param cache the custom Caffeine Cache instance to register\n\t * @since 5.2.8\n\t * @see #adaptCaffeineCache(String, com.github.benmanes.caffeine.cache.Cache)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "name",
+      "com.github.benmanes.caffeine.cache.Cache<Object",
+      "cache"
+    ],
+    "position": {
+      "column": 1,
+      "line": 280
+    },
+    "return": "void",
+    "signature": "public void registerCustomCache(String name, com.github.benmanes.caffeine.cache.Cache<Object, Object> cache)",
+    "source_code": "\tpublic void registerCustomCache(String name, com.github.benmanes.caffeine.cache.Cache<Object, Object> cache) {\n\t\tthis.customCacheNames.add(name);\n\t\tthis.cacheMap.put(name, adaptCaffeineCache(name, cache));\n\t}"
+  },
+  "org.springframework.cache.caffeine.<unknown>#setAsyncCacheLoader(AsyncCacheLoader<Object,cacheLoader)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Set the Caffeine AsyncCacheLoader to use for building each individual\n\t * {@link CaffeineCache} instance, turning it into a LoadingCache.\n\t * <p>This implicitly switches the {@link #setAsyncCacheMode \"asyncCacheMode\"}\n\t * flag to {@code true}.\n\t * @since 6.1\n\t * @see #createAsyncCaffeineCache\n\t * @see Caffeine#buildAsync(AsyncCacheLoader)\n\t * @see com.github.benmanes.caffeine.cache.LoadingCache\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "AsyncCacheLoader<Object",
+      "cacheLoader"
+    ],
+    "position": {
+      "column": 1,
+      "line": 185
+    },
+    "return": "void",
+    "signature": "public void setAsyncCacheLoader(AsyncCacheLoader<Object, Object> cacheLoader)",
+    "source_code": "\tpublic void setAsyncCacheLoader(AsyncCacheLoader<Object, Object> cacheLoader) {\n\t\tif (!ObjectUtils.nullSafeEquals(this.cacheLoader, cacheLoader)) {\n\t\t\tthis.cacheLoader = cacheLoader;\n\t\t\tthis.asyncCacheMode = true;\n\t\t\trefreshCommonCaches();\n\t\t}\n\t}"
+  },
+  "org.springframework.cache.interceptor.<unknown>#executeSynchronized(invoker,method,cache,key)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "invoker",
+      "method",
+      "cache",
+      "key"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1079
+    },
+    "return": "Object",
+    "signature": "public Object executeSynchronized(CacheOperationInvoker invoker, Method method, Cache cache, Object key)",
+    "source_code": "\t\tpublic Object executeSynchronized(CacheOperationInvoker invoker, Method method, Cache cache, Object key) {\n\t\t\tReactiveAdapter adapter = this.registry.getAdapter(method.getReturnType());\n\t\t\tif (adapter != null) {\n\t\t\t\tif (adapter.isMultiValue()) {\n\t\t\t\t\t// Flux or similar\n\t\t\t\t\treturn adapter.fromPublisher(Flux.from(Mono.fromFuture(\n\t\t\t\t\t\t\tcache.retrieve(key,\n\t\t\t\t\t\t\t\t\t() -> Flux.from(adapter.toPublisher(invokeOperation(invoker))).collectList().toFuture())))\n\t\t\t\t\t\t\t.flatMap(Flux::fromIterable));\n\t\t\t\t}\n\t\t\t\telse {\n\t\t\t\t\t// Mono or similar\n\t\t\t\t\treturn adapter.fromPublisher(Mono.fromFuture(\n\t\t\t\t\t\t\tcache.retrieve(key,\n\t\t\t\t\t\t\t\t\t() -> Mono.from(adapter.toPublisher(invokeOperation(invoker))).toFuture())));\n\t\t\t\t}\n\t\t\t}\n\t\t\tif (KotlinDetector.isKotlinReflectPresent() && KotlinDetector.isSuspendingFunction(method)) {\n\t\t\t\treturn Mono.fromFuture(cache.retrieve(key, () -> ((Mono<?>) invokeOperation(invoker)).toFuture()));\n\t\t\t}\n\t\t\treturn NOT_HANDLED;\n\t\t}"
+  },
+  "org.springframework.cache.interceptor.<unknown>#processCacheEvicts(contexts,result)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "contexts",
+      "result"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1103
+    },
+    "return": "Object",
+    "signature": "public Object processCacheEvicts(List<CacheOperationContext> contexts, @Nullable Object result)",
+    "source_code": "\t\tpublic Object processCacheEvicts(List<CacheOperationContext> contexts, @Nullable Object result) {\n\t\t\tReactiveAdapter adapter = (result != null ? this.registry.getAdapter(result.getClass()) : null);\n\t\t\tif (adapter != null) {\n\t\t\t\treturn adapter.fromPublisher(Mono.from(adapter.toPublisher(result))\n\t\t\t\t\t\t.doOnSuccess(value -> performCacheEvicts(contexts, result)));\n\t\t\t}\n\t\t\treturn NOT_HANDLED;\n\t\t}"
+  },
+  "org.springframework.context.annotation.<unknown>#applyTo(generationContext,beanRegistrationCode)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "generationContext",
+      "beanRegistrationCode"
+    ],
+    "position": {
+      "column": 1,
+      "line": 878
+    },
+    "return": "void",
+    "signature": "public void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode)",
+    "source_code": "\t\tpublic void applyTo(GenerationContext generationContext, BeanRegistrationCode beanRegistrationCode) {\n\t\t\tGeneratedClass generatedClass = generationContext.getGeneratedClasses()\n\t\t\t\t\t.addForFeatureComponent(\"ResourceAutowiring\", this.target, type -> {\n\t\t\t\t\t\ttype.addJavadoc(\"Resource autowiring for {@link $T}.\", this.target);\n\t\t\t\t\t\ttype.addModifiers(javax.lang.model.element.Modifier.PUBLIC);\n\t\t\t\t\t});\n\t\t\tGeneratedMethod generateMethod = generatedClass.getMethods().add(\"apply\", method -> {\n\t\t\t\tmethod.addJavadoc(\"Apply resource autowiring.\");\n\t\t\t\tmethod.addModifiers(javax.lang.model.element.Modifier.PUBLIC,\n\t\t\t\t\t\tjavax.lang.model.element.Modifier.STATIC);\n\t\t\t\tmethod.addParameter(RegisteredBean.class, REGISTERED_BEAN_PARAMETER);\n\t\t\t\tmethod.addParameter(this.target, INSTANCE_PARAMETER);\n\t\t\t\tmethod.returns(this.target);\n\t\t\t\tmethod.addCode(generateMethodCode(generatedClass.getName(),\n\t\t\t\t\t\tgenerationContext.getRuntimeHints()));\n\t\t\t});\n\t\t\tbeanRegistrationCode.addInstancePostProcessor(generateMethod.toMethodReference());\n\n\t\t\tregisterHints(generationContext.getRuntimeHints());\n\t\t}"
+  },
+  "org.springframework.context.annotation.<unknown>#configureScanner(parserContext,element)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "parserContext",
+      "element"
+    ],
+    "position": {
+      "column": 1,
+      "line": 96
+    },
+    "return": "ClassPathBeanDefinitionScanner",
+    "signature": "protected ClassPathBeanDefinitionScanner configureScanner(ParserContext parserContext, Element element)",
+    "source_code": "\tprotected ClassPathBeanDefinitionScanner configureScanner(ParserContext parserContext, Element element) {\n\t\tboolean useDefaultFilters = true;\n\t\tif (element.hasAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE)) {\n\t\t\tuseDefaultFilters = Boolean.parseBoolean(element.getAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE));\n\t\t}\n\n\t\t// Delegate bean definition registration to scanner class.\n\t\tClassPathBeanDefinitionScanner scanner = createScanner(parserContext.getReaderContext(), useDefaultFilters);\n\t\tscanner.setBeanDefinitionDefaults(parserContext.getDelegate().getBeanDefinitionDefaults());\n\t\tscanner.setAutowireCandidatePatterns(parserContext.getDelegate().getAutowireCandidatePatterns());\n\n\t\tif (element.hasAttribute(RESOURCE_PATTERN_ATTRIBUTE)) {\n\t\t\tscanner.setResourcePattern(element.getAttribute(RESOURCE_PATTERN_ATTRIBUTE));\n\t\t}\n\n\t\ttry {\n\t\t\tparseBeanNameGenerator(element, scanner);\n\t\t}\n\t\tcatch (Exception ex) {\n\t\t\tparserContext.getReaderContext().error(ex.getMessage(), parserContext.extractSource(element), ex.getCause());\n\t\t}\n\n\t\ttry {\n\t\t\tparseScope(element, scanner);\n\t\t}\n\t\tcatch (Exception ex) {\n\t\t\tparserContext.getReaderContext().error(ex.getMessage(), parserContext.extractSource(element), ex.getCause());\n\t\t}\n\n\t\tparseTypeFilters(element, scanner, parserContext);\n\n\t\treturn scanner;\n\t}"
+  },
+  "org.springframework.context.annotation.<unknown>#createTypeFilter(element,classLoader,parserContext)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "element",
+      "classLoader",
+      "parserContext"
+    ],
+    "position": {
+      "column": 1,
+      "line": 225
+    },
+    "return": "TypeFilter",
+    "signature": "protected TypeFilter createTypeFilter(Element element, @Nullable ClassLoader classLoader,\n\t\t\tParserContext parserContext)",
+    "source_code": "\tprotected TypeFilter createTypeFilter(Element element, @Nullable ClassLoader classLoader,\n\t\t\tParserContext parserContext) throws ClassNotFoundException {\n\n\t\tString filterType = element.getAttribute(FILTER_TYPE_ATTRIBUTE);\n\t\tString expression = element.getAttribute(FILTER_EXPRESSION_ATTRIBUTE);\n\t\texpression = parserContext.getReaderContext().getEnvironment().resolvePlaceholders(expression);\n\t\tswitch (filterType) {\n\t\t\tcase \"annotation\" -> {\n\t\t\t\treturn new AnnotationTypeFilter((Class<Annotation>) ClassUtils.forName(expression, classLoader));\n\t\t\t}\n\t\t\tcase \"assignable\" -> {\n\t\t\t\treturn new AssignableTypeFilter(ClassUtils.forName(expression, classLoader));\n\t\t\t}\n\t\t\tcase \"aspectj\" -> {\n\t\t\t\treturn new AspectJTypeFilter(expression, classLoader);\n\t\t\t}\n\t\t\tcase \"regex\" -> {\n\t\t\t\treturn new RegexPatternTypeFilter(Pattern.compile(expression));\n\t\t\t}\n\t\t\tcase \"custom\" -> {\n\t\t\t\tClass<?> filterClass = ClassUtils.forName(expression, classLoader);\n\t\t\t\tif (!TypeFilter.class.isAssignableFrom(filterClass)) {\n\t\t\t\t\tthrow new IllegalArgumentException(\n\t\t\t\t\t\t\t\"Class is not assignable to [\" + TypeFilter.class.getName() + \"]: \" + expression);\n\t\t\t\t}\n\t\t\t\treturn (TypeFilter) BeanUtils.instantiateClass(filterClass);\n\t\t\t}\n\t\t\tdefault -> throw new IllegalArgumentException(\"Unsupported filter type: \" + filterType);\n\t\t}\n\t}"
+  },
+  "org.springframework.core.<unknown>#forFieldAwareConstructor(ctor,parameterIndex,fieldName)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Create a new MethodParameter for the given field-aware constructor,\n\t * e.g. on a data class or record type.\n\t * <p>A field-aware method parameter will detect field annotations as well,\n\t * as long as the field name matches the parameter name.\n\t * @param ctor the Constructor to specify a parameter for\n\t * @param parameterIndex the index of the parameter\n\t * @param fieldName the name of the underlying field,\n\t * matching the constructor's parameter name\n\t * @return the corresponding MethodParameter instance\n\t * @since 6.1\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "ctor",
+      "parameterIndex",
+      "fieldName"
+    ],
+    "position": {
+      "column": 1,
+      "line": 875
+    },
+    "return": "MethodParameter",
+    "signature": "public MethodParameter forFieldAwareConstructor(Constructor<?> ctor, int parameterIndex, String fieldName)",
+    "source_code": "\tpublic static MethodParameter forFieldAwareConstructor(Constructor<?> ctor, int parameterIndex, String fieldName) {\n\t\treturn new FieldAwareConstructorParameter(ctor, parameterIndex, fieldName);\n\t}"
+  },
+  "org.springframework.core.io.buffer.<unknown>#outputStreamPublisher(outputStreamConsumer,bufferFactory,executor,chunkSize)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Creates a new {@code Publisher<DataBuffer>} based on bytes written to a\n\t * {@code OutputStream}.\n\t * <ul>\n\t * <li>The parameter {@code outputStreamConsumer} is invoked once per\n\t * subscription of the returned {@code Publisher}, when the first\n\t * item is\n\t * {@linkplain Subscription#request(long) requested}.</li>\n\t * <li>{@link OutputStream#write(byte[], int, int) OutputStream.write()}\n\t * invocations made by {@code outputStreamHandler} are buffered until they\n\t * reach or exceed {@code chunkSize}, or when the stream is\n\t * {@linkplain OutputStream#flush() flushed} and then result in a\n\t * {@linkplain Subscriber#onNext(Object) published} item\n\t * if there is {@linkplain Subscription#request(long) demand}.</li>\n\t * <li>If there is <em>no demand</em>, {@code OutputStream.write()} will block\n\t * until there is.</li>\n\t * <li>If the subscription is {@linkplain Subscription#cancel() cancelled},\n\t * {@code OutputStream.write()} will throw a {@code IOException}.</li>\n\t * <li>The subscription is\n\t * {@linkplain Subscriber#onComplete() completed} when\n\t * {@code outputStreamHandler} completes.</li>\n\t * <li>Any exceptions thrown from {@code outputStreamHandler} will\n\t * be dispatched to the {@linkplain Subscriber#onError(Throwable) Subscriber}.\n\t * </ul>\n\t * @param outputStreamConsumer invoked when the first buffer is requested\n\t * @param executor used to invoke the {@code outputStreamHandler}\n\t * @param chunkSize minimum size of the buffer produced by the publisher\n\t * @return a {@code Publisher<DataBuffer>} based on bytes written by\n\t * {@code outputStreamHandler}\n\t * @since 6.1\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "outputStreamConsumer",
+      "bufferFactory",
+      "executor",
+      "chunkSize"
+    ],
+    "position": {
+      "column": 1,
+      "line": 480
+    },
+    "return": "Publisher<DataBuffer>",
+    "signature": "public Publisher<DataBuffer> outputStreamPublisher(Consumer<OutputStream> outputStreamConsumer,\n\t\t\tDataBufferFactory bufferFactory, Executor executor, int chunkSize)",
+    "source_code": "\tpublic static Publisher<DataBuffer> outputStreamPublisher(Consumer<OutputStream> outputStreamConsumer,\n\t\t\tDataBufferFactory bufferFactory, Executor executor, int chunkSize) {\n\n\t\tAssert.notNull(outputStreamConsumer, \"OutputStreamConsumer must not be null\");\n\t\tAssert.notNull(bufferFactory, \"BufferFactory must not be null\");\n\t\tAssert.notNull(executor, \"Executor must not be null\");\n\t\tAssert.isTrue(chunkSize > 0, \"Chunk size must be > 0\");\n\n\t\treturn new OutputStreamPublisher(outputStreamConsumer, bufferFactory, executor, chunkSize);\n\t}"
+  },
+  "org.springframework.core.task.support.<unknown>#execute(task,startTimeout)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "task",
+      "startTimeout"
+    ],
+    "position": {
+      "column": 1,
+      "line": 103
+    },
+    "return": "void",
+    "signature": "public void execute(Runnable task, long startTimeout)",
+    "source_code": "\tpublic void execute(Runnable task, long startTimeout) {\n\t\texecute(task);\n\t}"
+  },
+  "org.springframework.expression.spel.support.<unknown>#convertAllArguments(converter,arguments,method)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Convert a supplied set of arguments into the requested types. If the parameterTypes are related to\n\t * a varargs method then the final entry in the parameterTypes array is going to be an array itself whose\n\t * component type should be used as the conversion target for extraneous arguments. (For example, if the\n\t * parameterTypes are {Integer, String[]} and the input arguments are {Integer, boolean, float} then both\n\t * the boolean and float must be converted to strings). This method does *not* repackage the arguments\n\t * into a form suitable for the varargs invocation - a subsequent call to setupArgumentsForVarargsInvocation handles that.\n\t * @param converter the converter to use for type conversions\n\t * @param arguments the arguments to convert to the requested parameter types\n\t * @param method the target Method\n\t * @return true if some kind of conversion occurred on the argument\n\t * @throws SpelEvaluationException if there is a problem with conversion\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "converter",
+      "arguments",
+      "method"
+    ],
+    "position": {
+      "column": 1,
+      "line": 251
+    },
+    "return": "boolean",
+    "signature": "public boolean convertAllArguments(TypeConverter converter, Object[] arguments, Method method)",
+    "source_code": "\tpublic static boolean convertAllArguments(TypeConverter converter, Object[] arguments, Method method)\n\t\t\tthrows SpelEvaluationException {\n\n\t\tInteger varargsPosition = (method.isVarArgs() ? method.getParameterCount() - 1 : null);\n\t\treturn convertArguments(converter, arguments, method, varargsPosition);\n\t}"
+  },
+  "org.springframework.expression.spel.support.<unknown>#convertAllMethodHandleArguments(converter,arguments,methodHandle,varargsPosition)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Takes an input set of argument values and converts them to the types specified as the\n\t * required parameter types. The arguments are converted 'in-place' in the input array.\n\t * @param converter the type converter to use for attempting conversions\n\t * @param arguments the actual arguments that need conversion\n\t * @param methodHandle the target MethodHandle\n\t * @param varargsPosition the known position of the varargs argument, if any\n\t * ({@code null} if not varargs)\n\t * @return {@code true} if some kind of conversion occurred on an argument\n\t * @throws EvaluationException if a problem occurs during conversion\n\t * @since 6.1\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "converter",
+      "arguments",
+      "methodHandle",
+      "varargsPosition"
+    ],
+    "position": {
+      "column": 1,
+      "line": 348
+    },
+    "return": "boolean",
+    "signature": "public boolean convertAllMethodHandleArguments(TypeConverter converter, Object[] arguments,\n\t\t\tMethodHandle methodHandle, @Nullable Integer varargsPosition)",
+    "source_code": "\tpublic static boolean convertAllMethodHandleArguments(TypeConverter converter, Object[] arguments,\n\t\t\tMethodHandle methodHandle, @Nullable Integer varargsPosition) throws EvaluationException {\n\n\t\tboolean conversionOccurred = false;\n\t\tfinal MethodType methodHandleArgumentTypes = methodHandle.type();\n\t\tif (varargsPosition == null) {\n\t\t\tfor (int i = 0; i < arguments.length; i++) {\n\t\t\t\tClass<?> argumentClass = methodHandleArgumentTypes.parameterType(i);\n\t\t\t\tResolvableType resolvableType = ResolvableType.forClass(argumentClass);\n\t\t\t\tTypeDescriptor targetType = new TypeDescriptor(resolvableType, argumentClass, null);\n\n\t\t\t\tObject argument = arguments[i];\n\t\t\t\targuments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);\n\t\t\t\tconversionOccurred |= (argument != arguments[i]);\n\t\t\t}\n\t\t}\n\t\telse {\n\t\t\t// Convert everything up to the varargs position\n\t\t\tfor (int i = 0; i < varargsPosition; i++) {\n\t\t\t\tClass<?> argumentClass = methodHandleArgumentTypes.parameterType(i);\n\t\t\t\tResolvableType resolvableType = ResolvableType.forClass(argumentClass);\n\t\t\t\tTypeDescriptor targetType = new TypeDescriptor(resolvableType, argumentClass, null);\n\n\t\t\t\tObject argument = arguments[i];\n\t\t\t\targuments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);\n\t\t\t\tconversionOccurred |= (argument != arguments[i]);\n\t\t\t}\n\n\t\t\tfinal Class<?> varArgClass = methodHandleArgumentTypes.lastParameterType().componentType();\n\t\t\tResolvableType varArgResolvableType = ResolvableType.forClass(varArgClass);\n\t\t\tTypeDescriptor varArgContentType = new TypeDescriptor(varArgResolvableType, varArgClass, null);\n\n\t\t\t// If the target is varargs and there is just one more argument, then convert it here.\n\t\t\tif (varargsPosition == arguments.length - 1) {\n\t\t\t\tObject argument = arguments[varargsPosition];\n\t\t\t\tTypeDescriptor sourceType = TypeDescriptor.forObject(argument);\n\t\t\t\tif (argument == null) {\n\t\t\t\t\t// Perform the equivalent of GenericConversionService.convertNullSource() for a single argument.\n\t\t\t\t\tif (varArgContentType.getElementTypeDescriptor().getObjectType() == Optional.class) {\n\t\t\t\t\t\targuments[varargsPosition] = Optional.empty();\n\t\t\t\t\t\tconversionOccurred = true;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t// If the argument type is equal to the varargs element type, there is no need to\n\t\t\t\t// convert it or wrap it in an array. For example, using StringToArrayConverter to\n\t\t\t\t// convert a String containing a comma would result in the String being split and\n\t\t\t\t// repackaged in an array when it should be used as-is.\n\t\t\t\telse if (!sourceType.equals(varArgContentType.getElementTypeDescriptor())) {\n\t\t\t\t\targuments[varargsPosition] = converter.convertValue(argument, sourceType, varArgContentType);\n\t\t\t\t}\n\t\t\t\t// Possible outcomes of the above if-else block:\n\t\t\t\t// 1) the input argument was null, and nothing was done.\n\t\t\t\t// 2) the input argument was null; the varargs element type is Optional; and the argument was converted to Optional.empty().\n\t\t\t\t// 3) the input argument was correct type but not wrapped in an array, and nothing was done.\n\t\t\t\t// 4) the input argument was already compatible (i.e., array of valid type), and nothing was done.\n\t\t\t\t// 5) the input argument was the wrong type and got converted and wrapped in an array.\n\t\t\t\tif (argument != arguments[varargsPosition] &&\n\t\t\t\t\t\t!isFirstEntryInArray(argument, arguments[varargsPosition])) {\n\t\t\t\t\tconversionOccurred = true; // case 5\n\t\t\t\t}\n\t\t\t}\n\t\t\t// Otherwise, convert remaining arguments to the varargs element type.\n\t\t\telse {\n\t\t\t\tAssert.state(varArgContentType != null, \"No element type\");\n\t\t\t\tfor (int i = varargsPosition; i < arguments.length; i++) {\n\t\t\t\t\tObject argument = arguments[i];\n\t\t\t\t\targuments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), varArgContentType);\n\t\t\t\t\tconversionOccurred |= (argument != arguments[i]);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn conversionOccurred;\n\t}"
+  },
+  "org.springframework.format.datetime.<unknown>#print(date,locale)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "date",
+      "locale"
+    ],
+    "position": {
+      "column": 1,
+      "line": 195
+    },
+    "return": "String",
+    "signature": "public String print(Date date, Locale locale)",
+    "source_code": "\tpublic String print(Date date, Locale locale) {\n\t\treturn getDateFormat(locale).format(date);\n\t}"
+  },
+  "org.springframework.http.client.reactive.<unknown>#add(key,value)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "key",
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 61
+    },
+    "return": "void",
+    "signature": "public void add(String key, @Nullable String value)",
+    "source_code": "\tpublic void add(String key, @Nullable String value) {\n\t\tif (!(this.headers instanceof HttpFields.Mutable mutableHttpFields)) {\n\t\t\tthrow new IllegalStateException(IMMUTABLE_HEADER_ERROR);\n\t\t}\n\t\tmutableHttpFields.add(key, value);\n\t}"
+  },
+  "org.springframework.http.client.reactive.<unknown>#put(key,value)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "key",
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 135
+    },
+    "return": "List<String>",
+    "signature": "public List<String> put(String key, List<String> value)",
+    "source_code": "\tpublic List<String> put(String key, List<String> value) {\n\t\tif (!(this.headers instanceof HttpFields.Mutable mutableHttpFields)) {\n\t\t\tthrow new IllegalStateException(IMMUTABLE_HEADER_ERROR);\n\t\t}\n\t\tList<String> oldValues = get(key);\n\t\tmutableHttpFields.put(key, value);\n\t\treturn oldValues;\n\t}"
+  },
+  "org.springframework.http.client.reactive.<unknown>#set(key,value)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "key",
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 79
+    },
+    "return": "void",
+    "signature": "public void set(String key, @Nullable String value)",
+    "source_code": "\tpublic void set(String key, @Nullable String value) {\n\t\tif (!(this.headers instanceof HttpFields.Mutable mutableHttpFields)) {\n\t\t\tthrow new IllegalStateException(IMMUTABLE_HEADER_ERROR);\n\t\t}\n\t\tmutableHttpFields.put(key, value);\n\t}"
+  },
+  "org.springframework.http.client.reactive.<unknown>#setAll(Map<String,values)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "Map<String",
+      "values"
+    ],
+    "position": {
+      "column": 1,
+      "line": 87
+    },
+    "return": "void",
+    "signature": "public void setAll(Map<String, String> values)",
+    "source_code": "\tpublic void setAll(Map<String, String> values) {\n\t\tvalues.forEach(this::set);\n\t}"
+  },
+  "org.springframework.http.codec.<unknown>#addDefaultHeaders(message,resource,contentType,Map<String,hints)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Adds the default headers for the given resource to the given message.\n\t * @since 6.1\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "message",
+      "resource",
+      "contentType",
+      "Map<String",
+      "hints"
+    ],
+    "position": {
+      "column": 1,
+      "line": 153
+    },
+    "return": "Mono<Void>",
+    "signature": "public Mono<Void> addDefaultHeaders(ReactiveHttpOutputMessage message, Resource resource, @Nullable MediaType contentType, Map<String, Object> hints)",
+    "source_code": "\tpublic Mono<Void> addDefaultHeaders(ReactiveHttpOutputMessage message, Resource resource, @Nullable MediaType contentType, Map<String, Object> hints) {\n\t\treturn Mono.defer(() -> {\n\t\t\tHttpHeaders headers = message.getHeaders();\n\t\t\tMediaType resourceMediaType = getResourceMediaType(contentType, resource, hints);\n\t\t\theaders.setContentType(resourceMediaType);\n\t\t\tif (message instanceof ServerHttpResponse) {\n\t\t\t\t// server side\n\t\t\t\theaders.set(HttpHeaders.ACCEPT_RANGES, \"bytes\");\n\t\t\t}\n\n\t\t\tif (headers.getContentLength() < 0) {\n\t\t\t\treturn lengthOf(resource)\n\t\t\t\t\t\t.flatMap(contentLength -> {\n\t\t\t\t\t\t\theaders.setContentLength(contentLength);\n\t\t\t\t\t\t\treturn Mono.empty();\n\t\t\t\t\t\t});\n\t\t\t}\n\t\t\telse {\n\t\t\t\treturn Mono.empty();\n\t\t\t}\n\t\t});\n\t}"
+  },
+  "org.springframework.http.converter.<unknown>#read(clazz,inputMessage)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * This implementation simple delegates to {@link #readInternal(Class, HttpInputMessage)}.\n\t * Future implementations might add some default behavior, however.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "clazz",
+      "inputMessage"
+    ],
+    "position": {
+      "column": 1,
+      "line": 195
+    },
+    "return": "T",
+    "signature": "public T read(Class<? extends T> clazz, HttpInputMessage inputMessage)",
+    "source_code": "\tpublic final T read(Class<? extends T> clazz, HttpInputMessage inputMessage)\n\t\t\tthrows IOException, HttpMessageNotReadableException {\n\n\t\treturn readInternal(clazz, inputMessage);\n\t}"
+  },
+  "org.springframework.http.server.reactive.<unknown>#createRequest(request,context)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "request",
+      "context"
+    ],
+    "position": {
+      "column": 1,
+      "line": 66
+    },
+    "return": "ServletServerHttpRequest",
+    "signature": "protected ServletServerHttpRequest createRequest(HttpServletRequest request, AsyncContext context)",
+    "source_code": "\tprotected ServletServerHttpRequest createRequest(HttpServletRequest request, AsyncContext context)\n\t\t\tthrows IOException, URISyntaxException {\n\n\t\tif (jetty11Present) {\n\t\t\tAssert.state(getServletPath() != null, \"Servlet path is not initialized\");\n\t\t\treturn new Jetty11ServerHttpRequest(\n\t\t\t\t\trequest, context, getServletPath(), getDataBufferFactory(), getBufferSize());\n\t\t}\n\t\telse {\n\t\t\treturn super.createRequest(request, context);\n\t\t}\n\t}"
+  },
+  "org.springframework.http.support.<unknown>#setAll(Map<String,values)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "Map<String",
+      "values"
+    ],
+    "position": {
+      "column": 1,
+      "line": 94
+    },
+    "return": "void",
+    "signature": "public void setAll(Map<String, String> values)",
+    "source_code": "\tpublic void setAll(Map<String, String> values) {\n\t\tvalues.forEach(this::set);\n\t}"
+  },
+  "org.springframework.jdbc.core.simple.<unknown>#param(jdbcIndex,value)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "jdbcIndex",
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 115
+    },
+    "return": "StatementSpec",
+    "signature": "public StatementSpec param(int jdbcIndex, @Nullable Object value)",
+    "source_code": "\t\tpublic StatementSpec param(int jdbcIndex, @Nullable Object value) {\n\t\t\tif (jdbcIndex < 1) {\n\t\t\t\tthrow new IllegalArgumentException(\"Invalid JDBC index: needs to start at 1\");\n\t\t\t}\n\t\t\tvalidateIndexedParamValue(value);\n\t\t\tint index = jdbcIndex - 1;\n\t\t\tint size = this.indexedParams.size();\n\t\t\tif (index < size) {\n\t\t\t\tthis.indexedParams.set(index, value);\n\t\t\t}\n\t\t\telse {\n\t\t\t\tfor (int i = size; i < index; i++) {\n\t\t\t\t\tthis.indexedParams.add(null);\n\t\t\t\t}\n\t\t\t\tthis.indexedParams.add(value);\n\t\t\t}\n\t\t\treturn this;\n\t\t}"
+  },
+  "org.springframework.jdbc.core.simple.<unknown>#param(jdbcIndex,value,sqlType)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "jdbcIndex",
+      "value",
+      "sqlType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 143
+    },
+    "return": "StatementSpec",
+    "signature": "public StatementSpec param(int jdbcIndex, @Nullable Object value, int sqlType)",
+    "source_code": "\t\tpublic StatementSpec param(int jdbcIndex, @Nullable Object value, int sqlType) {\n\t\t\treturn param(jdbcIndex, new SqlParameterValue(sqlType, value));\n\t\t}"
+  },
+  "org.springframework.jdbc.core.simple.<unknown>#params(Map<String,paramMap)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "Map<String",
+      "paramMap"
+    ],
+    "position": {
+      "column": 1,
+      "line": 172
+    },
+    "return": "StatementSpec",
+    "signature": "public StatementSpec params(Map<String, ?> paramMap)",
+    "source_code": "\t\tpublic StatementSpec params(Map<String, ?> paramMap) {\n\t\t\tthis.namedParams.addValues(paramMap);\n\t\t\treturn this;\n\t\t}"
+  },
+  "org.springframework.jdbc.datasource.init.<unknown>#splitSqlScript(resource,script,separator,commentPrefix,blockCommentStartDelimiter,blockCommentEndDelimiter,statements)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Split an SQL script into separate statements delimited by the provided\n\t * separator string. Each individual statement will be added to the provided\n\t * {@code List}.\n\t * <p>Within the script, the provided {@code commentPrefix} will be honored:\n\t * any text beginning with the comment prefix and extending to the end of the\n\t * line will be omitted from the output. Similarly, the provided\n\t * {@code blockCommentStartDelimiter} and {@code blockCommentEndDelimiter}\n\t * delimiters will be honored: any text enclosed in a block comment will be\n\t * omitted from the output. In addition, multiple adjacent whitespace characters\n\t * will be collapsed into a single space.\n\t * @param resource the resource from which the script was read\n\t * @param script the SQL script\n\t * @param separator text separating each statement\n\t * (typically a ';' or newline character)\n\t * @param commentPrefix the prefix that identifies SQL line comments\n\t * (typically \"--\")\n\t * @param blockCommentStartDelimiter the <em>start</em> block comment delimiter;\n\t * never {@code null} or empty\n\t * @param blockCommentEndDelimiter the <em>end</em> block comment delimiter;\n\t * never {@code null} or empty\n\t * @param statements the list that will contain the individual statements\n\t * @throws ScriptException if an error occurred while splitting the SQL script\n\t * @deprecated as of Spring Framework 5.2.16 with no plans for replacement.\n\t * This is an internal API and will likely be removed in Spring Framework 6.0.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "resource",
+      "script",
+      "separator",
+      "commentPrefix",
+      "blockCommentStartDelimiter",
+      "blockCommentEndDelimiter",
+      "statements"
+    ],
+    "position": {
+      "column": 1,
+      "line": 595
+    },
+    "return": "void",
+    "signature": "public void splitSqlScript(@Nullable EncodedResource resource, String script,\n\t\t\tString separator, String commentPrefix, String blockCommentStartDelimiter,\n\t\t\tString blockCommentEndDelimiter, List<String> statements)",
+    "source_code": "\tpublic static void splitSqlScript(@Nullable EncodedResource resource, String script,\n\t\t\tString separator, String commentPrefix, String blockCommentStartDelimiter,\n\t\t\tString blockCommentEndDelimiter, List<String> statements) throws ScriptException {\n\n\t\tAssert.hasText(commentPrefix, \"'commentPrefix' must not be null or empty\");\n\t\tsplitSqlScript(resource, script, separator, new String[] { commentPrefix },\n\t\t\t\tblockCommentStartDelimiter, blockCommentEndDelimiter, statements);\n\t}"
+  },
+  "org.springframework.messaging.handler.<unknown>#formatArgumentError(param,message)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "param",
+      "message"
+    ],
+    "position": {
+      "column": 1,
+      "line": 336
+    },
+    "return": "String",
+    "signature": "protected String formatArgumentError(MethodParameter param, String message)",
+    "source_code": "\tprotected static String formatArgumentError(MethodParameter param, String message) {\n\t\treturn \"Could not resolve parameter [\" + param.getParameterIndex() + \"] in \" +\n\t\t\t\tparam.getExecutable().toGenericString() + (StringUtils.hasText(message) ? \": \" + message : \"\");\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.<unknown>#resolveArgumentValue(parameter,message)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "parameter",
+      "message"
+    ],
+    "position": {
+      "column": 1,
+      "line": 84
+    },
+    "return": "Object",
+    "signature": "public Object resolveArgumentValue(MethodParameter parameter, Message<?> message)",
+    "source_code": "\tpublic Object resolveArgumentValue(MethodParameter parameter, Message<?> message) {\n\t\tNamedValueInfo namedValueInfo = getNamedValueInfo(parameter);\n\t\tMethodParameter nestedParameter = parameter.nestedIfOptional();\n\n\t\tObject resolvedName = resolveEmbeddedValuesAndExpressions(namedValueInfo.name);\n\t\tif (resolvedName == null) {\n\t\t\tthrow new IllegalArgumentException(\n\t\t\t\t\t\"Specified name must not resolve to null: [\" + namedValueInfo.name + \"]\");\n\t\t}\n\n\t\tObject arg = resolveArgumentInternal(nestedParameter, message, resolvedName.toString());\n\t\tif (arg == null) {\n\t\t\tif (namedValueInfo.defaultValue != null) {\n\t\t\t\targ = resolveEmbeddedValuesAndExpressions(namedValueInfo.defaultValue);\n\t\t\t}\n\t\t\telse if (namedValueInfo.required && !nestedParameter.isOptional()) {\n\t\t\t\thandleMissingValue(namedValueInfo.name, nestedParameter, message);\n\t\t\t}\n\t\t\targ = handleNullValue(namedValueInfo.name, arg, nestedParameter.getNestedParameterType());\n\t\t}\n\t\telse if (\"\".equals(arg) && namedValueInfo.defaultValue != null) {\n\t\t\targ = resolveEmbeddedValuesAndExpressions(namedValueInfo.defaultValue);\n\t\t}\n\n\t\tif (parameter != nestedParameter || !ClassUtils.isAssignableValue(parameter.getParameterType(), arg)) {\n\t\t\targ = this.conversionService.convert(arg, new TypeDescriptor(parameter));\n\t\t\t// Check for null value after conversion of incoming argument value\n\t\t\tif (arg == null) {\n\t\t\t\tif (namedValueInfo.defaultValue != null) {\n\t\t\t\t\targ = resolveEmbeddedValuesAndExpressions(namedValueInfo.defaultValue);\n\t\t\t\t}\n\t\t\t\telse if (namedValueInfo.required && !nestedParameter.isOptional()) {\n\t\t\t\t\thandleMissingValue(namedValueInfo.name, nestedParameter, message);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\treturn arg;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.support.<unknown>#handleResolvedValue(arg,name,parameter,message)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Invoked after a value is resolved.\n\t * @param arg the resolved argument value\n\t * @param name the argument name\n\t * @param parameter the argument parameter type\n\t * @param message the message\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "arg",
+      "name",
+      "parameter",
+      "message"
+    ],
+    "position": {
+      "column": 1,
+      "line": 242
+    },
+    "return": "void",
+    "signature": "protected void handleResolvedValue(@Nullable Object arg, String name, MethodParameter parameter, Message<?> message)",
+    "source_code": "\tprotected void handleResolvedValue(\n\t\t\t@Nullable Object arg, String name, MethodParameter parameter, Message<?> message) {\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.support.<unknown>#resolveArgumentInternal(parameter,message,name)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Resolves the given parameter type and value name into an argument value.\n\t * @param parameter the method parameter to resolve to an argument value\n\t * @param message the current request\n\t * @param name the name of the value being resolved\n\t * @return the resolved argument. May be {@code null}\n\t * @throws Exception in case of errors\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "parameter",
+      "message",
+      "name"
+    ],
+    "position": {
+      "column": 1,
+      "line": 201
+    },
+    "return": "Object",
+    "signature": "protected Object resolveArgumentInternal(MethodParameter parameter, Message<?> message, String name)",
+    "source_code": "\tprotected abstract Object resolveArgumentInternal(MethodParameter parameter, Message<?> message, String name)\n\t\t\tthrows Exception;\n\n\t/**\n\t * Invoked when a value is required, but {@link #resolveArgumentInternal}"
+  },
+  "org.springframework.scheduling.annotation.<unknown>#createRunnable(target,method,qualifier)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Create a {@link Runnable} for the given bean instance,\n\t * calling the specified scheduled method.\n\t * <p>The default implementation creates a {@link ScheduledMethodRunnable}.\n\t * @param target the target bean instance\n\t * @param method the scheduled method to call\n\t * @since 6.1\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "target",
+      "method",
+      "qualifier"
+    ],
+    "position": {
+      "column": 1,
+      "line": 526
+    },
+    "return": "Runnable",
+    "signature": "protected Runnable createRunnable(Object target, Method method, @Nullable String qualifier)",
+    "source_code": "\tprotected Runnable createRunnable(Object target, Method method, @Nullable String qualifier) {\n\t\tRunnable runnable = createRunnable(target, method);\n\t\tif (runnable != null) {\n\t\t\treturn runnable;\n\t\t}\n\t\tAssert.isTrue(method.getParameterCount() == 0, \"Only no-arg methods may be annotated with @Scheduled\");\n\t\tMethod invocableMethod = AopUtils.selectInvocableMethod(method, target.getClass());\n\t\treturn new ScheduledMethodRunnable(target, invocableMethod, qualifier, this.registrar::getObservationRegistry);\n\t}"
+  },
+  "org.springframework.scheduling.concurrent.<unknown>#afterExecute(task,ex)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * An after-execute callback for framework subclasses to delegate to\n\t * (for start/stop handling), and possibly also for custom subclasses\n\t * to extend (making sure to call this implementation as well).\n\t * @param task the task that has been executed\n\t * @param ex the exception thrown during execution, if any\n\t * @since 6.1\n\t * @see ThreadPoolExecutor#afterExecute(Runnable, Throwable)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "task",
+      "ex"
+    ],
+    "position": {
+      "column": 1,
+      "line": 454
+    },
+    "return": "void",
+    "signature": "protected void afterExecute(Runnable task, @Nullable Throwable ex)",
+    "source_code": "\tprotected void afterExecute(Runnable task, @Nullable Throwable ex) {\n\t\tif (this.lifecycleDelegate != null) {\n\t\t\tthis.lifecycleDelegate.afterExecute();\n\t\t}\n\t}"
+  },
+  "org.springframework.test.context.support.<unknown>#addPropertySourcesToEnvironment(environment,resourceLoader,descriptors)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Add property sources for the given {@code descriptors} to the supplied\n\t * {@link ConfigurableEnvironment environment}.\n\t * <p>Property placeholders in resource locations (i.e., <code>${...}</code>)\n\t * will be {@linkplain Environment#resolveRequiredPlaceholders(String) resolved}\n\t * against the {@code Environment}.\n\t * <p>A {@link ResourcePatternResolver} will be used to resolve resource\n\t * location patterns into multiple resource locations.\n\t * <p>Each {@link PropertySource} will be created via the configured\n\t * {@link PropertySourceDescriptor#propertySourceFactory() PropertySourceFactory}\n\t * (or the {@link DefaultPropertySourceFactory} if no factory is configured)\n\t * and added to the {@link PropertySources} of the environment with the highest\n\t * precedence.\n\t * @param environment the environment to update; never {@code null}\n\t * @param resourceLoader the {@code ResourceLoader} to use to load resources;\n\t * never {@code null}\n\t * @param descriptors the property source descriptors to process; potentially\n\t * empty but never {@code null}\n\t * @throws IllegalStateException if an error occurs while processing the\n\t * descriptors and registering property sources\n\t * @since 6.1\n\t * @see TestPropertySource#locations\n\t * @see TestPropertySource#encoding\n\t * @see TestPropertySource#factory\n\t * @see PropertySourceFactory\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "environment",
+      "resourceLoader",
+      "descriptors"
+    ],
+    "position": {
+      "column": 1,
+      "line": 288
+    },
+    "return": "void",
+    "signature": "public void addPropertySourcesToEnvironment(ConfigurableEnvironment environment,\n\t\t\tResourceLoader resourceLoader, List<PropertySourceDescriptor> descriptors)",
+    "source_code": "\tpublic static void addPropertySourcesToEnvironment(ConfigurableEnvironment environment,\n\t\t\tResourceLoader resourceLoader, List<PropertySourceDescriptor> descriptors) {\n\n\t\tAssert.notNull(environment, \"'environment' must not be null\");\n\t\tAssert.notNull(resourceLoader, \"'resourceLoader' must not be null\");\n\t\tAssert.notNull(descriptors, \"'descriptors' must not be null\");\n\t\tResourcePatternResolver resourcePatternResolver =\n\t\t\t\tResourcePatternUtils.getResourcePatternResolver(resourceLoader);\n\t\tMutablePropertySources propertySources = environment.getPropertySources();\n\t\ttry {\n\t\t\tfor (PropertySourceDescriptor descriptor : descriptors) {\n\t\t\t\tif (!descriptor.locations().isEmpty()) {\n\t\t\t\t\tClass<? extends PropertySourceFactory> factoryClass = descriptor.propertySourceFactory();\n\t\t\t\t\tPropertySourceFactory factory = (factoryClass != null ?\n\t\t\t\t\t\t\tBeanUtils.instantiateClass(factoryClass) : defaultPropertySourceFactory);\n\n\t\t\t\t\tfor (String location : descriptor.locations()) {\n\t\t\t\t\t\tString resolvedLocation = environment.resolveRequiredPlaceholders(location);\n\t\t\t\t\t\tfor (Resource resource : resourcePatternResolver.getResources(resolvedLocation)) {\n\t\t\t\t\t\t\tPropertySource<?> propertySource = factory.createPropertySource(descriptor.name(),\n\t\t\t\t\t\t\t\t\tnew EncodedResource(resource, descriptor.encoding()));\n\t\t\t\t\t\t\tpropertySources.addFirst(propertySource);\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tcatch (IOException ex) {\n\t\t\tthrow new IllegalStateException(\"Failed to add PropertySource to Environment\", ex);\n\t\t}\n\t}"
+  },
+  "org.springframework.test.context.support.<unknown>#put(key,value)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "key",
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 462
+    },
+    "return": "Object",
+    "signature": "public Object put(Object key, Object value)",
+    "source_code": "\t\tpublic Object put(Object key, Object value) {\n\t\t\tif (key instanceof String str) {\n\t\t\t\treturn this.map.put(str, value);\n\t\t\t}\n\t\t\t// No need to invoke super.put(key, value);\n\t\t\treturn null;\n\t\t}"
+  },
+  "org.springframework.util.<unknown>#findFieldIgnoreCase(clazz,name)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Attempt to find a {@link Field field} on the supplied {@link Class} with the\n\t * supplied {@code name}. Searches all superclasses up to {@link Object}.\n\t * @param clazz the class to introspect\n\t * @param name the name of the field (with upper/lower case to be ignored)\n\t * @return the corresponding Field object, or {@code null} if not found\n\t * @since 6.1\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "clazz",
+      "name"
+    ],
+    "position": {
+      "column": 1,
+      "line": 621
+    },
+    "return": "Field",
+    "signature": "public Field findFieldIgnoreCase(Class<?> clazz, String name)",
+    "source_code": "\tpublic static Field findFieldIgnoreCase(Class<?> clazz, String name) {\n\t\tAssert.notNull(clazz, \"Class must not be null\");\n\t\tAssert.notNull(name, \"Name must not be null\");\n\t\tClass<?> searchType = clazz;\n\t\twhile (Object.class != searchType && searchType != null) {\n\t\t\tField[] fields = getDeclaredFields(searchType);\n\t\t\tfor (Field field : fields) {\n\t\t\t\tif (name.equalsIgnoreCase(field.getName())) {\n\t\t\t\t\treturn field;\n\t\t\t\t}\n\t\t\t}\n\t\t\tsearchType = searchType.getSuperclass();\n\t\t}\n\t\treturn null;\n\t}"
+  },
+  "org.springframework.util.<unknown>#getOrDefault(key,defaultValue)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "key",
+      "defaultValue"
+    ],
+    "position": {
+      "column": 1,
+      "line": 243
+    },
+    "return": "V",
+    "signature": "public V getOrDefault(@Nullable Object key, @Nullable V defaultValue)",
+    "source_code": "\tpublic V getOrDefault(@Nullable Object key, @Nullable V defaultValue) {\n\t\tReference<K, V> ref = getReference(key, Restructure.WHEN_NECESSARY);\n\t\tEntry<K, V> entry = (ref != null ? ref.get() : null);\n\t\treturn (entry != null ? entry.getValue() : defaultValue);\n\t}"
+  },
+  "org.springframework.util.comparator.<unknown>#compare(left,right)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "left",
+      "right"
+    ],
+    "position": {
+      "column": 1,
+      "line": 97
+    },
+    "return": "int",
+    "signature": "public int compare(@Nullable T left, @Nullable T right)",
+    "source_code": "\tpublic int compare(@Nullable T left, @Nullable T right) {\n\t\tComparator<T> comparator = this.nullsLow ? Comparator.nullsFirst(this.nonNullComparator) : Comparator.nullsLast(this.nonNullComparator);\n\t\treturn comparator.compare(left, right);\n\t}"
+  },
+  "org.springframework.util.comparator.<unknown>#compare(o1,o2)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "o1",
+      "o2"
+    ],
+    "position": {
+      "column": 1,
+      "line": 95
+    },
+    "return": "int",
+    "signature": "public int compare(@Nullable T o1, @Nullable T o2)",
+    "source_code": "\tpublic int compare(@Nullable T o1, @Nullable T o2) {\n\t\tif (o1 == o2) {\n\t\t\treturn 0;\n\t\t}\n\t\tif (o1 == null) {\n\t\t\treturn (this.nullsLow ? -1 : 1);\n\t\t}\n\t\tif (o2 == null) {\n\t\t\treturn (this.nullsLow ? 1 : -1);\n\t\t}\n\t\treturn this.nonNullComparator.compare(o1, o2);\n\t}"
+  },
+  "org.springframework.util.comparator.<unknown>#compare(v1,v2)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "v1",
+      "v2"
+    ],
+    "position": {
+      "column": 1,
+      "line": 66
+    },
+    "return": "int",
+    "signature": "public int compare(Boolean v1, Boolean v2)",
+    "source_code": "\tpublic int compare(Boolean v1, Boolean v2) {\n\t\treturn (v1 ^ v2) ? ((v1 ^ this.trueLow) ? 1 : -1) : 0;\n\t}"
+  },
+  "org.springframework.validation.beanvalidation.<unknown>#compare(result1,result2)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "result1",
+      "result2"
+    ],
+    "position": {
+      "column": 1,
+      "line": 571
+    },
+    "return": "int",
+    "signature": "public int compare(ParameterValidationResult result1, ParameterValidationResult result2)",
+    "source_code": "\t\tpublic int compare(ParameterValidationResult result1, ParameterValidationResult result2) {\n\t\t\tint index1 = result1.getMethodParameter().getParameterIndex();\n\t\t\tint index2 = result2.getMethodParameter().getParameterIndex();\n\t\t\tint i = Integer.compare(index1, index2);\n\t\t\tif (i != 0) {\n\t\t\t\treturn i;\n\t\t\t}\n\t\t\tif (result1 instanceof ParameterErrors errors1 && result2 instanceof ParameterErrors errors2) {\n\t\t\t\tInteger containerIndex1 = errors1.getContainerIndex();\n\t\t\t\tInteger containerIndex2 = errors2.getContainerIndex();\n\t\t\t\tif (containerIndex1 != null && containerIndex2 != null) {\n\t\t\t\t\ti = Integer.compare(containerIndex1, containerIndex2);\n\t\t\t\t\tif (i != 0) {\n\t\t\t\t\t\treturn i;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\ti = compareKeys(errors1, errors2);\n\t\t\t\treturn i;\n\t\t\t}\n\t\t\treturn 0;\n\t\t}"
+  },
+  "org.springframework.validation.beanvalidation.<unknown>#invokeValidatorForReturnValue(target,method,returnValue,groups)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Invoke the validator, and return the resulting violations.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "target",
+      "method",
+      "returnValue",
+      "groups"
+    ],
+    "position": {
+      "column": 1,
+      "line": 292
+    },
+    "return": "Set<ConstraintViolation<Object>>",
+    "signature": "public Set<ConstraintViolation<Object>> invokeValidatorForReturnValue(Object target, Method method, @Nullable Object returnValue, Class<?>[] groups)",
+    "source_code": "\tpublic final Set<ConstraintViolation<Object>> invokeValidatorForReturnValue(\n\t\t\tObject target, Method method, @Nullable Object returnValue, Class<?>[] groups) {\n\n\t\tExecutableValidator execVal = this.validator.get().forExecutables();\n\t\treturn execVal.validateReturnValue(target, method, returnValue, groups);\n\t}"
+  },
+  "org.springframework.validation.beanvalidation.<unknown>#resolveName(parameter,value)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "parameter",
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 536
+    },
+    "return": "String",
+    "signature": "public String resolveName(MethodParameter parameter, @Nullable Object value)",
+    "source_code": "\t\tpublic String resolveName(MethodParameter parameter, @Nullable Object value) {\n\t\t\tString objectName = null;\n\t\t\tif (parameter.getParameterIndex() != -1) {\n\t\t\t\tobjectName = parameter.getParameterName();\n\t\t\t}\n\t\t\telse {\n\t\t\t\ttry {\n\t\t\t\t\tMethod method = parameter.getMethod();\n\t\t\t\t\tif (method != null) {\n\t\t\t\t\t\tClass<?> containingClass = parameter.getContainingClass();\n\t\t\t\t\t\tClass<?> resolvedType = GenericTypeResolver.resolveReturnType(method, containingClass);\n\t\t\t\t\t\tobjectName = Conventions.getVariableNameForReturnType(method, resolvedType, value);\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tcatch (IllegalArgumentException ex) {\n\t\t\t\t\t// insufficient type information\n\t\t\t\t}\n\t\t\t}\n\t\t\tif (objectName == null) {\n\t\t\t\tint index = parameter.getParameterIndex();\n\t\t\t\tobjectName = (parameter.getExecutable().getName() + (index != -1 ? \".arg\" + index : \".returnValue\"));\n\t\t\t}\n\t\t\treturn objectName;\n\t\t}"
+  },
+  "org.springframework.web.bind.<unknown>#errorsToStringList(errors,source,locale)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Variant of {@link #errorsToStringList(List)} that uses a\n\t * {@link MessageSource} to resolve the message code of the error, or fall\n\t * back on the error's default message.\n\t * @since 6.0\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "errors",
+      "source",
+      "locale"
+    ],
+    "position": {
+      "column": 1,
+      "line": 182
+    },
+    "return": "List<String>",
+    "signature": "public List<String> errorsToStringList(List<? extends ObjectError> errors, @Nullable MessageSource source, Locale locale)",
+    "source_code": "\tpublic static List<String> errorsToStringList(\n\t\t\tList<? extends ObjectError> errors, @Nullable MessageSource source, Locale locale) {\n\n\t\treturn (source != null ?\n\t\t\t\terrorsToStringList(errors, error -> source.getMessage(error, locale)) :\n\t\t\t\terrorsToStringList(errors));\n\t}"
+  },
+  "org.springframework.web.bind.<unknown>#resolveErrorMessages(messageSource,locale)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Resolve global and field errors to messages with the given\n\t * {@link MessageSource} and {@link Locale}.\n\t * @return a Map with errors as key and resolved messages as value\n\t * @since 6.0.3\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "messageSource",
+      "locale"
+    ],
+    "position": {
+      "column": 1,
+      "line": 148
+    },
+    "return": "String>",
+    "signature": "public String> resolveErrorMessages(MessageSource messageSource, Locale locale)",
+    "source_code": "\tpublic Map<ObjectError, String> resolveErrorMessages(MessageSource messageSource, Locale locale) {\n\t\tMap<ObjectError, String> map = new LinkedHashMap<>();\n\t\taddMessages(map, getGlobalErrors(), messageSource, locale);\n\t\taddMessages(map, getFieldErrors(), messageSource, locale);\n\t\treturn map;\n\t}"
+  },
+  "org.springframework.web.bind.support.<unknown>#createBinder(webRequest,target,objectName)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Create a new {@link WebDataBinder} for the given target object and\n\t * initialize it through a {@link WebBindingInitializer}.\n\t * @throws Exception in case of invalid state or arguments\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "webRequest",
+      "target",
+      "objectName"
+    ],
+    "position": {
+      "column": 1,
+      "line": 71
+    },
+    "return": "WebDataBinder",
+    "signature": "public WebDataBinder createBinder(NativeWebRequest webRequest, @Nullable Object target, String objectName)",
+    "source_code": "\tpublic final WebDataBinder createBinder(\n\t\t\tNativeWebRequest webRequest, @Nullable Object target, String objectName) throws Exception {\n\n\t\treturn createBinderInternal(webRequest, target, objectName, null);\n\t}"
+  },
+  "org.springframework.web.bind.support.<unknown>#createBinder(webRequest,target,objectName,type)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * {@inheritDoc}.\n\t * <p>By default, if the parameter has {@code @Valid}, Bean Validation is\n\t * excluded, deferring to method validation.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "webRequest",
+      "target",
+      "objectName",
+      "type"
+    ],
+    "position": {
+      "column": 1,
+      "line": 83
+    },
+    "return": "WebDataBinder",
+    "signature": "public WebDataBinder createBinder(NativeWebRequest webRequest, @Nullable Object target, String objectName,\n\t\t\tResolvableType type)",
+    "source_code": "\tpublic final WebDataBinder createBinder(\n\t\t\tNativeWebRequest webRequest, @Nullable Object target, String objectName,\n\t\t\tResolvableType type) throws Exception {\n\n\t\treturn createBinderInternal(webRequest, target, objectName, type);\n\t}"
+  },
+  "org.springframework.web.bind.support.<unknown>#resolveValue(name,type)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "name",
+      "type"
+    ],
+    "position": {
+      "column": 1,
+      "line": 165
+    },
+    "return": "Object",
+    "signature": "public Object resolveValue(String name, Class<?> type)",
+    "source_code": "\t\tpublic Object resolveValue(String name, Class<?> type) {\n\t\t\treturn this.map.get(name);\n\t\t}"
+  },
+  "org.springframework.web.client.<unknown>#exchange(exchangeFunction,close)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "exchangeFunction",
+      "close"
+    ],
+    "position": {
+      "column": 1,
+      "line": 448
+    },
+    "return": "T",
+    "signature": "public T exchange(ExchangeFunction<T> exchangeFunction, boolean close)",
+    "source_code": "\t\tpublic <T> T exchange(ExchangeFunction<T> exchangeFunction, boolean close) {\n\t\t\treturn exchangeInternal(exchangeFunction, close);\n\t\t}"
+  },
+  "org.springframework.web.context.request.<unknown>#setAttribute(name,value,scope)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "name",
+      "value",
+      "scope"
+    ],
+    "position": {
+      "column": 1,
+      "line": 110
+    },
+    "return": "void",
+    "signature": "public void setAttribute(String name, Object value, int scope)",
+    "source_code": "\tpublic void setAttribute(String name, Object value, int scope) {\n\t\tgetAttributeMap(scope).put(name, value);\n\t}"
+  },
+  "org.springframework.web.method.<unknown>#checkArguments(beanType,parameters)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "beanType",
+      "parameters"
+    ],
+    "position": {
+      "column": 1,
+      "line": 408
+    },
+    "return": "boolean",
+    "signature": "public boolean checkArguments(Class<?> beanType, MethodParameter[] parameters)",
+    "source_code": "\t\tpublic static boolean checkArguments(Class<?> beanType, MethodParameter[] parameters) {\n\t\t\tif (BEAN_VALIDATION_PRESENT && AnnotationUtils.findAnnotation(beanType, Validated.class) == null) {\n\t\t\t\tfor (MethodParameter param : parameters) {\n\t\t\t\t\tMergedAnnotations merged = MergedAnnotations.from(param.getParameterAnnotations());\n\t\t\t\t\tif (merged.stream().anyMatch(CONSTRAINT_PREDICATE)) {\n\t\t\t\t\t\treturn true;\n\t\t\t\t\t}\n\t\t\t\t\tClass<?> type = param.getParameterType();\n\t\t\t\t\tif (merged.stream().anyMatch(VALID_PREDICATE) && isIndexOrKeyBasedContainer(type)) {\n\t\t\t\t\t\treturn true;\n\t\t\t\t\t}\n\t\t\t\t\tmerged = MergedAnnotations.from(getContainerElementAnnotations(param));\n\t\t\t\t\tif (merged.stream().anyMatch(CONSTRAINT_PREDICATE)) {\n\t\t\t\t\t\treturn true;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\treturn false;\n\t\t}"
+  },
+  "org.springframework.web.method.<unknown>#findProvidedArgument(parameter,providedArgs)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "parameter",
+      "providedArgs"
+    ],
+    "position": {
+      "column": 1,
+      "line": 446
+    },
+    "return": "Object",
+    "signature": "protected Object findProvidedArgument(MethodParameter parameter, @Nullable Object... providedArgs)",
+    "source_code": "\tprotected static Object findProvidedArgument(MethodParameter parameter, @Nullable Object... providedArgs) {\n\t\tif (!ObjectUtils.isEmpty(providedArgs)) {\n\t\t\tfor (Object providedArg : providedArgs) {\n\t\t\t\tif (parameter.getParameterType().isInstance(providedArg)) {\n\t\t\t\t\treturn providedArg;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn null;\n\t}"
+  },
+  "org.springframework.web.method.annotation.<unknown>#constructAttribute(ctor,attributeName,parameter,binderFactory,webRequest)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Construct a new attribute instance with the given constructor.\n\t * <p>Called from\n\t * {@link #createAttribute(String, MethodParameter, WebDataBinderFactory, NativeWebRequest)}\n\t * after constructor resolution.\n\t * @param ctor the constructor to use\n\t * @param attributeName the name of the attribute (never {@code null})\n\t * @param parameter the method parameter declaration\n\t * @param binderFactory for creating WebDataBinder instance\n\t * @param webRequest the current request\n\t * @return the created model attribute (never {@code null})\n\t * @throws BindException in case of constructor argument binding failure\n\t * @throws Exception in case of constructor invocation failure\n\t * @since 5.1\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "ctor",
+      "attributeName",
+      "parameter",
+      "binderFactory",
+      "webRequest"
+    ],
+    "position": {
+      "column": 1,
+      "line": 245
+    },
+    "return": "Object",
+    "signature": "protected Object constructAttribute(Constructor<?> ctor, String attributeName, MethodParameter parameter,\n\t\t\tWebDataBinderFactory binderFactory, NativeWebRequest webRequest)",
+    "source_code": "\tprotected Object constructAttribute(Constructor<?> ctor, String attributeName, MethodParameter parameter,\n\t\t\tWebDataBinderFactory binderFactory, NativeWebRequest webRequest) throws Exception {\n\n\t\tif (ctor.getParameterCount() == 0) {\n\t\t\t// A single default constructor -> clearly a standard JavaBeans arrangement.\n\t\t\treturn BeanUtils.instantiateClass(ctor);\n\t\t}\n\n\t\t// A single data class constructor -> resolve constructor arguments from request parameters.\n\t\tString[] paramNames = BeanUtils.getParameterNames(ctor);\n\t\tClass<?>[] paramTypes = ctor.getParameterTypes();\n\t\tObject[] args = new Object[paramTypes.length];\n\t\tWebDataBinder binder = binderFactory.createBinder(webRequest, null, attributeName);\n\t\tString fieldDefaultPrefix = binder.getFieldDefaultPrefix();\n\t\tString fieldMarkerPrefix = binder.getFieldMarkerPrefix();\n\t\tboolean bindingFailure = false;\n\t\tSet<String> failedParams = new HashSet<>(4);\n\n\t\tfor (int i = 0; i < paramNames.length; i++) {\n\t\t\tString paramName = paramNames[i];\n\t\t\tClass<?> paramType = paramTypes[i];\n\t\t\tObject value = webRequest.getParameterValues(paramName);\n\n\t\t\t// Since WebRequest#getParameter exposes a single-value parameter as an array\n\t\t\t// with a single element, we unwrap the single value in such cases, analogous\n\t\t\t// to WebExchangeDataBinder.addBindValue(Map<String, Object>, String, List<?>).\n\t\t\tif (ObjectUtils.isArray(value) && Array.getLength(value) == 1) {\n\t\t\t\tvalue = Array.get(value, 0);\n\t\t\t}\n\n\t\t\tif (value == null) {\n\t\t\t\tif (fieldDefaultPrefix != null) {\n\t\t\t\t\tvalue = webRequest.getParameter(fieldDefaultPrefix + paramName);\n\t\t\t\t}\n\t\t\t\tif (value == null) {\n\t\t\t\t\tif (fieldMarkerPrefix != null && webRequest.getParameter(fieldMarkerPrefix + paramName) != null) {\n\t\t\t\t\t\tvalue = binder.getEmptyValue(paramType);\n\t\t\t\t\t}\n\t\t\t\t\telse {\n\t\t\t\t\t\tvalue = resolveConstructorArgument(paramName, paramType, webRequest);\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\n\t\t\ttry {\n\t\t\t\tMethodParameter methodParam = new FieldAwareConstructorParameter(ctor, i, paramName);\n\t\t\t\tif (value == null && methodParam.isOptional()) {\n\t\t\t\t\targs[i] = (methodParam.getParameterType() == Optional.class ? Optional.empty() : null);\n\t\t\t\t}\n\t\t\t\telse {\n\t\t\t\t\targs[i] = binder.convertIfNecessary(value, paramType, methodParam);\n\t\t\t\t}\n\t\t\t}\n\t\t\tcatch (TypeMismatchException ex) {\n\t\t\t\tex.initPropertyName(paramName);\n\t\t\t\targs[i] = null;\n\t\t\t\tfailedParams.add(paramName);\n\t\t\t\tbinder.getBindingResult().recordFieldValue(paramName, paramType, value);\n\t\t\t\tbinder.getBindingErrorProcessor().processPropertyAccessException(ex, binder.getBindingResult());\n\t\t\t\tbindingFailure = true;\n\t\t\t}\n\t\t}\n\n\t\tif (bindingFailure) {\n\t\t\tBindingResult result = binder.getBindingResult();\n\t\t\tfor (int i = 0; i < paramNames.length; i++) {\n\t\t\t\tString paramName = paramNames[i];\n\t\t\t\tif (!failedParams.contains(paramName)) {\n\t\t\t\t\tObject value = args[i];\n\t\t\t\t\tresult.recordFieldValue(paramName, paramTypes[i], value);\n\t\t\t\t\tvalidateValueIfApplicable(binder, parameter, ctor.getDeclaringClass(), paramName, value);\n\t\t\t\t}\n\t\t\t}\n\t\t\tif (!parameter.isOptional()) {\n\t\t\t\ttry {\n\t\t\t\t\tObject target = BeanUtils.instantiateClass(ctor, args);\n\t\t\t\t\tthrow new MethodArgumentNotValidException(parameter, result) {\n\t\t\t\t\t\t@Override\n\t\t\t\t\t\tpublic Object getTarget() {\n\t\t\t\t\t\t\treturn target;\n\t\t\t\t\t\t}\n\t\t\t\t\t};\n\t\t\t\t}\n\t\t\t\tcatch (BeanInstantiationException ex) {\n\t\t\t\t\t// swallow and proceed without target instance\n\t\t\t\t}\n\t\t\t}\n\t\t\tthrow new MethodArgumentNotValidException(parameter, result);\n\t\t}\n\n\t\ttry {\n\t\t\treturn BeanUtils.instantiateClass(ctor, args);\n\t\t}\n\t\tcatch (BeanInstantiationException ex) {\n\t\t\tif (KotlinDetector.isKotlinType(ctor.getDeclaringClass()) &&\n\t\t\t\t\tex.getCause() instanceof NullPointerException cause) {\n\t\t\t\tBindingResult result = binder.getBindingResult();\n\t\t\t\tObjectError error = new ObjectError(ctor.getName(), cause.getMessage());\n\t\t\t\tresult.addError(error);\n\t\t\t\tthrow new MethodArgumentNotValidException(parameter, result);\n\t\t\t}\n\t\t\telse {\n\t\t\t\tthrow ex;\n\t\t\t}\n\t\t}\n\t}"
+  },
+  "org.springframework.web.method.annotation.<unknown>#resolveName(param,value)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "param",
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 183
+    },
+    "return": "String",
+    "signature": "public String resolveName(MethodParameter param, @Nullable Object value)",
+    "source_code": "\t\tpublic String resolveName(MethodParameter param, @Nullable Object value) {\n\t\t\tif (param.hasParameterAnnotation(RequestBody.class) || param.hasParameterAnnotation(RequestPart.class)) {\n\t\t\t\treturn Conventions.getVariableNameForParameter(param);\n\t\t\t}\n\t\t\telse {\n\t\t\t\treturn (param.getParameterIndex() != -1 ?\n\t\t\t\t\t\tModelFactory.getNameForParameter(param) :\n\t\t\t\t\t\tModelFactory.getNameForReturnValue(value, param));\n\t\t\t}\n\t\t}"
+  },
+  "org.springframework.web.method.annotation.<unknown>#validateIfApplicable(binder,parameter)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Validate the model attribute if applicable.\n\t * <p>The default implementation checks for {@code @jakarta.validation.Valid},\n\t * Spring's {@link org.springframework.validation.annotation.Validated},\n\t * and custom annotations whose name starts with \"Valid\".\n\t * @param binder the DataBinder to be used\n\t * @param parameter the method parameter declaration\n\t * @see WebDataBinder#validate(Object...)\n\t * @see SmartValidator#validate(Object, Errors, Object...)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "binder",
+      "parameter"
+    ],
+    "position": {
+      "column": 1,
+      "line": 395
+    },
+    "return": "void",
+    "signature": "protected void validateIfApplicable(WebDataBinder binder, MethodParameter parameter)",
+    "source_code": "\tprotected void validateIfApplicable(WebDataBinder binder, MethodParameter parameter) {\n\t\tfor (Annotation ann : parameter.getParameterAnnotations()) {\n\t\t\tObject[] validationHints = ValidationAnnotationUtils.determineValidationHints(ann);\n\t\t\tif (validationHints != null) {\n\t\t\t\tbinder.validate(validationHints);\n\t\t\t\tbreak;\n\t\t\t}\n\t\t}\n\t}"
+  },
+  "org.springframework.web.reactive.<unknown>#createDataBinder(exchange,name)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Shortcut method to create a binder without a target object.\n\t * @param exchange the current exchange\n\t * @param name the name of the target object\n\t * @return the created data binder\n\t * @throws ServerErrorException if {@code @InitBinder} method invocation fails\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "exchange",
+      "name"
+    ],
+    "position": {
+      "column": 1,
+      "line": 129
+    },
+    "return": "WebExchangeDataBinder",
+    "signature": "public WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, String name)",
+    "source_code": "\tpublic WebExchangeDataBinder createDataBinder(ServerWebExchange exchange, String name) {\n\t\treturn createDataBinder(exchange, null, name, null);\n\t}"
+  },
+  "org.springframework.web.reactive.<unknown>#initBinder(binder,parameter)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "binder",
+      "parameter"
+    ],
+    "position": {
+      "column": 1,
+      "line": 224
+    },
+    "return": "void",
+    "signature": "public void initBinder(DataBinder binder, MethodParameter parameter)",
+    "source_code": "\t\tpublic static void initBinder(DataBinder binder, MethodParameter parameter) {\n\t\t\tif (ReactiveAdapterRegistry.getSharedInstance().getAdapter(parameter.getParameterType()) == null) {\n\t\t\t\tfor (Annotation annotation : parameter.getParameterAnnotations()) {\n\t\t\t\t\tif (annotation.annotationType().getName().equals(\"jakarta.validation.Valid\")) {\n\t\t\t\t\t\tbinder.setExcludedValidators(v -> v instanceof jakarta.validation.Validator ||\n\t\t\t\t\t\t\t\tv instanceof SmartValidator sv && sv.unwrap(jakarta.validation.Validator.class) != null);\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}"
+  },
+  "org.springframework.web.reactive.function.<unknown>#fromOutputStream(outputStreamConsumer,executor)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Inserter based on bytes written to a {@code OutputStream}.\n\t * @param outputStreamConsumer invoked with an {@link OutputStream} that\n\t * writes to the output message\n\t * @param executor used to invoke the {@code outputStreamHandler} on a\n\t * separate thread\n\t * @return an inserter that writes what is written to the output stream\n\t * @since 6.1\n\t * @see DataBufferUtils#outputStreamPublisher(Consumer, DataBufferFactory, Executor)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "outputStreamConsumer",
+      "executor"
+    ],
+    "position": {
+      "column": 1,
+      "line": 376
+    },
+    "return": "ReactiveHttpOutputMessage>",
+    "signature": "public ReactiveHttpOutputMessage> fromOutputStream(Consumer<OutputStream> outputStreamConsumer, Executor executor)",
+    "source_code": "\tpublic static <T extends Publisher<DataBuffer>> BodyInserter<T, ReactiveHttpOutputMessage> fromOutputStream(\n\t\t\tConsumer<OutputStream> outputStreamConsumer, Executor executor) {\n\n\t\tAssert.notNull(outputStreamConsumer, \"OutputStreamConsumer must not be null\");\n\t\tAssert.notNull(executor, \"Executor must not be null\");\n\n\t\treturn (outputMessage, context) -> outputMessage.writeWith(\n\t\t\t\tDataBufferUtils.outputStreamPublisher(outputStreamConsumer, outputMessage.bufferFactory(), executor));\n\t}"
+  },
+  "org.springframework.web.reactive.function.server.<unknown>#bind(bindType,dataBinderCustomizer)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "bindType",
+      "dataBinderCustomizer"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1248
+    },
+    "return": "Mono<T>",
+    "signature": "public Mono<T> bind(Class<T> bindType, Consumer<WebDataBinder> dataBinderCustomizer)",
+    "source_code": "\t\tpublic <T> Mono<T> bind(Class<T> bindType, Consumer<WebDataBinder> dataBinderCustomizer) {\n\t\t\treturn this.delegate.bind(bindType, dataBinderCustomizer);\n\t\t}"
+  },
+  "org.springframework.web.reactive.result.method.annotation.<unknown>#getValuesToBind(binder,exchange)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Protected method to obtain the values for data binding. By default this\n\t * method delegates to {@link WebExchangeDataBinder#getValuesToBind}.\n\t * @param binder the data binder in use\n\t * @param exchange the current exchange\n\t * @return a map of bind values\n\t * @since 5.3\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "binder",
+      "exchange"
+    ],
+    "position": {
+      "column": 1,
+      "line": 281
+    },
+    "return": "Object>>",
+    "signature": "public Object>> getValuesToBind(WebExchangeDataBinder binder, ServerWebExchange exchange)",
+    "source_code": "\tpublic Mono<Map<String, Object>> getValuesToBind(WebExchangeDataBinder binder, ServerWebExchange exchange) {\n\t\treturn binder.getValuesToBind(exchange);\n\t}"
+  },
+  "org.springframework.web.reactive.result.method.annotation.<unknown>#handleMissingValue(name,parameter)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Invoked when a named value is required, but\n\t * {@link #resolveName(String, MethodParameter, ServerWebExchange)} returned\n\t * {@code null} and there is no default value. Subclasses typically throw an\n\t * exception in this case.\n\t * @param name the name for the value\n\t * @param parameter the method parameter\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "name",
+      "parameter"
+    ],
+    "position": {
+      "column": 1,
+      "line": 263
+    },
+    "return": "void",
+    "signature": "protected void handleMissingValue(String name, MethodParameter parameter)",
+    "source_code": "\tprotected void handleMissingValue(String name, MethodParameter parameter) {\n\t\tthrow new MissingRequestValueException(\n\t\t\t\tname, parameter.getNestedParameterType(), \"request value\", parameter);\n\t}"
+  },
+  "org.springframework.web.reactive.socket.adapter.<unknown>#lastIndexOf(predicate,fromIndex)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "predicate",
+      "fromIndex"
+    ],
+    "position": {
+      "column": 1,
+      "line": 165
+    },
+    "return": "int",
+    "signature": "public int lastIndexOf(IntPredicate predicate, int fromIndex)",
+    "source_code": "\t\tpublic int lastIndexOf(IntPredicate predicate, int fromIndex) {\n\t\t\treturn this.delegate.lastIndexOf(predicate, fromIndex);\n\t\t}"
+  },
+  "org.springframework.web.reactive.socket.adapter.<unknown>#onWebSocketFrame(frame,callback)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "frame",
+      "callback"
+    ],
+    "position": {
+      "column": 1,
+      "line": 107
+    },
+    "return": "void",
+    "signature": "public void onWebSocketFrame(Frame frame, Callback callback)",
+    "source_code": "\tpublic void onWebSocketFrame(Frame frame, Callback callback) {\n\t\tif (this.delegateSession != null) {\n\t\t\tif (OpCode.PONG == frame.getOpCode()) {\n\t\t\t\tByteBuffer byteBuffer = (frame.getPayload() != null ? frame.getPayload() : EMPTY_PAYLOAD);\n\t\t\t\tDataBuffer buffer = this.delegateSession.bufferFactory().wrap(byteBuffer);\n\t\t\t\tbuffer = new JettyDataBuffer(buffer, callback);\n\t\t\t\tWebSocketMessage webSocketMessage = new WebSocketMessage(Type.PONG, buffer);\n\t\t\t\tthis.delegateSession.handleMessage(webSocketMessage.getType(), webSocketMessage);\n\t\t\t}\n\t\t}\n\t}"
+  },
+  "org.springframework.web.reactive.socket.adapter.<unknown>#toByteBuffer(index,length)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "index",
+      "length"
+    ],
+    "position": {
+      "column": 1,
+      "line": 298
+    },
+    "return": "ByteBuffer",
+    "signature": "public ByteBuffer toByteBuffer(int index, int length)",
+    "source_code": "\t\tpublic ByteBuffer toByteBuffer(int index, int length) {\n\t\t\treturn this.delegate.toByteBuffer(index, length);\n\t\t}"
+  },
+  "org.springframework.web.reactive.socket.adapter.<unknown>#toString(index,length,charset)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "index",
+      "length",
+      "charset"
+    ],
+    "position": {
+      "column": 1,
+      "line": 320
+    },
+    "return": "String",
+    "signature": "public String toString(int index, int length, Charset charset)",
+    "source_code": "\t\tpublic String toString(int index, int length, Charset charset) {\n\t\t\treturn this.delegate.toString(index, length, charset);\n\t\t}"
+  },
+  "org.springframework.web.servlet.function.<unknown>#addAll(Entry<String,c)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "Entry<String",
+      "c"
+    ],
+    "position": {
+      "column": 1,
+      "line": 525
+    },
+    "return": "boolean",
+    "signature": "public boolean addAll(@NonNull Collection<? extends Entry<String, Object>> c)",
+    "source_code": "\t\t\t\tpublic boolean addAll(@NonNull Collection<? extends Entry<String, Object>> c) {\n\t\t\t\t\tthrow new UnsupportedOperationException();\n\t\t\t\t}"
+  },
+  "org.springframework.web.servlet.function.<unknown>#modifyAttributes(Map<String,attributes)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "Map<String",
+      "attributes"
+    ],
+    "position": {
+      "column": 1,
+      "line": 532
+    },
+    "return": "void",
+    "signature": "public void modifyAttributes(Map<String, Object> attributes)",
+    "source_code": "\t\t\tpublic void modifyAttributes(Map<String, Object> attributes) {\n\t\t\t\tif (this.modifyAttributes != null) {\n\t\t\t\t\tthis.modifyAttributes.accept(attributes);\n\t\t\t\t}\n\t\t\t}"
+  },
+  "org.springframework.web.servlet.mvc.method.annotation.<unknown>#createRequestMappingInfo(httpExchange,customCondition)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Create a {@link RequestMappingInfo} from the supplied\n\t * {@link HttpExchange @HttpExchange} annotation, meta-annotation,\n\t * or synthesized result of merging annotation attributes within an\n\t * annotation hierarchy.\n\t * @since 6.1\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "httpExchange",
+      "customCondition"
+    ],
+    "position": {
+      "column": 1,
+      "line": 445
+    },
+    "return": "RequestMappingInfo",
+    "signature": "protected RequestMappingInfo createRequestMappingInfo(HttpExchange httpExchange, @Nullable RequestCondition<?> customCondition)",
+    "source_code": "\tprotected RequestMappingInfo createRequestMappingInfo(\n\t\t\tHttpExchange httpExchange, @Nullable RequestCondition<?> customCondition) {\n\n\t\tRequestMappingInfo.Builder builder = RequestMappingInfo\n\t\t\t\t.paths(resolveEmbeddedValuesInPatterns(toStringArray(httpExchange.value())))\n\t\t\t\t.methods(toMethodArray(httpExchange.method()))\n\t\t\t\t.consumes(toStringArray(httpExchange.contentType()))\n\t\t\t\t.produces(httpExchange.accept());\n\n\t\tif (customCondition != null) {\n\t\t\tbuilder.customCondition(customCondition);\n\t\t}\n\n\t\treturn builder.options(this.config).build();\n\t}"
+  },
+  "org.springframework.web.servlet.mvc.method.annotation.<unknown>#fromController(builder,controllerType)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * An alternative to {@link #fromController(Class)} that accepts a\n\t * {@code UriComponentsBuilder} representing the base URL. This is useful\n\t * when using MvcUriComponentsBuilder outside the context of processing a\n\t * request or to apply a custom baseUrl not matching the current request.\n\t * <p><strong>Note:</strong> This method extracts values from \"Forwarded\"\n\t * and \"X-Forwarded-*\" headers if found. See class-level docs.\n\t * @param builder the builder for the base URL; the builder will be cloned\n\t * and therefore not modified and may be re-used for further calls.\n\t * @param controllerType the controller to build a URI for\n\t * @return a UriComponentsBuilder instance (never {@code null})\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "builder",
+      "controllerType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 176
+    },
+    "return": "UriComponentsBuilder",
+    "signature": "public UriComponentsBuilder fromController(@Nullable UriComponentsBuilder builder,\n\t\t\tClass<?> controllerType)",
+    "source_code": "\tpublic static UriComponentsBuilder fromController(@Nullable UriComponentsBuilder builder,\n\t\t\tClass<?> controllerType) {\n\n\t\tbuilder = getBaseUrlToUse(builder);\n\n\t\t// Externally configured prefix via PathConfigurer..\n\t\tString prefix = getPathPrefix(controllerType);\n\t\tbuilder.path(prefix);\n\n\t\tString mapping = getClassMapping(controllerType);\n\t\tmapping = (!StringUtils.hasText(prefix + mapping) ? \"/\" : mapping);\n\t\tbuilder.path(mapping);\n\n\t\treturn builder;\n\t}"
+  },
+  "org.springframework.web.servlet.mvc.method.annotation.<unknown>#invoke(proxy,method,args)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "proxy",
+      "method",
+      "args"
+    ],
+    "position": {
+      "column": 1,
+      "line": 768
+    },
+    "return": "Object",
+    "signature": "public Object invoke(Object proxy, Method method, @Nullable Object[] args)",
+    "source_code": "\t\tpublic Object invoke(Object proxy, Method method, @Nullable Object[] args) {\n\t\t\treturn intercept(proxy, method, (args != null ? args : new Object[0]), null);\n\t\t}"
+  },
+  "org.springframework.web.servlet.mvc.method.annotation.<unknown>#withMethod(controllerType,method,args)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * An alternative to {@link #fromMethod(Class, Method, Object...)}\n\t * for use with an instance of this class created via {@link #relativeTo}.\n\t * <p><strong>Note:</strong> This method extracts values from \"Forwarded\"\n\t * and \"X-Forwarded-*\" headers if found. See class-level docs.\n\t * @since 4.2\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "controllerType",
+      "method",
+      "args"
+    ],
+    "position": {
+      "column": 1,
+      "line": 533
+    },
+    "return": "UriComponentsBuilder",
+    "signature": "public UriComponentsBuilder withMethod(Class<?> controllerType, Method method, Object... args)",
+    "source_code": "\tpublic UriComponentsBuilder withMethod(Class<?> controllerType, Method method, Object... args) {\n\t\treturn fromMethod(this.baseUrl, controllerType, method, args);\n\t}"
+  },
+  "org.springframework.web.servlet.mvc.method.annotation.<unknown>#withMethodName(controllerType,methodName,args)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * An alternative to {@link #fromMethodName(Class, String, Object...)}} for\n\t * use with an instance of this class created via {@link #relativeTo}.\n\t * <p><strong>Note:</strong> This method extracts values from \"Forwarded\"\n\t * and \"X-Forwarded-*\" headers if found. See class-level docs.\n\t * @since 4.2\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "controllerType",
+      "methodName",
+      "args"
+    ],
+    "position": {
+      "column": 1,
+      "line": 500
+    },
+    "return": "UriComponentsBuilder",
+    "signature": "public UriComponentsBuilder withMethodName(Class<?> controllerType, String methodName, Object... args)",
+    "source_code": "\tpublic UriComponentsBuilder withMethodName(Class<?> controllerType, String methodName, Object... args) {\n\t\treturn fromMethodName(this.baseUrl, controllerType, methodName, args);\n\t}"
+  },
+  "org.springframework.web.servlet.mvc.support.<unknown>#handleHandlerMethodValidationException(ex,request,response,handler)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Handle the case where method validation for a controller method failed.\n\t * <p>The default implementation returns {@code null} in which case the\n\t * exception is handled in {@link #handleErrorResponse}.\n\t * @param ex the exception to be handled\n\t * @param request current HTTP request\n\t * @param response current HTTP response\n\t * @param handler the executed handler\n\t * @return an empty {@code ModelAndView} indicating the exception was handled, or\n\t * {@code null} indicating the exception should be handled in {@link #handleErrorResponse}\n\t * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}\n\t * @since 6.1\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "ex",
+      "request",
+      "response",
+      "handler"
+    ],
+    "position": {
+      "column": 1,
+      "line": 428
+    },
+    "return": "ModelAndView",
+    "signature": "protected ModelAndView handleHandlerMethodValidationException(HandlerMethodValidationException ex,\n\t\t\tHttpServletRequest request, HttpServletResponse response, @Nullable Object handler)",
+    "source_code": "\tprotected ModelAndView handleHandlerMethodValidationException(HandlerMethodValidationException ex,\n\t\t\tHttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {\n\n\t\treturn null;\n\t}"
+  },
+  "org.springframework.web.socket.config.annotation.<unknown>#stompWebSocketHandlerMapping(subProtocolWebSocketHandler,messageBrokerTaskScheduler)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "subProtocolWebSocketHandler",
+      "messageBrokerTaskScheduler"
+    ],
+    "position": {
+      "column": 1,
+      "line": 82
+    },
+    "return": "HandlerMapping",
+    "signature": "public HandlerMapping stompWebSocketHandlerMapping(WebSocketHandler subProtocolWebSocketHandler, TaskScheduler messageBrokerTaskScheduler)",
+    "source_code": "\tpublic HandlerMapping stompWebSocketHandlerMapping(\n\t\t\tWebSocketHandler subProtocolWebSocketHandler, TaskScheduler messageBrokerTaskScheduler) {\n\n\t\tWebSocketHandler handler = decorateWebSocketHandler(subProtocolWebSocketHandler);\n\t\tWebMvcStompEndpointRegistry registry =\n\t\t\t\tnew WebMvcStompEndpointRegistry(handler, getTransportRegistration(), messageBrokerTaskScheduler);\n\t\tApplicationContext applicationContext = getApplicationContext();\n\t\tif (applicationContext != null) {\n\t\t\tregistry.setApplicationContext(applicationContext);\n\t\t}\n\t\tregisterStompEndpoints(registry);\n\t\treturn registry.getHandlerMapping();\n\t}"
+  },
+  "org.springframework.web.util.<unknown>#convertToReference(character,encoding)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return the reference mapped to the given character, or {@code null} if none found.\n\t * @since 4.1.2\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "character",
+      "encoding"
+    ],
+    "position": {
+      "column": 1,
+      "line": 135
+    },
+    "return": "String",
+    "signature": "public String convertToReference(char character, String encoding)",
+    "source_code": "\tpublic String convertToReference(char character, String encoding) {\n\t\tif (encoding.startsWith(\"UTF-\")){\n\t\t\treturn switch (character){\n\t\t\t\tcase '<' -> \"&lt;\";\n\t\t\t\tcase '>' -> \"&gt;\";\n\t\t\t\tcase '\"' -> \"&quot;\";\n\t\t\t\tcase '&' -> \"&amp;\";\n\t\t\t\tcase '\\'' -> \"&#39;\";\n\t\t\t\tdefault -> null;\n\t\t\t};\n\t\t}\n\t\telse if (character < 1000 || (character >= 8000 && character < 10000)) {\n\t\t\tint index = (character < 1000 ? character : character - 7000);\n\t\t\tString entityReference = this.characterToEntityReferenceMap[index];\n\t\t\tif (entityReference != null) {\n\t\t\t\treturn entityReference;\n\t\t\t}\n\t\t}\n\t\treturn null;\n\t}"
+  },
+  "org.springframework.web.util.<unknown>#resolveAndJoin(delimiter,prefix,suffix,errors,messageSource,locale)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Resolve all errors through the given {@link MessageSource} and join them.\n\t * @param delimiter the delimiter to use between each error\n\t * @param prefix characters to insert at the beginning\n\t * @param suffix characters to insert at the end\n\t * @param errors the errors to resolve and join\n\t * @param messageSource the {@code MessageSource} to resolve with\n\t * @param locale the locale to resolve with\n\t * @return the resolved errors formatted as a string\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "delimiter",
+      "prefix",
+      "suffix",
+      "errors",
+      "messageSource",
+      "locale"
+    ],
+    "position": {
+      "column": 1,
+      "line": 72
+    },
+    "return": "String",
+    "signature": "public String resolveAndJoin(CharSequence delimiter, CharSequence prefix, CharSequence suffix,\n\t\t\tList<? extends MessageSourceResolvable> errors, MessageSource messageSource, Locale locale)",
+    "source_code": "\tpublic static String resolveAndJoin(\n\t\t\tCharSequence delimiter, CharSequence prefix, CharSequence suffix,\n\t\t\tList<? extends MessageSourceResolvable> errors, MessageSource messageSource, Locale locale) {\n\n\t\treturn errors.stream()\n\t\t\t\t.map(error -> messageSource.getMessage(error, locale))\n\t\t\t\t.filter(StringUtils::hasText)\n\t\t\t\t.collect(Collectors.joining(delimiter, prefix, suffix));\n\t}"
+  }
+}

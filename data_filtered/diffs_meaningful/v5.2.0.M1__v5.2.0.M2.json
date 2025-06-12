@@ -1,0 +1,43 @@
+{
+  "org.springframework.messaging.handler.annotation.support.reactive.<unknown>#getMatchingMapping(mapping,message)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "mapping",
+      "message"
+    ],
+    "position": {
+      "column": 1,
+      "line": 306
+    },
+    "return": "CompositeMessageCondition",
+    "signature": "protected CompositeMessageCondition getMatchingMapping(CompositeMessageCondition mapping, Message<?> message)",
+    "source_code": "\tprotected CompositeMessageCondition getMatchingMapping(CompositeMessageCondition mapping, Message<?> message) {\n\t\treturn mapping.getMatchingCondition(message);\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.support.reactive.<unknown>#handleMatch(mapping,handlerMethod,message)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "mapping",
+      "handlerMethod",
+      "message"
+    ],
+    "position": {
+      "column": 1,
+      "line": 321
+    },
+    "return": "Mono<Void>",
+    "signature": "protected Mono<Void> handleMatch(CompositeMessageCondition mapping, HandlerMethod handlerMethod, Message<?> message)",
+    "source_code": "\tprotected Mono<Void> handleMatch(CompositeMessageCondition mapping, HandlerMethod handlerMethod, Message<?> message) {\n\t\tSet<String> patterns = mapping.getCondition(DestinationPatternsMessageCondition.class).getPatterns();\n\t\tif (!CollectionUtils.isEmpty(patterns)) {\n\t\t\tString pattern = patterns.iterator().next();\n\t\t\tString destination = getDestination(message);\n\t\t\tMap<String, String> vars = getPathMatcher().extractUriTemplateVariables(pattern, destination);\n\t\t\tif (!CollectionUtils.isEmpty(vars)) {\n\t\t\t\tMessageHeaderAccessor mha = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);\n\t\t\t\tAssert.state(mha != null && mha.isMutable(), \"Mutable MessageHeaderAccessor required\");\n\t\t\t\tmha.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);\n\t\t\t}\n\t\t}\n\t\treturn super.handleMatch(mapping, handlerMethod, message);\n\t}"
+  }
+}

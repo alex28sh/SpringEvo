@@ -19,8 +19,8 @@ console = Console()
 api_key = os.getenv("OPENAI_API_KEY", "")  # Prefer environment variable for safety
 model = os.getenv("OPENAI_API_MODEL", "o1-mini")
 
-INPUT_FILE = Path(__file__).resolve().parent.parent / "data" / "codes" / "codes_spring_success_mini.json"
-OUTPUT_DIR = Path(__file__).resolve().parent.parent / "data"  / "tests"
+INPUT_FILE = Path(__file__).resolve().parent.parent / "data_filtered" / "codes" / "codes_spring_success_mini.json"
+OUTPUT_DIR = Path(__file__).resolve().parent.parent / "data_filtered"  / "tests"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_FILE = OUTPUT_DIR / "tests_spring_mini.json"
 

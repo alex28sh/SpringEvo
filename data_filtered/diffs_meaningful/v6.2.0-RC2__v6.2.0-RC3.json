@@ -1,0 +1,125 @@
+{
+  "org.springframework.beans.factory.annotation.<unknown>#checkQualifiers(bdHolder,annotationsToSearch)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Match the given qualifier annotations against the candidate bean definition.\n\t * @return {@code false} if a qualifier has been found but not matched,\n\t * {@code true} if a qualifier has been found and matched,\n\t * {@code null} if no qualifier has been found at all\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "bdHolder",
+      "annotationsToSearch"
+    ],
+    "position": {
+      "column": 1,
+      "line": 185
+    },
+    "return": "Boolean",
+    "signature": "protected Boolean checkQualifiers(BeanDefinitionHolder bdHolder, Annotation[] annotationsToSearch)",
+    "source_code": "\tprotected Boolean checkQualifiers(BeanDefinitionHolder bdHolder, Annotation[] annotationsToSearch) {\n\t\tboolean qualifierFound = false;\n\t\tif (!ObjectUtils.isEmpty(annotationsToSearch)) {\n\t\t\tSimpleTypeConverter typeConverter = new SimpleTypeConverter();\n\t\t\tfor (Annotation annotation : annotationsToSearch) {\n\t\t\t\tClass<? extends Annotation> type = annotation.annotationType();\n\t\t\t\tif (isPlainJavaAnnotation(type)) {\n\t\t\t\t\tcontinue;\n\t\t\t\t}\n\t\t\t\tboolean checkMeta = true;\n\t\t\t\tboolean fallbackToMeta = false;\n\t\t\t\tif (isQualifier(type)) {\n\t\t\t\t\tqualifierFound = true;\n\t\t\t\t\tif (!checkQualifier(bdHolder, annotation, typeConverter)) {\n\t\t\t\t\t\tfallbackToMeta = true;\n\t\t\t\t\t}\n\t\t\t\t\telse {\n\t\t\t\t\t\tcheckMeta = false;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tif (checkMeta) {\n\t\t\t\t\tboolean foundMeta = false;\n\t\t\t\t\tfor (Annotation metaAnn : type.getAnnotations()) {\n\t\t\t\t\t\tClass<? extends Annotation> metaType = metaAnn.annotationType();\n\t\t\t\t\t\tif (isPlainJavaAnnotation(metaType)) {\n\t\t\t\t\t\t\tcontinue;\n\t\t\t\t\t\t}\n\t\t\t\t\t\tif (isQualifier(metaType)) {\n\t\t\t\t\t\t\tqualifierFound = true;\n\t\t\t\t\t\t\tfoundMeta = true;\n\t\t\t\t\t\t\t// Only accept fallback match if @Qualifier annotation has a value...\n\t\t\t\t\t\t\t// Otherwise, it is just a marker for a custom qualifier annotation.\n\t\t\t\t\t\t\tif ((fallbackToMeta && ObjectUtils.isEmpty(AnnotationUtils.getValue(metaAnn))) ||\n\t\t\t\t\t\t\t\t\t!checkQualifier(bdHolder, metaAnn, typeConverter)) {\n\t\t\t\t\t\t\t\treturn false;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\tif (fallbackToMeta && !foundMeta) {\n\t\t\t\t\t\treturn false;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn (qualifierFound ? true : null);\n\t}"
+  },
+  "org.springframework.http.client.<unknown>#map(b,off,len)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "b",
+      "off",
+      "len"
+    ],
+    "position": {
+      "column": 1,
+      "line": 208
+    },
+    "return": "ByteBuffer",
+    "signature": "public ByteBuffer map(byte[] b, int off, int len)",
+    "source_code": "\t\tpublic ByteBuffer map(byte[] b, int off, int len) {\n\t\t\tByteBuffer byteBuffer = ByteBuffer.allocate(len);\n\t\t\tbyteBuffer.put(b, off, len);\n\t\t\tbyteBuffer.flip();\n\t\t\treturn byteBuffer;\n\t\t}"
+  },
+  "org.springframework.messaging.support.<unknown>#sendInternal(message,timeout)": {
+    "change": "modifier_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "message",
+      "timeout"
+    ],
+    "position": {
+      "column": 1,
+      "line": 97
+    },
+    "return": "boolean",
+    "signature": "public boolean sendInternal(Message<?> message, long timeout)",
+    "source_code": "\tpublic boolean sendInternal(Message<?> message, long timeout) {\n\t\tfor (MessageHandler handler : getSubscribers()) {\n\t\t\tSendTask sendTask = new SendTask(message, handler);\n\t\t\tif (this.executor != null) {\n\t\t\t\ttry {\n\t\t\t\t\tthis.executor.execute(sendTask);\n\t\t\t\t}\n\t\t\t\tcatch (RejectedExecutionException ex) {\n\t\t\t\t\t// Probably on shutdown -> run send task locally instead\n\t\t\t\t\tsendTask.run();\n\t\t\t\t}\n\t\t\t}\n\t\t\telse {\n\t\t\t\t// No executor configured -> always run send tasks locally\n\t\t\t\tsendTask.run();\n\t\t\t}\n\t\t}\n\t\treturn true;\n\t}"
+  },
+  "org.springframework.web.client.<unknown>#cookie(name,value)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "name",
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 390
+    },
+    "return": "DefaultRequestBodyUriSpec",
+    "signature": "public DefaultRequestBodyUriSpec cookie(String name, String value)",
+    "source_code": "\t\tpublic DefaultRequestBodyUriSpec cookie(String name, String value) {\n\t\t\tgetCookies().add(name, value);\n\t\t\treturn this;\n\t\t}"
+  },
+  "org.springframework.web.client.<unknown>#cookies(Consumer<MultiValueMap<String,cookiesConsumer)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "Consumer<MultiValueMap<String",
+      "cookiesConsumer"
+    ],
+    "position": {
+      "column": 1,
+      "line": 396
+    },
+    "return": "DefaultRequestBodyUriSpec",
+    "signature": "public DefaultRequestBodyUriSpec cookies(Consumer<MultiValueMap<String, String>> cookiesConsumer)",
+    "source_code": "\t\tpublic DefaultRequestBodyUriSpec cookies(Consumer<MultiValueMap<String, String>> cookiesConsumer) {\n\t\t\tcookiesConsumer.accept(getCookies());\n\t\t\treturn this;\n\t\t}"
+  },
+  "org.springframework.web.servlet.mvc.support.<unknown>#handleDisconnectedClientException(ex,request,response,handler)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Handle an Exception that indicates the client has gone away. This is\n\t * typically an {@link IOException} of a specific subtype or with a message\n\t * specific to the underlying Servlet container. Those are detected through\n\t * {@link DisconnectedClientHelper#isClientDisconnectedException(Throwable)}\n\t * <p>By default, do nothing since the response is not usable.\n\t * @param ex the {@code Exception} to be handled\n\t * @param request current HTTP request\n\t * @param response current HTTP response\n\t * @param handler the executed handler, or {@code null} if none chosen\n\t * at the time of the exception (for example, if multipart resolution failed)\n\t * @return an empty ModelAndView indicating the exception was handled\n\t * @since 6.2\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "ex",
+      "request",
+      "response",
+      "handler"
+    ],
+    "position": {
+      "column": 1,
+      "line": 535
+    },
+    "return": "ModelAndView",
+    "signature": "protected ModelAndView handleDisconnectedClientException(Exception ex, HttpServletRequest request, HttpServletResponse response, @Nullable Object handler)",
+    "source_code": "\tprotected ModelAndView handleDisconnectedClientException(\n\t\t\tException ex, HttpServletRequest request, HttpServletResponse response, @Nullable Object handler) {\n\n\t\treturn new ModelAndView();\n\t}"
+  }
+}

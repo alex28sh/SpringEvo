@@ -1,0 +1,23 @@
+{
+  "org.springframework.core.io.buffer.<unknown>#toString(index,length,charset)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "index",
+      "length",
+      "charset"
+    ],
+    "position": {
+      "column": 1,
+      "line": 386
+    },
+    "return": "String",
+    "signature": "public String toString(int index, int length, Charset charset)",
+    "source_code": "\tpublic String toString(int index, int length, Charset charset) {\n\t\tcheckIndex(index, length);\n\t\tAssert.notNull(charset, \"Charset must not be null\");\n\n\t\tbyte[] bytes;\n\t\tint offset;\n\n\t\tif (this.byteBuffer.hasArray()) {\n\t\t\tbytes = this.byteBuffer.array();\n\t\t\toffset = this.byteBuffer.arrayOffset() + index;\n\t\t}\n\t\telse {\n\t\t\tbytes = new byte[length];\n\t\t\toffset = 0;\n\t\t\tByteBuffer duplicate = this.byteBuffer.duplicate();\n\t\t\tduplicate.clear().position(index).limit(index + length);\n\t\t\tduplicate.get(bytes, 0, length);\n\t\t}\n\t\treturn new String(bytes, offset, length, charset);\n\t}"
+  }
+}

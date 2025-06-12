@@ -1,0 +1,1952 @@
+{
+  "org.springframework.aop.support.<unknown>#union(cf1,cf2)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Match all classes that <i>either</i> (or both) of the given ClassFilters matches.\n\t * @param cf1 the first ClassFilter\n\t * @param cf2 the second ClassFilter\n\t * @return a distinct ClassFilter that matches all classes that either\n\t * of the given ClassFilter matches\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "cf1",
+      "cf2"
+    ],
+    "position": {
+      "column": 1,
+      "line": 47
+    },
+    "return": "ClassFilter",
+    "signature": "public ClassFilter union(ClassFilter cf1, ClassFilter cf2)",
+    "source_code": "\tpublic static ClassFilter union(ClassFilter cf1, ClassFilter cf2) {\n\t\tAssert.notNull(cf1, \"First ClassFilter must not be null\");\n\t\tAssert.notNull(cf2, \"Second ClassFilter must not be null\");\n\t\treturn new UnionClassFilter(new ClassFilter[] {cf1, cf2});\n\t}"
+  },
+  "org.springframework.aot.agent.<unknown>#visitMethod(access,name,descriptor,signature,exceptions)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "access",
+      "name",
+      "descriptor",
+      "signature",
+      "exceptions"
+    ],
+    "position": {
+      "column": 1,
+      "line": 62
+    },
+    "return": "MethodVisitor",
+    "signature": "public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions)",
+    "source_code": "\tpublic MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {\n\t\tMethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);\n\t\treturn new InvocationsRecorderMethodVisitor(mv);\n\t}"
+  },
+  "org.springframework.beans.<unknown>#findDeclaredMethodWithMinimalParameters(clazz,methodName)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Find a method with the given method name and minimal parameters (best case: none),\n\t * declared on the given class or one of its superclasses. Will return a public,\n\t * protected, package access, or private method.\n\t * <p>Checks {@code Class.getDeclaredMethods}, cascading upwards to all superclasses.\n\t * @param clazz the class to check\n\t * @param methodName the name of the method to find\n\t * @return the Method object, or {@code null} if not found\n\t * @throws IllegalArgumentException if methods of the given name were found but\n\t * could not be resolved to a unique method with minimal parameters\n\t * @see Class#getDeclaredMethods\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "clazz",
+      "methodName"
+    ],
+    "position": {
+      "column": 1,
+      "line": 371
+    },
+    "return": "Method",
+    "signature": "public Method findDeclaredMethodWithMinimalParameters(Class<?> clazz, String methodName)",
+    "source_code": "\tpublic static Method findDeclaredMethodWithMinimalParameters(Class<?> clazz, String methodName)\n\t\t\tthrows IllegalArgumentException {\n\n\t\tMethod targetMethod = findMethodWithMinimalParameters(clazz.getDeclaredMethods(), methodName);\n\t\tif (targetMethod == null && clazz.getSuperclass() != null) {\n\t\t\ttargetMethod = findDeclaredMethodWithMinimalParameters(clazz.getSuperclass(), methodName);\n\t\t}\n\t\treturn targetMethod;\n\t}"
+  },
+  "org.springframework.beans.factory.config.<unknown>#addIndexedArgumentValue(index,newValue)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Add an argument value for the given index in the constructor argument list.\n\t * @param index the index in the constructor argument list\n\t * @param newValue the argument value in the form of a ValueHolder\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "index",
+      "newValue"
+    ],
+    "position": {
+      "column": 1,
+      "line": 109
+    },
+    "return": "void",
+    "signature": "public void addIndexedArgumentValue(int index, ValueHolder newValue)",
+    "source_code": "\tpublic void addIndexedArgumentValue(int index, ValueHolder newValue) {\n\t\tAssert.isTrue(index >= 0, \"Index must not be negative\");\n\t\tAssert.notNull(newValue, \"ValueHolder must not be null\");\n\t\taddOrMergeIndexedArgumentValue(index, newValue);\n\t}"
+  },
+  "org.springframework.beans.factory.support.<unknown>#getBeansOfType(type,includeNonSingletons,allowEagerInit)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "type",
+      "includeNonSingletons",
+      "allowEagerInit"
+    ],
+    "position": {
+      "column": 1,
+      "line": 656
+    },
+    "return": "T>",
+    "signature": "public T> getBeansOfType(@Nullable Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)",
+    "source_code": "\tpublic <T> Map<String, T> getBeansOfType(\n\t\t\t@Nullable Class<T> type, boolean includeNonSingletons, boolean allowEagerInit) throws BeansException {\n\n\t\tString[] beanNames = getBeanNamesForType(type, includeNonSingletons, allowEagerInit);\n\t\tMap<String, T> result = CollectionUtils.newLinkedHashMap(beanNames.length);\n\t\tfor (String beanName : beanNames) {\n\t\t\ttry {\n\t\t\t\tObject beanInstance = getBean(beanName);\n\t\t\t\tif (!(beanInstance instanceof NullBean)) {\n\t\t\t\t\tresult.put(beanName, (T) beanInstance);\n\t\t\t\t}\n\t\t\t}\n\t\t\tcatch (BeanCreationException ex) {\n\t\t\t\tThrowable rootCause = ex.getMostSpecificCause();\n\t\t\t\tif (rootCause instanceof BeanCurrentlyInCreationException bce) {\n\t\t\t\t\tString exBeanName = bce.getBeanName();\n\t\t\t\t\tif (exBeanName != null && isCurrentlyInCreation(exBeanName)) {\n\t\t\t\t\t\tif (logger.isTraceEnabled()) {\n\t\t\t\t\t\t\tlogger.trace(\"Ignoring match to currently created bean '\" + exBeanName + \"': \" +\n\t\t\t\t\t\t\t\t\tex.getMessage());\n\t\t\t\t\t\t}\n\t\t\t\t\t\tonSuppressedException(ex);\n\t\t\t\t\t\t// Ignore: indicates a circular reference when autowiring constructors.\n\t\t\t\t\t\t// We want to find matches other than the currently created bean itself.\n\t\t\t\t\t\tcontinue;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tthrow ex;\n\t\t\t}\n\t\t}\n\t\treturn result;\n\t}"
+  },
+  "org.springframework.beans.factory.support.<unknown>#invokeInitMethods(beanName,bean,mbd)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Give a bean a chance to react now all its properties are set,\n\t * and a chance to know about its owning bean factory (this object).\n\t * This means checking whether the bean implements InitializingBean or defines\n\t * a custom init method, and invoking the necessary callback(s) if it does.\n\t * @param beanName the bean name in the factory (for debugging purposes)\n\t * @param bean the new bean instance we may need to initialize\n\t * @param mbd the merged bean definition that the bean was created with\n\t * (can also be {@code null}, if given an existing bean instance)\n\t * @throws Throwable if thrown by init methods or by the invocation process\n\t * @see #invokeCustomInitMethod\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "beanName",
+      "bean",
+      "mbd"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1809
+    },
+    "return": "void",
+    "signature": "protected void invokeInitMethods(String beanName, Object bean, @Nullable RootBeanDefinition mbd)",
+    "source_code": "\tprotected void invokeInitMethods(String beanName, Object bean, @Nullable RootBeanDefinition mbd)\n\t\t\tthrows Throwable {\n\n\t\tboolean isInitializingBean = (bean instanceof InitializingBean);\n\t\tif (isInitializingBean && (mbd == null || !mbd.hasAnyExternallyManagedInitMethod(\"afterPropertiesSet\"))) {\n\t\t\tif (logger.isTraceEnabled()) {\n\t\t\t\tlogger.trace(\"Invoking afterPropertiesSet() on bean with name '\" + beanName + \"'\");\n\t\t\t}\n\t\t\t((InitializingBean) bean).afterPropertiesSet();\n\t\t}\n\n\t\tif (mbd != null && bean.getClass() != NullBean.class) {\n\t\t\tString[] initMethodNames = mbd.getInitMethodNames();\n\t\t\tif (initMethodNames != null) {\n\t\t\t\tfor (String initMethodName : initMethodNames) {\n\t\t\t\t\tif (StringUtils.hasLength(initMethodName) &&\n\t\t\t\t\t\t\t!(isInitializingBean && \"afterPropertiesSet\".equals(initMethodName)) &&\n\t\t\t\t\t\t\t!mbd.hasAnyExternallyManagedInitMethod(initMethodName)) {\n\t\t\t\t\t\tinvokeCustomInitMethod(beanName, bean, mbd, initMethodName);\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}"
+  },
+  "org.springframework.beans.factory.support.<unknown>#registerBeanDefinition(beanName,beanDefinition)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "beanName",
+      "beanDefinition"
+    ],
+    "position": {
+      "column": 1,
+      "line": 996
+    },
+    "return": "void",
+    "signature": "public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)",
+    "source_code": "\tpublic void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)\n\t\t\tthrows BeanDefinitionStoreException {\n\n\t\tAssert.hasText(beanName, \"Bean name must not be empty\");\n\t\tAssert.notNull(beanDefinition, \"BeanDefinition must not be null\");\n\n\t\tif (beanDefinition instanceof AbstractBeanDefinition abd) {\n\t\t\ttry {\n\t\t\t\tabd.validate();\n\t\t\t}\n\t\t\tcatch (BeanDefinitionValidationException ex) {\n\t\t\t\tthrow new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,\n\t\t\t\t\t\t\"Validation of bean definition failed\", ex);\n\t\t\t}\n\t\t}\n\n\t\tBeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);\n\t\tif (existingDefinition != null) {\n\t\t\tif (!isAllowBeanDefinitionOverriding()) {\n\t\t\t\tthrow new BeanDefinitionOverrideException(beanName, beanDefinition, existingDefinition);\n\t\t\t}\n\t\t\telse if (existingDefinition.getRole() < beanDefinition.getRole()) {\n\t\t\t\t// e.g. was ROLE_APPLICATION, now overriding with ROLE_SUPPORT or ROLE_INFRASTRUCTURE\n\t\t\t\tif (logger.isInfoEnabled()) {\n\t\t\t\t\tlogger.info(\"Overriding user-defined bean definition for bean '\" + beanName +\n\t\t\t\t\t\t\t\"' with a framework-generated bean definition: replacing [\" +\n\t\t\t\t\t\t\texistingDefinition + \"] with [\" + beanDefinition + \"]\");\n\t\t\t\t}\n\t\t\t}\n\t\t\telse if (!beanDefinition.equals(existingDefinition)) {\n\t\t\t\tif (logger.isDebugEnabled()) {\n\t\t\t\t\tlogger.debug(\"Overriding bean definition for bean '\" + beanName +\n\t\t\t\t\t\t\t\"' with a different definition: replacing [\" + existingDefinition +\n\t\t\t\t\t\t\t\"] with [\" + beanDefinition + \"]\");\n\t\t\t\t}\n\t\t\t}\n\t\t\telse {\n\t\t\t\tif (logger.isTraceEnabled()) {\n\t\t\t\t\tlogger.trace(\"Overriding bean definition for bean '\" + beanName +\n\t\t\t\t\t\t\t\"' with an equivalent definition: replacing [\" + existingDefinition +\n\t\t\t\t\t\t\t\"] with [\" + beanDefinition + \"]\");\n\t\t\t\t}\n\t\t\t}\n\t\t\tthis.beanDefinitionMap.put(beanName, beanDefinition);\n\t\t}\n\t\telse {\n\t\t\tif (isAlias(beanName)) {\n\t\t\t\tif (!isAllowBeanDefinitionOverriding()) {\n\t\t\t\t\tString aliasedName = canonicalName(beanName);\n\t\t\t\t\tif (containsBeanDefinition(aliasedName)) {  // alias for existing bean definition\n\t\t\t\t\t\tthrow new BeanDefinitionOverrideException(\n\t\t\t\t\t\t\t\tbeanName, beanDefinition, getBeanDefinition(aliasedName));\n\t\t\t\t\t}\n\t\t\t\t\telse {  // alias pointing to non-existing bean definition\n\t\t\t\t\t\tthrow new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,\n\t\t\t\t\t\t\t\t\"Cannot register bean definition for bean '\" + beanName +\n\t\t\t\t\t\t\t\t\"' since there is already an alias for bean '\" + aliasedName + \"' bound.\");\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\telse {\n\t\t\t\t\tremoveAlias(beanName);\n\t\t\t\t}\n\t\t\t}\n\t\t\tif (hasBeanCreationStarted()) {\n\t\t\t\t// Cannot modify startup-time collection elements anymore (for stable iteration)\n\t\t\t\tsynchronized (this.beanDefinitionMap) {\n\t\t\t\t\tthis.beanDefinitionMap.put(beanName, beanDefinition);\n\t\t\t\t\tList<String> updatedDefinitions = new ArrayList<>(this.beanDefinitionNames.size() + 1);\n\t\t\t\t\tupdatedDefinitions.addAll(this.beanDefinitionNames);\n\t\t\t\t\tupdatedDefinitions.add(beanName);\n\t\t\t\t\tthis.beanDefinitionNames = updatedDefinitions;\n\t\t\t\t\tremoveManualSingletonName(beanName);\n\t\t\t\t}\n\t\t\t}\n\t\t\telse {\n\t\t\t\t// Still in startup registration phase\n\t\t\t\tthis.beanDefinitionMap.put(beanName, beanDefinition);\n\t\t\t\tthis.beanDefinitionNames.add(beanName);\n\t\t\t\tremoveManualSingletonName(beanName);\n\t\t\t}\n\t\t\tthis.frozenBeanDefinitionNames = null;\n\t\t}\n\n\t\tif (existingDefinition != null || containsSingleton(beanName)) {\n\t\t\tresetBeanDefinition(beanName);\n\t\t}\n\t\telse if (isConfigurationFrozen()) {\n\t\t\tclearByTypeCache();\n\t\t}\n\t}"
+  },
+  "org.springframework.beans.factory.support.<unknown>#resolveAutowiredArgument(descriptor,beanName,autowiredBeanNames,typeConverter,fallback)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Template method for resolving the specified argument which is supposed to be autowired.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "descriptor",
+      "beanName",
+      "autowiredBeanNames",
+      "typeConverter",
+      "fallback"
+    ],
+    "position": {
+      "column": 1,
+      "line": 876
+    },
+    "return": "Object",
+    "signature": "protected Object resolveAutowiredArgument(DependencyDescriptor descriptor, String beanName,\n\t\t\t@Nullable Set<String> autowiredBeanNames, TypeConverter typeConverter, boolean fallback)",
+    "source_code": "\tprotected Object resolveAutowiredArgument(DependencyDescriptor descriptor, String beanName,\n\t\t\t@Nullable Set<String> autowiredBeanNames, TypeConverter typeConverter, boolean fallback) {\n\n\t\tClass<?> paramType = descriptor.getMethodParameter().getParameterType();\n\t\tif (InjectionPoint.class.isAssignableFrom(paramType)) {\n\t\t\tInjectionPoint injectionPoint = currentInjectionPoint.get();\n\t\t\tif (injectionPoint == null) {\n\t\t\t\tthrow new IllegalStateException(\"No current InjectionPoint available for \" + descriptor);\n\t\t\t}\n\t\t\treturn injectionPoint;\n\t\t}\n\t\ttry {\n\t\t\treturn this.beanFactory.resolveDependency(\n\t\t\t\t\tdescriptor, beanName, autowiredBeanNames, typeConverter);\n\t\t}\n\t\tcatch (NoUniqueBeanDefinitionException ex) {\n\t\t\tthrow ex;\n\t\t}\n\t\tcatch (NoSuchBeanDefinitionException ex) {\n\t\t\tif (fallback) {\n\t\t\t\t// Single constructor or factory method -> let's return an empty array/collection\n\t\t\t\t// for e.g. a vararg or a non-null List/Set/Map parameter.\n\t\t\t\tif (paramType.isArray()) {\n\t\t\t\t\treturn Array.newInstance(paramType.getComponentType(), 0);\n\t\t\t\t}\n\t\t\t\telse if (CollectionFactory.isApproximableCollectionType(paramType)) {\n\t\t\t\t\treturn CollectionFactory.createCollection(paramType, 0);\n\t\t\t\t}\n\t\t\t\telse if (CollectionFactory.isApproximableMapType(paramType)) {\n\t\t\t\t\treturn CollectionFactory.createMap(paramType, 0);\n\t\t\t\t}\n\t\t\t}\n\t\t\tthrow ex;\n\t\t}\n\t}"
+  },
+  "org.springframework.beans.factory.xml.<unknown>#parseArrayElement(arrayEle,bd)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Parse an array element.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "arrayEle",
+      "bd"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1117
+    },
+    "return": "Object",
+    "signature": "public Object parseArrayElement(Element arrayEle, @Nullable BeanDefinition bd)",
+    "source_code": "\tpublic Object parseArrayElement(Element arrayEle, @Nullable BeanDefinition bd) {\n\t\tString elementType = arrayEle.getAttribute(VALUE_TYPE_ATTRIBUTE);\n\t\tNodeList nl = arrayEle.getChildNodes();\n\t\tManagedArray target = new ManagedArray(elementType, nl.getLength());\n\t\ttarget.setSource(extractSource(arrayEle));\n\t\ttarget.setElementTypeName(elementType);\n\t\ttarget.setMergeEnabled(parseMergeAttribute(arrayEle));\n\t\tparseCollectionElements(nl, target, bd, elementType);\n\t\treturn target;\n\t}"
+  },
+  "org.springframework.cache.caffeine.<unknown>#put(key,value)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "key",
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 103
+    },
+    "return": "void",
+    "signature": "public void put(Object key, @Nullable Object value)",
+    "source_code": "\tpublic void put(Object key, @Nullable Object value) {\n\t\tthis.cache.put(key, toStoreValue(value));\n\t}"
+  },
+  "org.springframework.context.annotation.<unknown>#registerBean(beanClass,supplier)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Register a bean from the given bean class, deriving its metadata from\n\t * class-declared annotations, using the given supplier for obtaining a new\n\t * instance (possibly declared as a lambda expression or method reference).\n\t * @param beanClass the class of the bean\n\t * @param supplier a callback for creating an instance of the bean\n\t * (may be {@code null})\n\t * @since 5.0\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "beanClass",
+      "supplier"
+    ],
+    "position": {
+      "column": 1,
+      "line": 199
+    },
+    "return": "void",
+    "signature": "public void registerBean(Class<T> beanClass, @Nullable Supplier<T> supplier)",
+    "source_code": "\tpublic <T> void registerBean(Class<T> beanClass, @Nullable Supplier<T> supplier) {\n\t\tdoRegisterBean(beanClass, null, null, supplier, null);\n\t}"
+  },
+  "org.springframework.context.support.<unknown>#getMessageFormat(code,locale)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "code",
+      "locale"
+    ],
+    "position": {
+      "column": 1,
+      "line": 642
+    },
+    "return": "MessageFormat",
+    "signature": "public MessageFormat getMessageFormat(String code, Locale locale)",
+    "source_code": "\t\tpublic MessageFormat getMessageFormat(String code, Locale locale) {\n\t\t\tif (this.properties == null) {\n\t\t\t\treturn null;\n\t\t\t}\n\t\t\tMap<Locale, MessageFormat> localeMap = this.cachedMessageFormats.get(code);\n\t\t\tif (localeMap != null) {\n\t\t\t\tMessageFormat result = localeMap.get(locale);\n\t\t\t\tif (result != null) {\n\t\t\t\t\treturn result;\n\t\t\t\t}\n\t\t\t}\n\t\t\tString msg = this.properties.getProperty(code);\n\t\t\tif (msg != null) {\n\t\t\t\tif (localeMap == null) {\n\t\t\t\t\tlocaleMap = new ConcurrentHashMap<>();\n\t\t\t\t\tMap<Locale, MessageFormat> existing = this.cachedMessageFormats.putIfAbsent(code, localeMap);\n\t\t\t\t\tif (existing != null) {\n\t\t\t\t\t\tlocaleMap = existing;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tMessageFormat result = createMessageFormat(msg, locale);\n\t\t\t\tlocaleMap.put(locale, result);\n\t\t\t\treturn result;\n\t\t\t}\n\t\t\treturn null;\n\t\t}"
+  },
+  "org.springframework.context.support.<unknown>#loadProperties(resource,filename)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Load the properties from the given resource.\n\t * @param resource the resource to load from\n\t * @param filename the original bundle filename (basename + Locale)\n\t * @return the populated Properties instance\n\t * @throws IOException if properties loading failed\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "resource",
+      "filename"
+    ],
+    "position": {
+      "column": 1,
+      "line": 508
+    },
+    "return": "Properties",
+    "signature": "protected Properties loadProperties(Resource resource, String filename)",
+    "source_code": "\tprotected Properties loadProperties(Resource resource, String filename) throws IOException {\n\t\tProperties props = newProperties();\n\t\ttry (InputStream is = resource.getInputStream()) {\n\t\t\tString resourceFilename = resource.getFilename();\n\t\t\tif (resourceFilename != null && resourceFilename.endsWith(XML_SUFFIX)) {\n\t\t\t\tif (logger.isDebugEnabled()) {\n\t\t\t\t\tlogger.debug(\"Loading properties [\" + resource.getFilename() + \"]\");\n\t\t\t\t}\n\t\t\t\tthis.propertiesPersister.loadFromXml(props, is);\n\t\t\t}\n\t\t\telse {\n\t\t\t\tString encoding = null;\n\t\t\t\tif (this.fileEncodings != null) {\n\t\t\t\t\tencoding = this.fileEncodings.getProperty(filename);\n\t\t\t\t}\n\t\t\t\tif (encoding == null) {\n\t\t\t\t\tencoding = getDefaultEncoding();\n\t\t\t\t}\n\t\t\t\tif (encoding != null) {\n\t\t\t\t\tif (logger.isDebugEnabled()) {\n\t\t\t\t\t\tlogger.debug(\"Loading properties [\" + resource.getFilename() + \"] with encoding '\" + encoding + \"'\");\n\t\t\t\t\t}\n\t\t\t\t\tthis.propertiesPersister.load(props, new InputStreamReader(is, encoding));\n\t\t\t\t}\n\t\t\t\telse {\n\t\t\t\t\tif (logger.isDebugEnabled()) {\n\t\t\t\t\t\tlogger.debug(\"Loading properties [\" + resource.getFilename() + \"]\");\n\t\t\t\t\t}\n\t\t\t\t\tthis.propertiesPersister.load(props, is);\n\t\t\t\t}\n\t\t\t}\n\t\t\treturn props;\n\t\t}\n\t}"
+  },
+  "org.springframework.context.support.<unknown>#registerBean(beanName,beanClass,customizers)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Register a bean from the given bean class, optionally customizing its\n\t * bean definition metadata (typically declared as a lambda expression).\n\t * @param beanName the name of the bean (may be {@code null})\n\t * @param beanClass the class of the bean (resolving a public constructor\n\t * to be autowired, possibly simply the default constructor)\n\t * @param customizers one or more callbacks for customizing the factory's\n\t * {@link BeanDefinition}, e.g. setting a lazy-init or primary flag\n\t * @since 5.0\n\t * @see #registerBean(String, Class, Supplier, BeanDefinitionCustomizer...)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "beanName",
+      "beanClass",
+      "customizers"
+    ],
+    "position": {
+      "column": 1,
+      "line": 505
+    },
+    "return": "void",
+    "signature": "public void registerBean(@Nullable String beanName, Class<T> beanClass, BeanDefinitionCustomizer... customizers)",
+    "source_code": "\tpublic final <T> void registerBean(\n\t\t\t@Nullable String beanName, Class<T> beanClass, BeanDefinitionCustomizer... customizers) {\n\n\t\tregisterBean(beanName, beanClass, null, customizers);\n\t}"
+  },
+  "org.springframework.core.<unknown>#forClassWithGenerics(clazz,generics)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return a {@link ResolvableType} for the specified {@link Class} with pre-declared generics.\n\t * @param clazz the class (or interface) to introspect\n\t * @param generics the generics of the class\n\t * @return a {@link ResolvableType} for the specific class and generics\n\t * @see #forClassWithGenerics(Class, Class...)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "clazz",
+      "generics"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1076
+    },
+    "return": "ResolvableType",
+    "signature": "public ResolvableType forClassWithGenerics(Class<?> clazz, ResolvableType... generics)",
+    "source_code": "\tpublic static ResolvableType forClassWithGenerics(Class<?> clazz, ResolvableType... generics) {\n\t\tAssert.notNull(clazz, \"Class must not be null\");\n\t\tAssert.notNull(generics, \"Generics array must not be null\");\n\t\tTypeVariable<?>[] variables = clazz.getTypeParameters();\n\t\tAssert.isTrue(variables.length == generics.length, () -> \"Mismatched number of generics specified for \" + clazz.toGenericString());\n\n\t\tType[] arguments = new Type[generics.length];\n\t\tfor (int i = 0; i < generics.length; i++) {\n\t\t\tResolvableType generic = generics[i];\n\t\t\tType argument = (generic != null ? generic.getType() : null);\n\t\t\targuments[i] = (argument != null && !(argument instanceof TypeVariable) ? argument : variables[i]);\n\t\t}\n\n\t\tParameterizedType syntheticType = new SyntheticParameterizedType(clazz, arguments);\n\t\treturn forType(syntheticType, new TypeVariablesVariableResolver(variables, generics));\n\t}"
+  },
+  "org.springframework.core.<unknown>#forField(field,nestingLevel)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return a {@link ResolvableType} for the specified {@link Field} with the\n\t * given nesting level.\n\t * @param field the source field\n\t * @param nestingLevel the nesting level (1 for the outer level; 2 for a nested\n\t * generic type; etc)\n\t * @see #forField(Field)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "field",
+      "nestingLevel"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1166
+    },
+    "return": "ResolvableType",
+    "signature": "public ResolvableType forField(Field field, int nestingLevel)",
+    "source_code": "\tpublic static ResolvableType forField(Field field, int nestingLevel) {\n\t\tAssert.notNull(field, \"Field must not be null\");\n\t\treturn forType(null, new FieldTypeProvider(field), null).getNested(nestingLevel);\n\t}"
+  },
+  "org.springframework.core.<unknown>#forMethodOrConstructor(methodOrConstructor,parameterIndex)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Create a new MethodParameter for the given method or constructor.\n\t * <p>This is a convenience factory method for scenarios where a\n\t * Method or Constructor reference is treated in a generic fashion.\n\t * @param methodOrConstructor the Method or Constructor to specify a parameter for\n\t * @param parameterIndex the index of the parameter\n\t * @return the corresponding MethodParameter instance\n\t * @deprecated as of 5.0, in favor of {@link #forExecutable}\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "methodOrConstructor",
+      "parameterIndex"
+    ],
+    "position": {
+      "column": 1,
+      "line": 798
+    },
+    "return": "MethodParameter",
+    "signature": "public MethodParameter forMethodOrConstructor(Object methodOrConstructor, int parameterIndex)",
+    "source_code": "\tpublic static MethodParameter forMethodOrConstructor(Object methodOrConstructor, int parameterIndex) {\n\t\tif (!(methodOrConstructor instanceof Executable executable)) {\n\t\t\tthrow new IllegalArgumentException(\n\t\t\t\t\t\"Given object [\" + methodOrConstructor + \"] is neither a Method nor a Constructor\");\n\t\t}\n\t\treturn forExecutable(executable, parameterIndex);\n\t}"
+  },
+  "org.springframework.core.<unknown>#forMethodParameter(methodParameter,implementationType)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return a {@link ResolvableType} for the specified {@link MethodParameter} with a\n\t * given implementation type. Use this variant when the class that declares the method\n\t * includes generic parameter variables that are satisfied by the implementation type.\n\t * @param methodParameter the source method parameter (must not be {@code null})\n\t * @param implementationType the implementation type\n\t * @return a {@link ResolvableType} for the specified method parameter\n\t * @see #forMethodParameter(MethodParameter)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "methodParameter",
+      "implementationType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1295
+    },
+    "return": "ResolvableType",
+    "signature": "public ResolvableType forMethodParameter(MethodParameter methodParameter,\n\t\t\t@Nullable ResolvableType implementationType)",
+    "source_code": "\tpublic static ResolvableType forMethodParameter(MethodParameter methodParameter,\n\t\t\t@Nullable ResolvableType implementationType) {\n\n\t\tAssert.notNull(methodParameter, \"MethodParameter must not be null\");\n\t\timplementationType = (implementationType != null ? implementationType :\n\t\t\t\tforType(methodParameter.getContainingClass()));\n\t\tResolvableType owner = implementationType.as(methodParameter.getDeclaringClass());\n\t\treturn forType(null, new MethodParameterTypeProvider(methodParameter), owner.asVariableResolver()).\n\t\t\t\tgetNested(methodParameter.getNestingLevel(), methodParameter.typeIndexesPerLevel);\n\t}"
+  },
+  "org.springframework.core.<unknown>#toCodeForSuffix(value,nameSuffix)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Look up the given value within the given group of constants.\n\t * <p>Will return the first match.\n\t * @param value constant value to look up\n\t * @param nameSuffix suffix of the constant names to search (may be {@code null})\n\t * @return the name of the constant field\n\t * @throws ConstantException if the value wasn't found\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "value",
+      "nameSuffix"
+    ],
+    "position": {
+      "column": 1,
+      "line": 298
+    },
+    "return": "String",
+    "signature": "public String toCodeForSuffix(Object value, @Nullable String nameSuffix)",
+    "source_code": "\tpublic String toCodeForSuffix(Object value, @Nullable String nameSuffix) throws ConstantException {\n\t\tString suffixToUse = (nameSuffix != null ? nameSuffix.trim().toUpperCase(Locale.ENGLISH) : \"\");\n\t\tfor (Map.Entry<String, Object> entry : this.fieldCache.entrySet()) {\n\t\t\tif (entry.getKey().endsWith(suffixToUse) && entry.getValue().equals(value)) {\n\t\t\t\treturn entry.getKey();\n\t\t\t}\n\t\t}\n\t\tthrow new ConstantException(this.className, suffixToUse, value);\n\t}"
+  },
+  "org.springframework.core.annotation.<unknown>#getAttributeValue(attributeName,type)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "attributeName",
+      "type"
+    ],
+    "position": {
+      "column": 1,
+      "line": 369
+    },
+    "return": "T",
+    "signature": "protected T getAttributeValue(String attributeName, Class<T> type)",
+    "source_code": "\tprotected <T> T getAttributeValue(String attributeName, Class<T> type) {\n\t\tint attributeIndex = getAttributeIndex(attributeName, false);\n\t\treturn (attributeIndex != -1 ? getValue(attributeIndex, type) : null);\n\t}"
+  },
+  "org.springframework.core.io.buffer.<unknown>#read(path,bufferFactory,bufferSize,options)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Read bytes from the given file {@code Path} into a {@code Flux} of {@code DataBuffer}s.\n\t * The method ensures that the file is closed when the flux is terminated.\n\t * @param path the path to read bytes from\n\t * @param bufferFactory the factory to create data buffers with\n\t * @param bufferSize the maximum size of the data buffers\n\t * @return a Flux of data buffers read from the given channel\n\t * @since 5.2\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "path",
+      "bufferFactory",
+      "bufferSize",
+      "options"
+    ],
+    "position": {
+      "column": 1,
+      "line": 171
+    },
+    "return": "Flux<DataBuffer>",
+    "signature": "public Flux<DataBuffer> read(Path path, DataBufferFactory bufferFactory, int bufferSize, OpenOption... options)",
+    "source_code": "\tpublic static Flux<DataBuffer> read(\n\t\t\tPath path, DataBufferFactory bufferFactory, int bufferSize, OpenOption... options) {\n\n\t\tAssert.notNull(path, \"Path must not be null\");\n\t\tAssert.notNull(bufferFactory, \"DataBufferFactory must not be null\");\n\t\tAssert.isTrue(bufferSize > 0, \"'bufferSize' must be > 0\");\n\t\tif (options.length > 0) {\n\t\t\tfor (OpenOption option : options) {\n\t\t\t\tAssert.isTrue(!(option == StandardOpenOption.APPEND || option == StandardOpenOption.WRITE),\n\t\t\t\t\t\t() -> \"'\" + option + \"' not allowed\");\n\t\t\t}\n\t\t}\n\n\t\treturn readAsynchronousFileChannel(() -> AsynchronousFileChannel.open(path, options),\n\t\t\t\tbufferFactory, bufferSize);\n\t}"
+  },
+  "org.springframework.expression.spel.support.<unknown>#write(context,target,name,newValue)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "context",
+      "target",
+      "name",
+      "newValue"
+    ],
+    "position": {
+      "column": 1,
+      "line": 708
+    },
+    "return": "void",
+    "signature": "public void write(EvaluationContext context, @Nullable Object target, String name, @Nullable Object newValue)",
+    "source_code": "\t\tpublic void write(EvaluationContext context, @Nullable Object target, String name, @Nullable Object newValue) {\n\t\t\tthrow new UnsupportedOperationException(\"Should not be called on an OptimalPropertyAccessor\");\n\t\t}"
+  },
+  "org.springframework.http.<unknown>#addAll(MultiValueMap<String,values)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "MultiValueMap<String",
+      "values"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1734
+    },
+    "return": "void",
+    "signature": "public void addAll(MultiValueMap<String, String> values)",
+    "source_code": "\tpublic void addAll(MultiValueMap<String, String> values) {\n\t\tthis.headers.addAll(values);\n\t}"
+  },
+  "org.springframework.http.client.reactive.<unknown>#put(key,values)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "key",
+      "values"
+    ],
+    "position": {
+      "column": 1,
+      "line": 131
+    },
+    "return": "List<String>",
+    "signature": "public List<String> put(String key, List<String> values)",
+    "source_code": "\tpublic List<String> put(String key, List<String> values) {\n\t\tList<String> oldValues = remove(key);\n\t\tvalues.forEach(value -> add(key, value));\n\t\treturn oldValues;\n\t}"
+  },
+  "org.springframework.http.codec.<unknown>#write(input,actualType,elementType,mediaType,request,response,Map<String,hints)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "input",
+      "actualType",
+      "elementType",
+      "mediaType",
+      "request",
+      "response",
+      "Map<String",
+      "hints"
+    ],
+    "position": {
+      "column": 1,
+      "line": 193
+    },
+    "return": "Mono<Void>",
+    "signature": "public Mono<Void> write(Publisher<?> input, ResolvableType actualType, ResolvableType elementType,\n\t\t\t@Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response,\n\t\t\tMap<String, Object> hints)",
+    "source_code": "\tpublic Mono<Void> write(Publisher<?> input, ResolvableType actualType, ResolvableType elementType,\n\t\t\t@Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response,\n\t\t\tMap<String, Object> hints) {\n\n\t\tMap<String, Object> allHints = Hints.merge(hints,\n\t\t\t\tgetEncodeHints(actualType, elementType, mediaType, request, response));\n\n\t\treturn write(input, elementType, mediaType, response, allHints);\n\t}"
+  },
+  "org.springframework.http.converter.<unknown>#readInternal(clazz,inputMessage)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "clazz",
+      "inputMessage"
+    ],
+    "position": {
+      "column": 1,
+      "line": 89
+    },
+    "return": "ResourceRegion",
+    "signature": "protected ResourceRegion readInternal(Class<?> clazz, HttpInputMessage inputMessage)",
+    "source_code": "\tprotected ResourceRegion readInternal(Class<?> clazz, HttpInputMessage inputMessage)\n\t\t\tthrows IOException, HttpMessageNotReadableException {\n\n\t\tthrow new UnsupportedOperationException();\n\t}"
+  },
+  "org.springframework.http.server.reactive.<unknown>#addAll(key,values)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "key",
+      "values"
+    ],
+    "position": {
+      "column": 1,
+      "line": 64
+    },
+    "return": "void",
+    "signature": "public void addAll(String key, List<? extends String> values)",
+    "source_code": "\tpublic void addAll(String key, List<? extends String> values) {\n\t\tvalues.forEach(value -> add(key, value));\n\t}"
+  },
+  "org.springframework.http.server.reactive.<unknown>#createResponse(response,asyncContext,request)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "response",
+      "asyncContext",
+      "request"
+    ],
+    "position": {
+      "column": 1,
+      "line": 72
+    },
+    "return": "ServletServerHttpResponse",
+    "signature": "protected ServletServerHttpResponse createResponse(HttpServletResponse response,\n\t\t\tAsyncContext asyncContext, ServletServerHttpRequest request)",
+    "source_code": "\tprotected ServletServerHttpResponse createResponse(HttpServletResponse response,\n\t\t\tAsyncContext asyncContext, ServletServerHttpRequest request) throws IOException {\n\n\t\treturn new TomcatServerHttpResponse(\n\t\t\t\tresponse, asyncContext, getDataBufferFactory(), getBufferSize(), request);\n\t}"
+  },
+  "org.springframework.http.server.reactive.<unknown>#setAll(Map<String,values)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "Map<String",
+      "values"
+    ],
+    "position": {
+      "column": 1,
+      "line": 79
+    },
+    "return": "void",
+    "signature": "public void setAll(Map<String, String> values)",
+    "source_code": "\tpublic void setAll(Map<String, String> values) {\n\t\tvalues.forEach(this::set);\n\t}"
+  },
+  "org.springframework.jdbc.core.<unknown>#newInstance(requiredType,conversionService)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Static factory method to create a new {@code SingleColumnRowMapper}.\n\t * @param requiredType the type that each result object is expected to match\n\t * @param conversionService the {@link ConversionService} for converting a\n\t * fetched value, or {@code null} for none\n\t * @since 5.0.4\n\t * @see #newInstance(Class)\n\t * @see #setConversionService\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "requiredType",
+      "conversionService"
+    ],
+    "position": {
+      "column": 1,
+      "line": 235
+    },
+    "return": "SingleColumnRowMapper<T>",
+    "signature": "public SingleColumnRowMapper<T> newInstance(Class<T> requiredType, @Nullable ConversionService conversionService)",
+    "source_code": "\tpublic static <T> SingleColumnRowMapper<T> newInstance(\n\t\t\tClass<T> requiredType, @Nullable ConversionService conversionService) {\n\n\t\tSingleColumnRowMapper<T> rowMapper = newInstance(requiredType);\n\t\trowMapper.setConversionService(conversionService);\n\t\treturn rowMapper;\n\t}"
+  },
+  "org.springframework.jdbc.core.<unknown>#query(psc,rch)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "psc",
+      "rch"
+    ],
+    "position": {
+      "column": 1,
+      "line": 767
+    },
+    "return": "void",
+    "signature": "public void query(PreparedStatementCreator psc, RowCallbackHandler rch)",
+    "source_code": "\tpublic void query(PreparedStatementCreator psc, RowCallbackHandler rch) throws DataAccessException {\n\t\tquery(psc, new RowCallbackHandlerResultSetExtractor(rch));\n\t}"
+  },
+  "org.springframework.jdbc.core.<unknown>#query(sql,pss,rse)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "sql",
+      "pss",
+      "rse"
+    ],
+    "position": {
+      "column": 1,
+      "line": 743
+    },
+    "return": "T",
+    "signature": "public T query(String sql, @Nullable PreparedStatementSetter pss, ResultSetExtractor<T> rse)",
+    "source_code": "\tpublic <T> T query(String sql, @Nullable PreparedStatementSetter pss, ResultSetExtractor<T> rse) throws DataAccessException {\n\t\treturn query(new SimplePreparedStatementCreator(sql), pss, rse);\n\t}"
+  },
+  "org.springframework.jdbc.core.<unknown>#query(sql,rse)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "sql",
+      "rse"
+    ],
+    "position": {
+      "column": 1,
+      "line": 436
+    },
+    "return": "T",
+    "signature": "public T query(final String sql, final ResultSetExtractor<T> rse)",
+    "source_code": "\tpublic <T> T query(final String sql, final ResultSetExtractor<T> rse) throws DataAccessException {\n\t\tAssert.notNull(sql, \"SQL must not be null\");\n\t\tAssert.notNull(rse, \"ResultSetExtractor must not be null\");\n\t\tif (logger.isDebugEnabled()) {\n\t\t\tlogger.debug(\"Executing SQL query [\" + sql + \"]\");\n\t\t}\n\n\t\t/**\n\t\t * Callback to execute the query.\n\t\t */\n\t\tclass QueryStatementCallback implements StatementCallback<T>, SqlProvider {\n\t\t\t@Override\n\t\t\t@Nullable\n\t\t\tpublic T doInStatement(Statement stmt) throws SQLException {\n\t\t\t\tResultSet rs = null;\n\t\t\t\ttry {\n\t\t\t\t\trs = stmt.executeQuery(sql);\n\t\t\t\t\treturn rse.extractData(rs);\n\t\t\t\t}\n\t\t\t\tfinally {\n\t\t\t\t\tJdbcUtils.closeResultSet(rs);\n\t\t\t\t}\n\t\t\t}\n\t\t\t@Override\n\t\t\tpublic String getSql() {\n\t\t\t\treturn sql;\n\t\t\t}\n\t\t}\n\n\t\treturn execute(new QueryStatementCallback(), true);\n\t}"
+  },
+  "org.springframework.jdbc.core.<unknown>#queryForObject(sql,args,requiredType)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "sql",
+      "args",
+      "requiredType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 900
+    },
+    "return": "T",
+    "signature": "public T queryForObject(String sql, @Nullable Object[] args, Class<T> requiredType)",
+    "source_code": "\tpublic <T> T queryForObject(String sql, @Nullable Object[] args, Class<T> requiredType) throws DataAccessException {\n\t\treturn queryForObject(sql, args, getSingleColumnRowMapper(requiredType));\n\t}"
+  },
+  "org.springframework.jdbc.core.<unknown>#queryForRowSet(sql,args,argTypes)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "sql",
+      "args",
+      "argTypes"
+    ],
+    "position": {
+      "column": 1,
+      "line": 946
+    },
+    "return": "SqlRowSet",
+    "signature": "public SqlRowSet queryForRowSet(String sql, Object[] args, int[] argTypes)",
+    "source_code": "\tpublic SqlRowSet queryForRowSet(String sql, Object[] args, int[] argTypes) throws DataAccessException {\n\t\treturn result(query(sql, args, argTypes, new SqlRowSetResultSetExtractor()));\n\t}"
+  },
+  "org.springframework.jdbc.core.<unknown>#setParameterValue(ps,paramIndex,param,inValue)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Set the value for a parameter. The method used is based on the SQL type\n\t * of the parameter and we can handle complex types like arrays and LOBs.\n\t * @param ps the prepared statement or callable statement\n\t * @param paramIndex index of the parameter we are setting\n\t * @param param the parameter as it is declared including type\n\t * @param inValue the value to set\n\t * @throws SQLException if thrown by PreparedStatement methods\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "ps",
+      "paramIndex",
+      "param",
+      "inValue"
+    ],
+    "position": {
+      "column": 1,
+      "line": 154
+    },
+    "return": "void",
+    "signature": "public void setParameterValue(PreparedStatement ps, int paramIndex, SqlParameter param,\n\t\t\t@Nullable Object inValue)",
+    "source_code": "\tpublic static void setParameterValue(PreparedStatement ps, int paramIndex, SqlParameter param,\n\t\t\t@Nullable Object inValue) throws SQLException {\n\n\t\tsetParameterValueInternal(ps, paramIndex, param.getSqlType(), param.getTypeName(), param.getScale(), inValue);\n\t}"
+  },
+  "org.springframework.jdbc.support.<unknown>#doTranslate(task,sql,ex)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "task",
+      "sql",
+      "ex"
+    ],
+    "position": {
+      "column": 1,
+      "line": 181
+    },
+    "return": "DataAccessException",
+    "signature": "protected DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex)",
+    "source_code": "\tprotected DataAccessException doTranslate(String task, @Nullable String sql, SQLException ex) {\n\t\tSQLException sqlEx = ex;\n\t\tif (sqlEx instanceof BatchUpdateException && sqlEx.getNextException() != null) {\n\t\t\tSQLException nestedSqlEx = sqlEx.getNextException();\n\t\t\tif (nestedSqlEx.getErrorCode() > 0 || nestedSqlEx.getSQLState() != null) {\n\t\t\t\tsqlEx = nestedSqlEx;\n\t\t\t}\n\t\t}\n\n\t\t// First, try custom translation from overridden method.\n\t\tDataAccessException dae = customTranslate(task, sql, sqlEx);\n\t\tif (dae != null) {\n\t\t\treturn dae;\n\t\t}\n\n\t\t// Next, try the custom SQLException translator, if available.\n\t\tSQLErrorCodes sqlErrorCodes = getSqlErrorCodes();\n\t\tif (sqlErrorCodes != null) {\n\t\t\tSQLExceptionTranslator customTranslator = sqlErrorCodes.getCustomSqlExceptionTranslator();\n\t\t\tif (customTranslator != null) {\n\t\t\t\tDataAccessException customDex = customTranslator.translate(task, sql, sqlEx);\n\t\t\t\tif (customDex != null) {\n\t\t\t\t\treturn customDex;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\t// Check SQLErrorCodes with corresponding error code, if available.\n\t\tif (sqlErrorCodes != null) {\n\t\t\tString errorCode;\n\t\t\tif (sqlErrorCodes.isUseSqlStateForTranslation()) {\n\t\t\t\terrorCode = sqlEx.getSQLState();\n\t\t\t}\n\t\t\telse {\n\t\t\t\t// Try to find SQLException with actual error code, looping through the causes.\n\t\t\t\t// E.g. applicable to java.sql.DataTruncation as of JDK 1.6.\n\t\t\t\tSQLException current = sqlEx;\n\t\t\t\twhile (current.getErrorCode() == 0 && current.getCause() instanceof SQLException sqlException) {\n\t\t\t\t\tcurrent = sqlException;\n\t\t\t\t}\n\t\t\t\terrorCode = Integer.toString(current.getErrorCode());\n\t\t\t}\n\n\t\t\tif (errorCode != null) {\n\t\t\t\t// Look for defined custom translations first.\n\t\t\t\tCustomSQLErrorCodesTranslation[] customTranslations = sqlErrorCodes.getCustomTranslations();\n\t\t\t\tif (customTranslations != null) {\n\t\t\t\t\tfor (CustomSQLErrorCodesTranslation customTranslation : customTranslations) {\n\t\t\t\t\t\tif (Arrays.binarySearch(customTranslation.getErrorCodes(), errorCode) >= 0 &&\n\t\t\t\t\t\t\t\tcustomTranslation.getExceptionClass() != null) {\n\t\t\t\t\t\t\tDataAccessException customException = createCustomException(\n\t\t\t\t\t\t\t\t\ttask, sql, sqlEx, customTranslation.getExceptionClass());\n\t\t\t\t\t\t\tif (customException != null) {\n\t\t\t\t\t\t\t\tlogTranslation(task, sql, sqlEx, true);\n\t\t\t\t\t\t\t\treturn customException;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t// Next, look for grouped error codes.\n\t\t\t\tif (Arrays.binarySearch(sqlErrorCodes.getBadSqlGrammarCodes(), errorCode) >= 0) {\n\t\t\t\t\tlogTranslation(task, sql, sqlEx, false);\n\t\t\t\t\treturn new BadSqlGrammarException(task, (sql != null ? sql : \"\"), sqlEx);\n\t\t\t\t}\n\t\t\t\telse if (Arrays.binarySearch(sqlErrorCodes.getInvalidResultSetAccessCodes(), errorCode) >= 0) {\n\t\t\t\t\tlogTranslation(task, sql, sqlEx, false);\n\t\t\t\t\treturn new InvalidResultSetAccessException(task, (sql != null ? sql : \"\"), sqlEx);\n\t\t\t\t}\n\t\t\t\telse if (Arrays.binarySearch(sqlErrorCodes.getDuplicateKeyCodes(), errorCode) >= 0) {\n\t\t\t\t\tlogTranslation(task, sql, sqlEx, false);\n\t\t\t\t\treturn new DuplicateKeyException(buildMessage(task, sql, sqlEx), sqlEx);\n\t\t\t\t}\n\t\t\t\telse if (Arrays.binarySearch(sqlErrorCodes.getDataIntegrityViolationCodes(), errorCode) >= 0) {\n\t\t\t\t\tlogTranslation(task, sql, sqlEx, false);\n\t\t\t\t\treturn new DataIntegrityViolationException(buildMessage(task, sql, sqlEx), sqlEx);\n\t\t\t\t}\n\t\t\t\telse if (Arrays.binarySearch(sqlErrorCodes.getPermissionDeniedCodes(), errorCode) >= 0) {\n\t\t\t\t\tlogTranslation(task, sql, sqlEx, false);\n\t\t\t\t\treturn new PermissionDeniedDataAccessException(buildMessage(task, sql, sqlEx), sqlEx);\n\t\t\t\t}\n\t\t\t\telse if (Arrays.binarySearch(sqlErrorCodes.getDataAccessResourceFailureCodes(), errorCode) >= 0) {\n\t\t\t\t\tlogTranslation(task, sql, sqlEx, false);\n\t\t\t\t\treturn new DataAccessResourceFailureException(buildMessage(task, sql, sqlEx), sqlEx);\n\t\t\t\t}\n\t\t\t\telse if (Arrays.binarySearch(sqlErrorCodes.getTransientDataAccessResourceCodes(), errorCode) >= 0) {\n\t\t\t\t\tlogTranslation(task, sql, sqlEx, false);\n\t\t\t\t\treturn new TransientDataAccessResourceException(buildMessage(task, sql, sqlEx), sqlEx);\n\t\t\t\t}\n\t\t\t\telse if (Arrays.binarySearch(sqlErrorCodes.getCannotAcquireLockCodes(), errorCode) >= 0) {\n\t\t\t\t\tlogTranslation(task, sql, sqlEx, false);\n\t\t\t\t\treturn new CannotAcquireLockException(buildMessage(task, sql, sqlEx), sqlEx);\n\t\t\t\t}\n\t\t\t\telse if (Arrays.binarySearch(sqlErrorCodes.getDeadlockLoserCodes(), errorCode) >= 0) {\n\t\t\t\t\tlogTranslation(task, sql, sqlEx, false);\n\t\t\t\t\treturn new org.springframework.dao.DeadlockLoserDataAccessException(buildMessage(task, sql, sqlEx), sqlEx);\n\t\t\t\t}\n\t\t\t\telse if (Arrays.binarySearch(sqlErrorCodes.getCannotSerializeTransactionCodes(), errorCode) >= 0) {\n\t\t\t\t\tlogTranslation(task, sql, sqlEx, false);\n\t\t\t\t\treturn new org.springframework.dao.CannotSerializeTransactionException(buildMessage(task, sql, sqlEx), sqlEx);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\t// We couldn't identify it more precisely - let's hand it over to the SQLState fallback translator.\n\t\tif (logger.isDebugEnabled()) {\n\t\t\tString codes;\n\t\t\tif (sqlErrorCodes != null && sqlErrorCodes.isUseSqlStateForTranslation()) {\n\t\t\t\tcodes = \"SQL state '\" + sqlEx.getSQLState() + \"', error code '\" + sqlEx.getErrorCode();\n\t\t\t}\n\t\t\telse {\n\t\t\t\tcodes = \"Error code '\" + sqlEx.getErrorCode() + \"'\";\n\t\t\t}\n\t\t\tlogger.debug(\"Unable to translate SQLException with \" + codes + \", will now try the fallback translator\");\n\t\t}\n\n\t\treturn null;\n\t}"
+  },
+  "org.springframework.jms.connection.<unknown>#doCreateConnection(username,password)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * This implementation delegates to the {@code createConnection(username, password)}\n\t * method of the target ConnectionFactory, passing in the specified user credentials.\n\t * If the specified username is empty, it will simply delegate to the standard\n\t * {@code createConnection()} method of the target ConnectionFactory.\n\t * @param username the username to use\n\t * @param password the password to use\n\t * @return the Connection\n\t * @see jakarta.jms.ConnectionFactory#createConnection(String, String)\n\t * @see jakarta.jms.ConnectionFactory#createConnection()\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "username",
+      "password"
+    ],
+    "position": {
+      "column": 1,
+      "line": 185
+    },
+    "return": "Connection",
+    "signature": "protected Connection doCreateConnection(@Nullable String username, @Nullable String password)",
+    "source_code": "\tprotected Connection doCreateConnection(@Nullable String username, @Nullable String password) throws JMSException {\n\t\tConnectionFactory target = obtainTargetConnectionFactory();\n\t\tif (StringUtils.hasLength(username)) {\n\t\t\treturn target.createConnection(username, password);\n\t\t}\n\t\telse {\n\t\t\treturn target.createConnection();\n\t\t}\n\t}"
+  },
+  "org.springframework.jms.core.<unknown>#convertAndSend(message,postProcessor)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "message",
+      "postProcessor"
+    ],
+    "position": {
+      "column": 1,
+      "line": 668
+    },
+    "return": "void",
+    "signature": "public void convertAndSend(Object message, MessagePostProcessor postProcessor)",
+    "source_code": "\tpublic void convertAndSend(Object message, MessagePostProcessor postProcessor) throws JmsException {\n\t\tDestination defaultDestination = getDefaultDestination();\n\t\tif (defaultDestination != null) {\n\t\t\tconvertAndSend(defaultDestination, message, postProcessor);\n\t\t}\n\t\telse {\n\t\t\tconvertAndSend(getRequiredDefaultDestinationName(), message, postProcessor);\n\t\t}\n\t}"
+  },
+  "org.springframework.jms.core.<unknown>#doSend(producer,message)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Actually send the given JMS message.\n\t * @param producer the JMS MessageProducer to send with\n\t * @param message the JMS Message to send\n\t * @throws JMSException if thrown by JMS API methods\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "producer",
+      "message"
+    ],
+    "position": {
+      "column": 1,
+      "line": 629
+    },
+    "return": "void",
+    "signature": "protected void doSend(MessageProducer producer, Message message)",
+    "source_code": "\tprotected void doSend(MessageProducer producer, Message message) throws JMSException {\n\t\tif (this.deliveryDelay >= 0) {\n\t\t\tproducer.setDeliveryDelay(this.deliveryDelay);\n\t\t}\n\t\tif (isExplicitQosEnabled()) {\n\t\t\tproducer.send(message, getDeliveryMode(), getPriority(), getTimeToLive());\n\t\t}\n\t\telse {\n\t\t\tproducer.send(message);\n\t\t}\n\t}"
+  },
+  "org.springframework.jms.listener.adapter.<unknown>#sendResponse(session,destination,response)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Send the given response message to the given destination.\n\t * @param response the JMS message to send\n\t * @param destination the JMS destination to send to\n\t * @param session the JMS session to operate on\n\t * @throws JMSException if thrown by JMS API methods\n\t * @see #postProcessProducer\n\t * @see jakarta.jms.Session#createProducer\n\t * @see jakarta.jms.MessageProducer#send\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "session",
+      "destination",
+      "response"
+    ],
+    "position": {
+      "column": 1,
+      "line": 429
+    },
+    "return": "void",
+    "signature": "protected void sendResponse(Session session, Destination destination, Message response)",
+    "source_code": "\tprotected void sendResponse(Session session, Destination destination, Message response) throws JMSException {\n\t\tMessageProducer producer = session.createProducer(destination);\n\t\ttry {\n\t\t\tpostProcessProducer(producer, response);\n\t\t\tQosSettings settings = getResponseQosSettings();\n\t\t\tif (settings != null) {\n\t\t\t\tproducer.send(response, settings.getDeliveryMode(), settings.getPriority(),\n\t\t\t\t\t\tsettings.getTimeToLive());\n\t\t\t}\n\t\t\telse {\n\t\t\t\tproducer.send(response);\n\t\t\t}\n\t\t}\n\t\tfinally {\n\t\t\tJmsUtils.closeMessageProducer(producer);\n\t\t}\n\t}"
+  },
+  "org.springframework.jmx.export.<unknown>#getObjectName(bean,beanKey)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Retrieve the {@code ObjectName} for a bean.\n\t * <p>If the bean implements the {@code SelfNaming} interface, then the\n\t * {@code ObjectName} will be retrieved using {@code SelfNaming.getObjectName()}.\n\t * Otherwise, the configured {@code ObjectNamingStrategy} is used.\n\t * @param bean the name of the bean in the {@code BeanFactory}\n\t * @param beanKey the key associated with the bean in the beans map\n\t * @return the {@code ObjectName} for the supplied bean\n\t * @throws javax.management.MalformedObjectNameException\n\t * if the retrieved {@code ObjectName} is malformed\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "bean",
+      "beanKey"
+    ],
+    "position": {
+      "column": 1,
+      "line": 750
+    },
+    "return": "ObjectName",
+    "signature": "protected ObjectName getObjectName(Object bean, @Nullable String beanKey)",
+    "source_code": "\tprotected ObjectName getObjectName(Object bean, @Nullable String beanKey) throws MalformedObjectNameException {\n\t\tif (bean instanceof SelfNaming selfNaming) {\n\t\t\treturn selfNaming.getObjectName();\n\t\t}\n\t\telse {\n\t\t\treturn this.namingStrategy.getObjectName(bean, beanKey);\n\t\t}\n\t}"
+  },
+  "org.springframework.jmx.export.assembler.<unknown>#setNotificationInfoMappings(Map<String,notificationInfoMappings)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "Map<String",
+      "notificationInfoMappings"
+    ],
+    "position": {
+      "column": 1,
+      "line": 57
+    },
+    "return": "void",
+    "signature": "public void setNotificationInfoMappings(Map<String, Object> notificationInfoMappings)",
+    "source_code": "\tpublic void setNotificationInfoMappings(Map<String, Object> notificationInfoMappings) {\n\t\tnotificationInfoMappings.forEach((beanKey, result) ->\n\t\t\t\tthis.notificationInfoMappings.put(beanKey, extractNotificationMetadata(result)));\n\t}"
+  },
+  "org.springframework.mail.javamail.<unknown>#createMimeMultiparts(mimeMessage,multipartMode)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Determine the MimeMultipart objects to use, which will be used\n\t * to store attachments on the one hand and text(s) and inline elements\n\t * on the other hand.\n\t * <p>Texts and inline elements can either be stored in the root element\n\t * itself (MULTIPART_MODE_MIXED, MULTIPART_MODE_RELATED) or in a nested element\n\t * rather than the root element directly (MULTIPART_MODE_MIXED_RELATED).\n\t * <p>By default, the root MimeMultipart element will be of type \"mixed\"\n\t * (MULTIPART_MODE_MIXED) or \"related\" (MULTIPART_MODE_RELATED).\n\t * The main multipart element will either be added as nested element of\n\t * type \"related\" (MULTIPART_MODE_MIXED_RELATED) or be identical to the root\n\t * element itself (MULTIPART_MODE_MIXED, MULTIPART_MODE_RELATED).\n\t * @param mimeMessage the MimeMessage object to add the root MimeMultipart\n\t * object to\n\t * @param multipartMode the multipart mode, as passed into the constructor\n\t * (MIXED, RELATED, MIXED_RELATED, or NO)\n\t * @throws MessagingException if multipart creation failed\n\t * @see #setMimeMultiparts\n\t * @see #MULTIPART_MODE_NO\n\t * @see #MULTIPART_MODE_MIXED\n\t * @see #MULTIPART_MODE_RELATED\n\t * @see #MULTIPART_MODE_MIXED_RELATED\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "mimeMessage",
+      "multipartMode"
+    ],
+    "position": {
+      "column": 1,
+      "line": 334
+    },
+    "return": "void",
+    "signature": "protected void createMimeMultiparts(MimeMessage mimeMessage, int multipartMode)",
+    "source_code": "\tprotected void createMimeMultiparts(MimeMessage mimeMessage, int multipartMode) throws MessagingException {\n\t\tswitch (multipartMode) {\n\t\t\tcase MULTIPART_MODE_NO -> setMimeMultiparts(null, null);\n\t\t\tcase MULTIPART_MODE_MIXED -> {\n\t\t\t\tMimeMultipart mixedMultipart = new MimeMultipart(MULTIPART_SUBTYPE_MIXED);\n\t\t\t\tmimeMessage.setContent(mixedMultipart);\n\t\t\t\tsetMimeMultiparts(mixedMultipart, mixedMultipart);\n\t\t\t}\n\t\t\tcase MULTIPART_MODE_RELATED -> {\n\t\t\t\tMimeMultipart relatedMultipart = new MimeMultipart(MULTIPART_SUBTYPE_RELATED);\n\t\t\t\tmimeMessage.setContent(relatedMultipart);\n\t\t\t\tsetMimeMultiparts(relatedMultipart, relatedMultipart);\n\t\t\t}\n\t\t\tcase MULTIPART_MODE_MIXED_RELATED -> {\n\t\t\t\tMimeMultipart rootMixedMultipart = new MimeMultipart(MULTIPART_SUBTYPE_MIXED);\n\t\t\t\tmimeMessage.setContent(rootMixedMultipart);\n\t\t\t\tMimeMultipart nestedRelatedMultipart = new MimeMultipart(MULTIPART_SUBTYPE_RELATED);\n\t\t\t\tMimeBodyPart relatedBodyPart = new MimeBodyPart();\n\t\t\t\trelatedBodyPart.setContent(nestedRelatedMultipart);\n\t\t\t\trootMixedMultipart.addBodyPart(relatedBodyPart);\n\t\t\t\tsetMimeMultiparts(rootMixedMultipart, nestedRelatedMultipart);\n\t\t\t}\n\t\t\tdefault ->\n\t\t\t\tthrow new IllegalArgumentException(\"Only multipart modes MIXED_RELATED, RELATED and NO supported\");\n\t\t}\n\t}"
+  },
+  "org.springframework.mail.javamail.<unknown>#setText(plainText,htmlText)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Set the given plain text and HTML text as alternatives, offering\n\t * both options to the email client. Requires multipart mode.\n\t * <p><b>NOTE:</b> Invoke {@link #addInline} <i>after</i> {@code setText};\n\t * else, mail readers might not be able to resolve inline references correctly.\n\t * @param plainText the plain text for the message\n\t * @param htmlText the HTML text for the message\n\t * @throws MessagingException in case of errors\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "plainText",
+      "htmlText"
+    ],
+    "position": {
+      "column": 1,
+      "line": 836
+    },
+    "return": "void",
+    "signature": "public void setText(String plainText, String htmlText)",
+    "source_code": "\tpublic void setText(String plainText, String htmlText) throws MessagingException {\n\t\tAssert.notNull(plainText, \"Plain text must not be null\");\n\t\tAssert.notNull(htmlText, \"HTML text must not be null\");\n\n\t\tMimeMultipart messageBody = new MimeMultipart(MULTIPART_SUBTYPE_ALTERNATIVE);\n\t\tgetMainPart().setContent(messageBody, CONTENT_TYPE_ALTERNATIVE);\n\n\t\t// Create the plain text part of the message.\n\t\tMimeBodyPart plainTextPart = new MimeBodyPart();\n\t\tsetPlainTextToMimePart(plainTextPart, plainText);\n\t\tmessageBody.addBodyPart(plainTextPart);\n\n\t\t// Create the HTML text part of the message.\n\t\tMimeBodyPart htmlTextPart = new MimeBodyPart();\n\t\tsetHtmlTextToMimePart(htmlTextPart, htmlText);\n\t\tmessageBody.addBodyPart(htmlTextPart);\n\t}"
+  },
+  "org.springframework.messaging.core.<unknown>#convertAndSend(destination,payload)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "destination",
+      "payload"
+    ],
+    "position": {
+      "column": 1,
+      "line": 121
+    },
+    "return": "void",
+    "signature": "public void convertAndSend(D destination, Object payload)",
+    "source_code": "\tpublic void convertAndSend(D destination, Object payload) throws MessagingException {\n\t\tconvertAndSend(destination, payload, (Map<String, Object>) null);\n\t}"
+  },
+  "org.springframework.messaging.simp.annotation.support.<unknown>#getTargetDestinations(annotation,message,defaultPrefix)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "annotation",
+      "message",
+      "defaultPrefix"
+    ],
+    "position": {
+      "column": 1,
+      "line": 221
+    },
+    "return": "String[]",
+    "signature": "protected String[] getTargetDestinations(@Nullable Annotation annotation, Message<?> message, String defaultPrefix)",
+    "source_code": "\tprotected String[] getTargetDestinations(@Nullable Annotation annotation, Message<?> message, String defaultPrefix) {\n\t\tif (annotation != null) {\n\t\t\tString[] value = (String[]) AnnotationUtils.getValue(annotation);\n\t\t\tif (!ObjectUtils.isEmpty(value)) {\n\t\t\t\treturn value;\n\t\t\t}\n\t\t}\n\n\t\tString name = DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER;\n\t\tString destination = (String) message.getHeaders().get(name);\n\t\tif (!StringUtils.hasText(destination)) {\n\t\t\tthrow new IllegalStateException(\"No lookup destination header in \" + message);\n\t\t}\n\n\t\treturn (destination.startsWith(\"/\") ?\n\t\t\t\tnew String[] {defaultPrefix + destination} : new String[] {defaultPrefix + '/' + destination});\n\t}"
+  },
+  "org.springframework.messaging.simp.broker.<unknown>#registerUnregister(serverState,request,blackhole)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "serverState",
+      "request",
+      "blackhole"
+    ],
+    "position": {
+      "column": 1,
+      "line": 161
+    },
+    "return": "void",
+    "signature": "public void registerUnregister(ServerState serverState, Requests request, Blackhole blackhole)",
+    "source_code": "\tpublic void registerUnregister(ServerState serverState, Requests request, Blackhole blackhole) {\n\t\tserverState.registry.registerSubscription(request.subscribe);\n\t\tblackhole.consume(serverState.registry.findSubscriptionsInternal(request.findDestination, serverState.findMessage));\n\t\tserverState.registry.unregisterSubscription(request.unsubscribe);\n\t\tblackhole.consume(serverState.registry.findSubscriptionsInternal(request.findDestination, serverState.findMessage));\n\t}"
+  },
+  "org.springframework.orm.hibernate5.<unknown>#findByExample(entityName,exampleEntity)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "entityName",
+      "exampleEntity"
+    ],
+    "position": {
+      "column": 1,
+      "line": 833
+    },
+    "return": "List<T>",
+    "signature": "public List<T> findByExample(String entityName, T exampleEntity)",
+    "source_code": "\tpublic <T> List<T> findByExample(String entityName, T exampleEntity) throws DataAccessException {\n\t\treturn findByExample(entityName, exampleEntity, -1, -1);\n\t}"
+  },
+  "org.springframework.orm.hibernate5.<unknown>#load(entityName,id)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "entityName",
+      "id"
+    ],
+    "position": {
+      "column": 1,
+      "line": 499
+    },
+    "return": "Object",
+    "signature": "public Object load(String entityName, Serializable id)",
+    "source_code": "\tpublic Object load(String entityName, Serializable id) throws DataAccessException {\n\t\treturn load(entityName, id, null);\n\t}"
+  },
+  "org.springframework.orm.hibernate5.<unknown>#replicate(entityName,entity,replicationMode)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "entityName",
+      "entity",
+      "replicationMode"
+    ],
+    "position": {
+      "column": 1,
+      "line": 690
+    },
+    "return": "void",
+    "signature": "public void replicate(String entityName, Object entity, ReplicationMode replicationMode)",
+    "source_code": "\tpublic void replicate(String entityName, Object entity, ReplicationMode replicationMode)\n\t\t\tthrows DataAccessException {\n\n\t\texecuteWithNativeSession(session -> {\n\t\t\tcheckWriteOperationAllowed(session);\n\t\t\tsession.replicate(entityName, entity, replicationMode);\n\t\t\treturn null;\n\t\t});\n\t}"
+  },
+  "org.springframework.orm.hibernate5.<unknown>#update(entity,lockMode)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "entity",
+      "lockMode"
+    ],
+    "position": {
+      "column": 1,
+      "line": 632
+    },
+    "return": "void",
+    "signature": "public void update(Object entity, @Nullable LockMode lockMode)",
+    "source_code": "\tpublic void update(Object entity, @Nullable LockMode lockMode) throws DataAccessException {\n\t\texecuteWithNativeSession(session -> {\n\t\t\tcheckWriteOperationAllowed(session);\n\t\t\tsession.update(entity);\n\t\t\tif (lockMode != null) {\n\t\t\t\tsession.buildLockRequest(new LockOptions(lockMode)).lock(entity);\n\t\t\t}\n\t\t\treturn null;\n\t\t});\n\t}"
+  },
+  "org.springframework.orm.jpa.<unknown>#getTransactionalEntityManager(emf,Map<?,properties)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Obtain a JPA EntityManager from the given factory. Is aware of a corresponding\n\t * EntityManager bound to the current thread, e.g. when using JpaTransactionManager.\n\t * <p>Note: Will return {@code null} if no thread-bound EntityManager found!\n\t * @param emf the EntityManagerFactory to create the EntityManager with\n\t * @param properties the properties to be passed into the {@code createEntityManager}\n\t * call (may be {@code null})\n\t * @return the EntityManager, or {@code null} if none found\n\t * @throws DataAccessResourceFailureException if the EntityManager couldn't be obtained\n\t * @see JpaTransactionManager\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "emf",
+      "Map<?",
+      "properties"
+    ],
+    "position": {
+      "column": 1,
+      "line": 152
+    },
+    "return": "EntityManager",
+    "signature": "public EntityManager getTransactionalEntityManager(EntityManagerFactory emf, @Nullable Map<?, ?> properties)",
+    "source_code": "\tpublic static EntityManager getTransactionalEntityManager(EntityManagerFactory emf, @Nullable Map<?, ?> properties)\n\t\t\tthrows DataAccessResourceFailureException {\n\t\ttry {\n\t\t\treturn doGetTransactionalEntityManager(emf, properties, true);\n\t\t}\n\t\tcatch (PersistenceException ex) {\n\t\t\tthrow new DataAccessResourceFailureException(\"Could not obtain JPA EntityManager\", ex);\n\t\t}\n\t}"
+  },
+  "org.springframework.orm.jpa.support.<unknown>#postProcessProperties(pvs,bean,beanName)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "pvs",
+      "bean",
+      "beanName"
+    ],
+    "position": {
+      "column": 1,
+      "line": 382
+    },
+    "return": "PropertyValues",
+    "signature": "public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName)",
+    "source_code": "\tpublic PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {\n\t\tInjectionMetadata metadata = findPersistenceMetadata(beanName, bean.getClass(), pvs);\n\t\ttry {\n\t\t\tmetadata.inject(bean, beanName, pvs);\n\t\t}\n\t\tcatch (Throwable ex) {\n\t\t\tthrow new BeanCreationException(beanName, \"Injection of persistence dependencies failed\", ex);\n\t\t}\n\t\treturn pvs;\n\t}"
+  },
+  "org.springframework.oxm.xstream.<unknown>#marshalSaxHandlers(graph,contentHandler,lexicalHandler)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "graph",
+      "contentHandler",
+      "lexicalHandler"
+    ],
+    "position": {
+      "column": 1,
+      "line": 713
+    },
+    "return": "void",
+    "signature": "protected void marshalSaxHandlers(Object graph, ContentHandler contentHandler, @Nullable LexicalHandler lexicalHandler)",
+    "source_code": "\tprotected void marshalSaxHandlers(Object graph, ContentHandler contentHandler, @Nullable LexicalHandler lexicalHandler)\n\t\t\tthrows XmlMappingException {\n\n\t\tSaxWriter saxWriter = new SaxWriter(this.nameCoder);\n\t\tsaxWriter.setContentHandler(contentHandler);\n\t\tdoMarshal(graph, saxWriter, null);\n\t}"
+  },
+  "org.springframework.scripting.support.<unknown>#getScriptedObject(scriptSource,actualInterfaces)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Load and parse the script via JSR-223's ScriptEngine.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "scriptSource",
+      "actualInterfaces"
+    ],
+    "position": {
+      "column": 1,
+      "line": 144
+    },
+    "return": "Object",
+    "signature": "public Object getScriptedObject(ScriptSource scriptSource, @Nullable Class<?>... actualInterfaces)",
+    "source_code": "\tpublic Object getScriptedObject(ScriptSource scriptSource, @Nullable Class<?>... actualInterfaces)\n\t\t\tthrows IOException, ScriptCompilationException {\n\n\t\tObject script = evaluateScript(scriptSource);\n\n\t\tif (!ObjectUtils.isEmpty(actualInterfaces)) {\n\t\t\tboolean adaptationRequired = false;\n\t\t\tfor (Class<?> requestedIfc : actualInterfaces) {\n\t\t\t\tif (script instanceof Class<?> clazz ? !requestedIfc.isAssignableFrom(clazz) :\n\t\t\t\t\t\t!requestedIfc.isInstance(script)) {\n\t\t\t\t\tadaptationRequired = true;\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t}\n\t\t\tif (adaptationRequired) {\n\t\t\t\tscript = adaptToInterfaces(script, scriptSource, actualInterfaces);\n\t\t\t}\n\t\t}\n\n\t\tif (script instanceof Class<?> scriptClass) {\n\t\t\ttry {\n\t\t\t\treturn ReflectionUtils.accessibleConstructor(scriptClass).newInstance();\n\t\t\t}\n\t\t\tcatch (NoSuchMethodException ex) {\n\t\t\t\tthrow new ScriptCompilationException(\n\t\t\t\t\t\t\"No default constructor on script class: \" + scriptClass.getName(), ex);\n\t\t\t}\n\t\t\tcatch (InstantiationException ex) {\n\t\t\t\tthrow new ScriptCompilationException(\n\t\t\t\t\t\tscriptSource, \"Unable to instantiate script class: \" + scriptClass.getName(), ex);\n\t\t\t}\n\t\t\tcatch (IllegalAccessException ex) {\n\t\t\t\tthrow new ScriptCompilationException(\n\t\t\t\t\t\tscriptSource, \"Could not access script constructor: \" + scriptClass.getName(), ex);\n\t\t\t}\n\t\t\tcatch (InvocationTargetException ex) {\n\t\t\t\tthrow new ScriptCompilationException(\n\t\t\t\t\t\t\"Failed to invoke script constructor: \" + scriptClass.getName(), ex.getTargetException());\n\t\t\t}\n\t\t}\n\n\t\treturn script;\n\t}"
+  },
+  "org.springframework.scripting.support.<unknown>#postProcessBeforeInstantiation(beanClass,beanName)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "beanClass",
+      "beanName"
+    ],
+    "position": {
+      "column": 1,
+      "line": 308
+    },
+    "return": "Object",
+    "signature": "public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName)",
+    "source_code": "\tpublic Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {\n\t\t// We only apply special treatment to ScriptFactory implementations here.\n\t\tif (!ScriptFactory.class.isAssignableFrom(beanClass)) {\n\t\t\treturn null;\n\t\t}\n\n\t\tAssert.state(this.beanFactory != null, \"No BeanFactory set\");\n\t\tBeanDefinition bd = this.beanFactory.getMergedBeanDefinition(beanName);\n\t\tString scriptFactoryBeanName = SCRIPT_FACTORY_NAME_PREFIX + beanName;\n\t\tString scriptedObjectBeanName = SCRIPTED_OBJECT_NAME_PREFIX + beanName;\n\t\tprepareScriptBeans(bd, scriptFactoryBeanName, scriptedObjectBeanName);\n\n\t\tScriptFactory scriptFactory = this.scriptBeanFactory.getBean(scriptFactoryBeanName, ScriptFactory.class);\n\t\tScriptSource scriptSource = getScriptSource(scriptFactoryBeanName, scriptFactory.getScriptSourceLocator());\n\t\tboolean isFactoryBean = false;\n\t\ttry {\n\t\t\tClass<?> scriptedObjectType = scriptFactory.getScriptedObjectType(scriptSource);\n\t\t\t// Returned type may be null if the factory is unable to determine the type.\n\t\t\tif (scriptedObjectType != null) {\n\t\t\t\tisFactoryBean = FactoryBean.class.isAssignableFrom(scriptedObjectType);\n\t\t\t}\n\t\t}\n\t\tcatch (Exception ex) {\n\t\t\tthrow new BeanCreationException(beanName,\n\t\t\t\t\t\"Could not determine scripted object type for \" + scriptFactory, ex);\n\t\t}\n\n\t\tlong refreshCheckDelay = resolveRefreshCheckDelay(bd);\n\t\tif (refreshCheckDelay >= 0) {\n\t\t\tClass<?>[] interfaces = scriptFactory.getScriptInterfaces();\n\t\t\tRefreshableScriptTargetSource ts = new RefreshableScriptTargetSource(this.scriptBeanFactory,\n\t\t\t\t\tscriptedObjectBeanName, scriptFactory, scriptSource, isFactoryBean);\n\t\t\tboolean proxyTargetClass = resolveProxyTargetClass(bd);\n\t\t\tString language = (String) bd.getAttribute(LANGUAGE_ATTRIBUTE);\n\t\t\tif (proxyTargetClass && (language == null || !language.equals(\"groovy\"))) {\n\t\t\t\tthrow new BeanDefinitionValidationException(\n\t\t\t\t\t\t\"Cannot use proxyTargetClass=true with script beans where language is not 'groovy': '\" +\n\t\t\t\t\t\tlanguage + \"'\");\n\t\t\t}\n\t\t\tts.setRefreshCheckDelay(refreshCheckDelay);\n\t\t\treturn createRefreshableProxy(ts, interfaces, proxyTargetClass);\n\t\t}\n\n\t\tif (isFactoryBean) {\n\t\t\tscriptedObjectBeanName = BeanFactory.FACTORY_BEAN_PREFIX + scriptedObjectBeanName;\n\t\t}\n\t\treturn this.scriptBeanFactory.getBean(scriptedObjectBeanName);\n\t}"
+  },
+  "org.springframework.test.context.cache.<unknown>#put(key,context)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * {@inheritDoc}\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "key",
+      "context"
+    ],
+    "position": {
+      "column": 1,
+      "line": 147
+    },
+    "return": "void",
+    "signature": "public void put(MergedContextConfiguration key, ApplicationContext context)",
+    "source_code": "\tpublic void put(MergedContextConfiguration key, ApplicationContext context) {\n\t\tAssert.notNull(key, \"Key must not be null\");\n\t\tAssert.notNull(context, \"ApplicationContext must not be null\");\n\n\t\tthis.contextMap.put(key, context);\n\t\tMergedContextConfiguration child = key;\n\t\tMergedContextConfiguration parent = child.getParent();\n\t\twhile (parent != null) {\n\t\t\tSet<MergedContextConfiguration> list = this.hierarchyMap.computeIfAbsent(parent, k -> new HashSet<>());\n\t\t\tlist.add(child);\n\t\t\tchild = parent;\n\t\t\tparent = child.getParent();\n\t\t}\n\t}"
+  },
+  "org.springframework.test.context.junit.jupiter.<unknown>#evaluateAnnotation(annotationType,Function<A,expressionExtractor,Function<A,reasonExtractor,Function<A,loadContextExtractor,enabledOnTrue,context)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Evaluate the expression configured via the supplied annotation type on\n\t * the {@link AnnotatedElement} for the supplied {@link ExtensionContext}.\n\t * @param annotationType the type of annotation to process\n\t * @param expressionExtractor a function that extracts the expression from\n\t * the annotation\n\t * @param reasonExtractor a function that extracts the reason from the\n\t * annotation\n\t * @param loadContextExtractor a function that extracts the {@code loadContext}\n\t * flag from the annotation\n\t * @param enabledOnTrue indicates whether the returned {@code ConditionEvaluationResult}\n\t * should be {@link ConditionEvaluationResult#enabled enabled} if the expression\n\t * evaluates to {@code true}\n\t * @param context the {@code ExtensionContext}\n\t * @return {@link ConditionEvaluationResult#enabled enabled} if the container\n\t * or test should be enabled; otherwise {@link ConditionEvaluationResult#disabled disabled}\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "annotationType",
+      "Function<A",
+      "expressionExtractor",
+      "Function<A",
+      "reasonExtractor",
+      "Function<A",
+      "loadContextExtractor",
+      "enabledOnTrue",
+      "context"
+    ],
+    "position": {
+      "column": 1,
+      "line": 88
+    },
+    "return": "ConditionEvaluationResult",
+    "signature": "protected ConditionEvaluationResult evaluateAnnotation(Class<A> annotationType,\n\t\t\tFunction<A, String> expressionExtractor, Function<A, String> reasonExtractor,\n\t\t\tFunction<A, Boolean> loadContextExtractor, boolean enabledOnTrue, ExtensionContext context)",
+    "source_code": "\tprotected <A extends Annotation> ConditionEvaluationResult evaluateAnnotation(Class<A> annotationType,\n\t\t\tFunction<A, String> expressionExtractor, Function<A, String> reasonExtractor,\n\t\t\tFunction<A, Boolean> loadContextExtractor, boolean enabledOnTrue, ExtensionContext context) {\n\n\t\tAssert.state(context.getElement().isPresent(), \"No AnnotatedElement\");\n\t\tAnnotatedElement element = context.getElement().get();\n\t\tOptional<A> annotation = findMergedAnnotation(element, annotationType);\n\n\t\tif (annotation.isEmpty()) {\n\t\t\tString reason = String.format(\"%s is enabled since @%s is not present\", element,\n\t\t\t\t\tannotationType.getSimpleName());\n\t\t\tif (logger.isDebugEnabled()) {\n\t\t\t\tlogger.debug(reason);\n\t\t\t}\n\t\t\treturn ConditionEvaluationResult.enabled(reason);\n\t\t}\n\n\t\tString expression = annotation.map(expressionExtractor).map(String::trim).filter(StringUtils::hasLength)\n\t\t\t\t.orElseThrow(() -> new IllegalStateException(String.format(\n\t\t\t\t\t\t\"The expression in @%s on [%s] must not be blank\", annotationType.getSimpleName(), element)));\n\n\t\tboolean loadContext = loadContextExtractor.apply(annotation.get());\n\t\tboolean evaluatedToTrue = evaluateExpression(expression, loadContext, annotationType, context);\n\t\tConditionEvaluationResult result;\n\n\t\tif (evaluatedToTrue) {\n\t\t\tString adjective = (enabledOnTrue ? \"enabled\" : \"disabled\");\n\t\t\tString reason = annotation.map(reasonExtractor).filter(StringUtils::hasText).orElseGet(\n\t\t\t\t\t() -> String.format(\"%s is %s because @%s(\\\"%s\\\") evaluated to true\", element, adjective,\n\t\t\t\t\t\tannotationType.getSimpleName(), expression));\n\t\t\tif (logger.isInfoEnabled()) {\n\t\t\t\tlogger.info(reason);\n\t\t\t}\n\t\t\tresult = (enabledOnTrue ? ConditionEvaluationResult.enabled(reason)\n\t\t\t\t\t: ConditionEvaluationResult.disabled(reason));\n\t\t}\n\t\telse {\n\t\t\tString adjective = (enabledOnTrue ? \"disabled\" : \"enabled\");\n\t\t\tString reason = String.format(\"%s is %s because @%s(\\\"%s\\\") did not evaluate to true\",\n\t\t\t\t\telement, adjective, annotationType.getSimpleName(), expression);\n\t\t\tif (logger.isDebugEnabled()) {\n\t\t\t\tlogger.debug(reason);\n\t\t\t}\n\t\t\tresult = (enabledOnTrue ? ConditionEvaluationResult.disabled(reason) :\n\t\t\t\t\tConditionEvaluationResult.enabled(reason));\n\t\t}\n\n\t\t// If we eagerly loaded the ApplicationContext to evaluate SpEL expressions\n\t\t// and the test class ends up being disabled, we have to check if the\n\t\t// user asked for the ApplicationContext to be closed via @DirtiesContext,\n\t\t// since the DirtiesContextTestExecutionListener will never be invoked for\n\t\t// a disabled test class.\n\t\t// See https://github.com/spring-projects/spring-framework/issues/26694\n\t\tif (loadContext && result.isDisabled() && element instanceof Class<?> testClass) {\n\t\t\tDirtiesContext dirtiesContext = TestContextAnnotationUtils.findMergedAnnotation(testClass, DirtiesContext.class);\n\t\t\tif (dirtiesContext != null) {\n\t\t\t\tHierarchyMode hierarchyMode = dirtiesContext.hierarchyMode();\n\t\t\t\tSpringExtension.getTestContextManager(context).getTestContext().markApplicationContextDirty(hierarchyMode);\n\t\t\t}\n\t\t}\n\n\t\treturn result;\n\t}"
+  },
+  "org.springframework.test.web.servlet.setup.<unknown>#addPlaceholderValue(name,value)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * In a standalone setup there is no support for placeholder values embedded in\n\t * request mappings. This method allows manually provided placeholder values so they\n\t * can be resolved. Alternatively consider creating a test that initializes a\n\t * {@link WebApplicationContext}.\n\t * @since 4.2.8\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "name",
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 371
+    },
+    "return": "StandaloneMockMvcBuilder",
+    "signature": "public StandaloneMockMvcBuilder addPlaceholderValue(String name, String value)",
+    "source_code": "\tpublic StandaloneMockMvcBuilder addPlaceholderValue(String name, String value) {\n\t\tthis.placeholderValues.put(name, value);\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.test.web.servlet.setup.<unknown>#autowire(beanClass,autowireMode,dependencyCheck)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "beanClass",
+      "autowireMode",
+      "dependencyCheck"
+    ],
+    "position": {
+      "column": 1,
+      "line": 431
+    },
+    "return": "Object",
+    "signature": "public Object autowire(Class<?> beanClass, int autowireMode, boolean dependencyCheck)",
+    "source_code": "\t\tpublic Object autowire(Class<?> beanClass, int autowireMode, boolean dependencyCheck) {\n\t\t\treturn BeanUtils.instantiateClass(beanClass);\n\t\t}"
+  },
+  "org.springframework.transaction.interceptor.<unknown>#getCacheKey(method,targetClass)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Determine a cache key for the given method and target class.\n\t * <p>Must not produce same key for overloaded methods.\n\t * Must produce same key for different instances of the same method.\n\t * @param method the method (never {@code null})\n\t * @param targetClass the target class (may be {@code null})\n\t * @return the cache key (never {@code null})\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "method",
+      "targetClass"
+    ],
+    "position": {
+      "column": 1,
+      "line": 152
+    },
+    "return": "Object",
+    "signature": "protected Object getCacheKey(Method method, @Nullable Class<?> targetClass)",
+    "source_code": "\tprotected Object getCacheKey(Method method, @Nullable Class<?> targetClass) {\n\t\treturn new MethodClassKey(method, targetClass);\n\t}"
+  },
+  "org.springframework.transaction.jta.<unknown>#doRegisterAfterCompletionWithJtaTransaction(txObject,synchronizations)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Register a JTA synchronization on the JTA TransactionManager, for calling\n\t * {@code afterCompletion} on the given Spring TransactionSynchronizations.\n\t * <p>The default implementation registers the synchronizations on the\n\t * JTA 1.1 TransactionSynchronizationRegistry, if available, or on the\n\t * JTA TransactionManager's current Transaction - again, if available.\n\t * If none of the two is available, a warning will be logged.\n\t * <p>Can be overridden in subclasses, for specific JTA implementations.\n\t * @param txObject the current transaction object\n\t * @param synchronizations a List of TransactionSynchronization objects\n\t * @throws RollbackException if thrown by JTA methods\n\t * @throws SystemException if thrown by JTA methods\n\t * @see #getTransactionManager()\n\t * @see jakarta.transaction.Transaction#registerSynchronization\n\t * @see jakarta.transaction.TransactionSynchronizationRegistry#registerInterposedSynchronization\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "txObject",
+      "synchronizations"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1141
+    },
+    "return": "void",
+    "signature": "protected void doRegisterAfterCompletionWithJtaTransaction(JtaTransactionObject txObject, List<TransactionSynchronization> synchronizations)",
+    "source_code": "\tprotected void doRegisterAfterCompletionWithJtaTransaction(\n\t\t\tJtaTransactionObject txObject, List<TransactionSynchronization> synchronizations)\n\t\t\tthrows RollbackException, SystemException {\n\n\t\tint jtaStatus = txObject.getUserTransaction().getStatus();\n\t\tif (jtaStatus == Status.STATUS_NO_TRANSACTION) {\n\t\t\tthrow new RollbackException(\"JTA transaction already completed - probably rolled back\");\n\t\t}\n\t\tif (jtaStatus == Status.STATUS_ROLLEDBACK) {\n\t\t\tthrow new RollbackException(\"JTA transaction already rolled back (probably due to a timeout)\");\n\t\t}\n\n\t\tif (this.transactionSynchronizationRegistry != null) {\n\t\t\t// JTA 1.1 TransactionSynchronizationRegistry available - use it.\n\t\t\tthis.transactionSynchronizationRegistry.registerInterposedSynchronization(\n\t\t\t\t\tnew JtaAfterCompletionSynchronization(synchronizations));\n\t\t}\n\n\t\telse if (getTransactionManager() != null) {\n\t\t\t// At least the JTA TransactionManager available - use that one.\n\t\t\tTransaction transaction = getTransactionManager().getTransaction();\n\t\t\tif (transaction == null) {\n\t\t\t\tthrow new IllegalStateException(\"No JTA Transaction available\");\n\t\t\t}\n\t\t\ttransaction.registerSynchronization(new JtaAfterCompletionSynchronization(synchronizations));\n\t\t}\n\n\t\telse {\n\t\t\t// No JTA TransactionManager available - log a warning.\n\t\t\tlogger.warn(\"Participating in existing JTA transaction, but no JTA TransactionManager available: \" +\n\t\t\t\t\t\"cannot register Spring after-completion callbacks with outer JTA transaction - \" +\n\t\t\t\t\t\"processing Spring after-completion callbacks with outcome status 'unknown'\");\n\t\t\tinvokeAfterCompletion(synchronizations, TransactionSynchronization.STATUS_UNKNOWN);\n\t\t}\n\t}"
+  },
+  "org.springframework.transaction.support.<unknown>#bindResource(key,value)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Bind the given resource for the given key to the current thread.\n\t * @param key the key to bind the value to (usually the resource factory)\n\t * @param value the value to bind (usually the active resource object)\n\t * @throws IllegalStateException if there is already a value bound to the thread\n\t * @see ResourceTransactionManager#getResourceFactory()\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "key",
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 167
+    },
+    "return": "void",
+    "signature": "public void bindResource(Object key, Object value)",
+    "source_code": "\tpublic static void bindResource(Object key, Object value) throws IllegalStateException {\n\t\tObject actualKey = TransactionSynchronizationUtils.unwrapResourceIfNecessary(key);\n\t\tAssert.notNull(value, \"Value must not be null\");\n\t\tMap<Object, Object> map = resources.get();\n\t\t// set ThreadLocal Map if none found\n\t\tif (map == null) {\n\t\t\tmap = new HashMap<>();\n\t\t\tresources.set(map);\n\t\t}\n\t\tObject oldValue = map.put(actualKey, value);\n\t\t// Transparently suppress a ResourceHolder that was marked as void...\n\t\tif (oldValue instanceof ResourceHolder resourceHolder && resourceHolder.isVoid()) {\n\t\t\toldValue = null;\n\t\t}\n\t\tif (oldValue != null) {\n\t\t\tthrow new IllegalStateException(\n\t\t\t\t\t\"Already value [\" + oldValue + \"] for key [\" + actualKey + \"] bound to thread\");\n\t\t}\n\t}"
+  },
+  "org.springframework.util.<unknown>#containsConstant(enumValues,constant)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Check whether the given array of enum constants contains a constant with the given name,\n\t * ignoring case when determining a match.\n\t * @param enumValues the enum values to check, typically obtained via {@code MyEnum.values()}\n\t * @param constant the constant name to find (must not be null or empty string)\n\t * @return whether the constant has been found in the given array\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "enumValues",
+      "constant"
+    ],
+    "position": {
+      "column": 1,
+      "line": 205
+    },
+    "return": "boolean",
+    "signature": "public boolean containsConstant(Enum<?>[] enumValues, String constant)",
+    "source_code": "\tpublic static boolean containsConstant(Enum<?>[] enumValues, String constant) {\n\t\treturn containsConstant(enumValues, constant, false);\n\t}"
+  },
+  "org.springframework.util.<unknown>#copy(in,out)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Copy the contents of the given String to the given Writer.\n\t * Closes the writer when done.\n\t * @param in the String to copy from\n\t * @param out the Writer to copy to\n\t * @throws IOException in case of I/O errors\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "in",
+      "out"
+    ],
+    "position": {
+      "column": 1,
+      "line": 194
+    },
+    "return": "void",
+    "signature": "public void copy(String in, Writer out)",
+    "source_code": "\tpublic static void copy(String in, Writer out) throws IOException {\n\t\tAssert.notNull(in, \"No input String specified\");\n\t\tAssert.notNull(out, \"No Writer specified\");\n\n\t\ttry {\n\t\t\tout.write(in);\n\t\t}\n\t\tfinally {\n\t\t\tclose(out);\n\t\t}\n\t}"
+  },
+  "org.springframework.util.xml.<unknown>#endElement(uri,localName,qName)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "uri",
+      "localName",
+      "qName"
+    ],
+    "position": {
+      "column": 1,
+      "line": 90
+    },
+    "return": "void",
+    "signature": "public void endElement(String uri, String localName, String qName)",
+    "source_code": "\tpublic void endElement(String uri, String localName, String qName) {\n\t\tthis.elements.remove(this.elements.size() - 1);\n\t}"
+  },
+  "org.springframework.web.bind.<unknown>#rejectValue(field,errorCode)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "field",
+      "errorCode"
+    ],
+    "position": {
+      "column": 1,
+      "line": 103
+    },
+    "return": "void",
+    "signature": "public void rejectValue(@Nullable String field, String errorCode)",
+    "source_code": "\tpublic void rejectValue(@Nullable String field, String errorCode) {\n\t\tthis.source.rejectValue(field, errorCode);\n\t}"
+  },
+  "org.springframework.web.client.<unknown>#create(message,statusCode,statusText,headers,body,charset)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Variant of {@link #create(HttpStatusCode, String, HttpHeaders, byte[], Charset)}\n\t * with an optional prepared message.\n\t * @since 5.2.2\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "message",
+      "statusCode",
+      "statusText",
+      "headers",
+      "body",
+      "charset"
+    ],
+    "position": {
+      "column": 1,
+      "line": 97
+    },
+    "return": "HttpClientErrorException",
+    "signature": "public HttpClientErrorException create(@Nullable String message, HttpStatusCode statusCode,\n\t\t\tString statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset)",
+    "source_code": "\tpublic static HttpClientErrorException create(@Nullable String message, HttpStatusCode statusCode,\n\t\t\tString statusText, HttpHeaders headers, byte[] body, @Nullable Charset charset) {\n\n\t\tif (statusCode instanceof HttpStatus status) {\n\t\t\treturn switch (status) {\n\t\t\t\tcase BAD_REQUEST -> message != null ?\n\t\t\t\t\t\tnew BadRequest(message, statusText, headers, body, charset) :\n\t\t\t\t\t\tnew BadRequest(statusText, headers, body, charset);\n\t\t\t\tcase UNAUTHORIZED -> message != null ?\n\t\t\t\t\t\tnew Unauthorized(message, statusText, headers, body, charset) :\n\t\t\t\t\t\tnew Unauthorized(statusText, headers, body, charset);\n\t\t\t\tcase FORBIDDEN -> message != null ?\n\t\t\t\t\t\tnew Forbidden(message, statusText, headers, body, charset) :\n\t\t\t\t\t\tnew Forbidden(statusText, headers, body, charset);\n\t\t\t\tcase NOT_FOUND -> message != null ?\n\t\t\t\t\t\tnew NotFound(message, statusText, headers, body, charset) :\n\t\t\t\t\t\tnew NotFound(statusText, headers, body, charset);\n\t\t\t\tcase METHOD_NOT_ALLOWED -> message != null ?\n\t\t\t\t\t\tnew MethodNotAllowed(message, statusText, headers, body, charset) :\n\t\t\t\t\t\tnew MethodNotAllowed(statusText, headers, body, charset);\n\t\t\t\tcase NOT_ACCEPTABLE -> message != null ?\n\t\t\t\t\t\tnew NotAcceptable(message, statusText, headers, body, charset) :\n\t\t\t\t\t\tnew NotAcceptable(statusText, headers, body, charset);\n\t\t\t\tcase CONFLICT -> message != null ?\n\t\t\t\t\t\tnew Conflict(message, statusText, headers, body, charset) :\n\t\t\t\t\t\tnew Conflict(statusText, headers, body, charset);\n\t\t\t\tcase GONE -> message != null ?\n\t\t\t\t\t\tnew Gone(message, statusText, headers, body, charset) :\n\t\t\t\t\t\tnew Gone(statusText, headers, body, charset);\n\t\t\t\tcase UNSUPPORTED_MEDIA_TYPE -> message != null ?\n\t\t\t\t\t\tnew UnsupportedMediaType(message, statusText, headers, body, charset) :\n\t\t\t\t\t\tnew UnsupportedMediaType(statusText, headers, body, charset);\n\t\t\t\tcase TOO_MANY_REQUESTS -> message != null ?\n\t\t\t\t\t\tnew TooManyRequests(message, statusText, headers, body, charset) :\n\t\t\t\t\t\tnew TooManyRequests(statusText, headers, body, charset);\n\t\t\t\tcase UNPROCESSABLE_ENTITY -> message != null ?\n\t\t\t\t\t\tnew UnprocessableEntity(message, statusText, headers, body, charset) :\n\t\t\t\t\t\tnew UnprocessableEntity(statusText, headers, body, charset);\n\t\t\t\tdefault -> message != null ?\n\t\t\t\t\t\tnew HttpClientErrorException(message, statusCode, statusText, headers, body, charset) :\n\t\t\t\t\t\tnew HttpClientErrorException(statusCode, statusText, headers, body, charset);\n\t\t\t};\n\t\t}\n\t\tif (message != null) {\n\t\t\treturn new HttpClientErrorException(message, statusCode, statusText, headers, body, charset);\n\t\t}\n\t\telse {\n\t\t\treturn new HttpClientErrorException(statusCode, statusText, headers, body, charset);\n\t\t}\n\t}"
+  },
+  "org.springframework.web.client.<unknown>#getForEntity(url,responseType)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "url",
+      "responseType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 418
+    },
+    "return": "ResponseEntity<T>",
+    "signature": "public ResponseEntity<T> getForEntity(URI url, Class<T> responseType)",
+    "source_code": "\tpublic <T> ResponseEntity<T> getForEntity(URI url, Class<T> responseType) throws RestClientException {\n\t\tRequestCallback requestCallback = acceptHeaderRequestCallback(responseType);\n\t\tResponseExtractor<ResponseEntity<T>> responseExtractor = responseEntityExtractor(responseType);\n\t\treturn nonNull(execute(url, HttpMethod.GET, requestCallback, responseExtractor));\n\t}"
+  },
+  "org.springframework.web.method.annotation.<unknown>#from(bindingInitializer,parameterNameDiscoverer)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Static factory method to create a {@link HandlerMethodValidator} if Bean\n\t * Validation is enabled in Spring MVC or WebFlux.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "bindingInitializer",
+      "parameterNameDiscoverer"
+    ],
+    "position": {
+      "column": 1,
+      "line": 99
+    },
+    "return": "MethodValidator",
+    "signature": "public MethodValidator from(@Nullable WebBindingInitializer bindingInitializer,\n\t\t\t@Nullable ParameterNameDiscoverer parameterNameDiscoverer)",
+    "source_code": "\tpublic static MethodValidator from(\n\t\t\t@Nullable WebBindingInitializer bindingInitializer,\n\t\t\t@Nullable ParameterNameDiscoverer parameterNameDiscoverer) {\n\n\t\tif (bindingInitializer instanceof ConfigurableWebBindingInitializer configurableInitializer) {\n\t\t\tif (configurableInitializer.getValidator() instanceof Validator validator) {\n\t\t\t\tMethodValidationAdapter adapter = new MethodValidationAdapter(validator);\n\t\t\t\tif (parameterNameDiscoverer != null) {\n\t\t\t\t\tadapter.setParameterNameDiscoverer(parameterNameDiscoverer);\n\t\t\t\t}\n\t\t\t\tMessageCodesResolver codesResolver = configurableInitializer.getMessageCodesResolver();\n\t\t\t\tif (codesResolver != null) {\n\t\t\t\t\tadapter.setMessageCodesResolver(codesResolver);\n\t\t\t\t}\n\t\t\t\tHandlerMethodValidator methodValidator = new HandlerMethodValidator(adapter);\n\t\t\t\tadapter.setBindingResultNameResolver(methodValidator::determineObjectName);\n\t\t\t\treturn methodValidator;\n\t\t\t}\n\t\t}\n\t\treturn null;\n\t}"
+  },
+  "org.springframework.web.reactive.function.client.<unknown>#create(statusCode,statusText,headers,body,charset,request)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Create {@code WebClientResponseException} or an HTTP status specific subclass.\n\t * @since 6.0\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "statusCode",
+      "statusText",
+      "headers",
+      "body",
+      "charset",
+      "request"
+    ],
+    "position": {
+      "column": 1,
+      "line": 301
+    },
+    "return": "WebClientResponseException",
+    "signature": "public WebClientResponseException create(HttpStatusCode statusCode, String statusText, HttpHeaders headers,\n\t\t\tbyte[] body, @Nullable Charset charset, @Nullable HttpRequest request)",
+    "source_code": "\tpublic static WebClientResponseException create(\n\t\t\tHttpStatusCode statusCode, String statusText, HttpHeaders headers,\n\t\t\tbyte[] body, @Nullable Charset charset, @Nullable HttpRequest request) {\n\n\t\tif (statusCode instanceof HttpStatus httpStatus) {\n\t\t\tswitch (httpStatus) {\n\t\t\t\tcase BAD_REQUEST:\n\t\t\t\t\treturn new WebClientResponseException.BadRequest(statusText, headers, body, charset, request);\n\t\t\t\tcase UNAUTHORIZED:\n\t\t\t\t\treturn new WebClientResponseException.Unauthorized(statusText, headers, body, charset, request);\n\t\t\t\tcase FORBIDDEN:\n\t\t\t\t\treturn new WebClientResponseException.Forbidden(statusText, headers, body, charset, request);\n\t\t\t\tcase NOT_FOUND:\n\t\t\t\t\treturn new WebClientResponseException.NotFound(statusText, headers, body, charset, request);\n\t\t\t\tcase METHOD_NOT_ALLOWED:\n\t\t\t\t\treturn new WebClientResponseException.MethodNotAllowed(statusText, headers, body, charset, request);\n\t\t\t\tcase NOT_ACCEPTABLE:\n\t\t\t\t\treturn new WebClientResponseException.NotAcceptable(statusText, headers, body, charset, request);\n\t\t\t\tcase CONFLICT:\n\t\t\t\t\treturn new WebClientResponseException.Conflict(statusText, headers, body, charset, request);\n\t\t\t\tcase GONE:\n\t\t\t\t\treturn new WebClientResponseException.Gone(statusText, headers, body, charset, request);\n\t\t\t\tcase UNSUPPORTED_MEDIA_TYPE:\n\t\t\t\t\treturn new WebClientResponseException.UnsupportedMediaType(statusText, headers, body, charset, request);\n\t\t\t\tcase TOO_MANY_REQUESTS:\n\t\t\t\t\treturn new WebClientResponseException.TooManyRequests(statusText, headers, body, charset, request);\n\t\t\t\tcase UNPROCESSABLE_ENTITY:\n\t\t\t\t\treturn new WebClientResponseException.UnprocessableEntity(statusText, headers, body, charset, request);\n\t\t\t\tcase INTERNAL_SERVER_ERROR:\n\t\t\t\t\treturn new WebClientResponseException.InternalServerError(statusText, headers, body, charset, request);\n\t\t\t\tcase NOT_IMPLEMENTED:\n\t\t\t\t\treturn new WebClientResponseException.NotImplemented(statusText, headers, body, charset, request);\n\t\t\t\tcase BAD_GATEWAY:\n\t\t\t\t\treturn new WebClientResponseException.BadGateway(statusText, headers, body, charset, request);\n\t\t\t\tcase SERVICE_UNAVAILABLE:\n\t\t\t\t\treturn new WebClientResponseException.ServiceUnavailable(statusText, headers, body, charset, request);\n\t\t\t\tcase GATEWAY_TIMEOUT:\n\t\t\t\t\treturn new WebClientResponseException.GatewayTimeout(statusText, headers, body, charset, request);\n\t\t\t}\n\t\t}\n\t\treturn new WebClientResponseException(statusCode, statusText, headers, body, charset, request);\n\t}"
+  },
+  "org.springframework.web.reactive.result.method.<unknown>#registerMapping(mapping,handler,method)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Register the given mapping.\n\t * <p>This method may be invoked at runtime after initialization has completed.\n\t * @param mapping the mapping for the handler method\n\t * @param handler the handler\n\t * @param method the method\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "mapping",
+      "handler",
+      "method"
+    ],
+    "position": {
+      "column": 1,
+      "line": 132
+    },
+    "return": "void",
+    "signature": "public void registerMapping(T mapping, Object handler, Method method)",
+    "source_code": "\tpublic void registerMapping(T mapping, Object handler, Method method) {\n\t\tif (logger.isTraceEnabled()) {\n\t\t\tlogger.trace(\"Register \\\"\" + mapping + \"\\\" to \" + method.toGenericString());\n\t\t}\n\t\tthis.mappingRegistry.register(mapping, handler, method);\n\t}"
+  },
+  "org.springframework.web.reactive.socket.adapter.<unknown>#complete(channel,context)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "channel",
+      "context"
+    ],
+    "position": {
+      "column": 1,
+      "line": 127
+    },
+    "return": "void",
+    "signature": "public void complete(WebSocketChannel channel, Void context)",
+    "source_code": "\t\tpublic void complete(WebSocketChannel channel, Void context) {\n\t\t\tDataBufferUtils.release(this.payload);\n\t\t\tgetSendProcessor().setReadyToSend(true);\n\t\t\tgetSendProcessor().onWritePossible();\n\t\t}"
+  },
+  "org.springframework.web.servlet.<unknown>#processHandlerException(request,response,handler,ex)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Determine an error ModelAndView via the registered HandlerExceptionResolvers.\n\t * @param request current HTTP request\n\t * @param response current HTTP response\n\t * @param handler the executed handler, or {@code null} if none chosen at the time of the exception\n\t * (for example, if multipart resolution failed)\n\t * @param ex the exception that got thrown during handler execution\n\t * @return a corresponding ModelAndView to forward to\n\t * @throws Exception if no error ModelAndView found\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "request",
+      "response",
+      "handler",
+      "ex"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1331
+    },
+    "return": "ModelAndView",
+    "signature": "protected ModelAndView processHandlerException(HttpServletRequest request, HttpServletResponse response,\n\t\t\t@Nullable Object handler, Exception ex)",
+    "source_code": "\tprotected ModelAndView processHandlerException(HttpServletRequest request, HttpServletResponse response,\n\t\t\t@Nullable Object handler, Exception ex) throws Exception {\n\n\t\t// Success and error responses may use different content types\n\t\trequest.removeAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);\n\n\t\t// Check registered HandlerExceptionResolvers...\n\t\tModelAndView exMv = null;\n\t\tif (this.handlerExceptionResolvers != null) {\n\t\t\tfor (HandlerExceptionResolver resolver : this.handlerExceptionResolvers) {\n\t\t\t\texMv = resolver.resolveException(request, response, handler, ex);\n\t\t\t\tif (exMv != null) {\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tif (exMv != null) {\n\t\t\tif (exMv.isEmpty()) {\n\t\t\t\trequest.setAttribute(EXCEPTION_ATTRIBUTE, ex);\n\t\t\t\treturn null;\n\t\t\t}\n\t\t\t// We might still need view name translation for a plain error model...\n\t\t\tif (!exMv.hasView()) {\n\t\t\t\tString defaultViewName = getDefaultViewName(request);\n\t\t\t\tif (defaultViewName != null) {\n\t\t\t\t\texMv.setViewName(defaultViewName);\n\t\t\t\t}\n\t\t\t}\n\t\t\tif (logger.isTraceEnabled()) {\n\t\t\t\tlogger.trace(\"Using resolved error view: \" + exMv, ex);\n\t\t\t}\n\t\t\telse if (logger.isDebugEnabled()) {\n\t\t\t\tlogger.debug(\"Using resolved error view: \" + exMv);\n\t\t\t}\n\t\t\tWebUtils.exposeErrorRequestAttributes(request, ex, getServletName());\n\t\t\treturn exMv;\n\t\t}\n\n\t\tthrow ex;\n\t}"
+  },
+  "org.springframework.web.servlet.function.<unknown>#create(obj,timeout)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "obj",
+      "timeout"
+    ],
+    "position": {
+      "column": 1,
+      "line": 172
+    },
+    "return": "AsyncServerResponse",
+    "signature": "public AsyncServerResponse create(Object obj, @Nullable Duration timeout)",
+    "source_code": "\tpublic static AsyncServerResponse create(Object obj, @Nullable Duration timeout) {\n\t\tAssert.notNull(obj, \"Argument to async must not be null\");\n\n\t\tif (obj instanceof CompletableFuture futureResponse) {\n\t\t\treturn new DefaultAsyncServerResponse(futureResponse, timeout);\n\t\t}\n\t\telse if (reactiveStreamsPresent) {\n\t\t\tReactiveAdapterRegistry registry = ReactiveAdapterRegistry.getSharedInstance();\n\t\t\tReactiveAdapter publisherAdapter = registry.getAdapter(obj.getClass());\n\t\t\tif (publisherAdapter != null) {\n\t\t\t\tPublisher<ServerResponse> publisher = publisherAdapter.toPublisher(obj);\n\t\t\t\tReactiveAdapter futureAdapter = registry.getAdapter(CompletableFuture.class);\n\t\t\t\tif (futureAdapter != null) {\n\t\t\t\t\tCompletableFuture<ServerResponse> futureResponse =\n\t\t\t\t\t\t\t(CompletableFuture<ServerResponse>) futureAdapter.fromPublisher(publisher);\n\t\t\t\t\treturn new DefaultAsyncServerResponse(futureResponse, timeout);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tthrow new IllegalArgumentException(\"Asynchronous type not supported: \" + obj.getClass());\n\t}"
+  },
+  "org.springframework.web.servlet.handler.<unknown>#afterCompletion(request,response,handler,ex)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "request",
+      "response",
+      "handler",
+      "ex"
+    ],
+    "position": {
+      "column": 1,
+      "line": 70
+    },
+    "return": "void",
+    "signature": "public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,\n\t\t\t@Nullable Exception ex)",
+    "source_code": "\tpublic void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,\n\t\t\t@Nullable Exception ex) throws Exception {\n\n\t\tthis.requestInterceptor.afterCompletion(new DispatcherServletWebRequest(request, response), ex);\n\t}"
+  },
+  "org.springframework.web.servlet.handler.<unknown>#lookupHandler(path,lookupPath,request)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Look up a handler instance for the given URL path. This method is used\n\t * when parsed {@code PathPattern}s are {@link #usesPathPatterns() enabled}.\n\t * @param path the parsed RequestPath\n\t * @param lookupPath the String lookupPath for checking direct hits\n\t * @param request current HTTP request\n\t * @return a matching handler, or {@code null} if not found\n\t * @since 5.3\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "path",
+      "lookupPath",
+      "request"
+    ],
+    "position": {
+      "column": 1,
+      "line": 189
+    },
+    "return": "Object",
+    "signature": "protected Object lookupHandler(RequestPath path, String lookupPath, HttpServletRequest request)",
+    "source_code": "\tprotected Object lookupHandler(\n\t\t\tRequestPath path, String lookupPath, HttpServletRequest request) throws Exception {\n\n\t\tObject handler = getDirectMatch(lookupPath, request);\n\t\tif (handler != null) {\n\t\t\treturn handler;\n\t\t}\n\n\t\t// Pattern match?\n\t\tList<PathPattern> matches = null;\n\t\tfor (PathPattern pattern : this.pathPatternHandlerMap.keySet()) {\n\t\t\tif (pattern.matches(path.pathWithinApplication())) {\n\t\t\t\tmatches = (matches != null ? matches : new ArrayList<>());\n\t\t\t\tmatches.add(pattern);\n\t\t\t}\n\t\t}\n\t\tif (matches == null) {\n\t\t\treturn null;\n\t\t}\n\t\tif (matches.size() > 1) {\n\t\t\tmatches.sort(PathPattern.SPECIFICITY_COMPARATOR);\n\t\t\tif (logger.isTraceEnabled()) {\n\t\t\t\tlogger.trace(\"Matching patterns \" + matches);\n\t\t\t}\n\t\t}\n\t\tPathPattern pattern = matches.get(0);\n\t\thandler = this.pathPatternHandlerMap.get(pattern);\n\t\tif (handler instanceof String handlerName) {\n\t\t\thandler = obtainApplicationContext().getBean(handlerName);\n\t\t}\n\t\tvalidateHandler(handler, request);\n\t\tString pathWithinMapping = pattern.extractPathWithinPattern(path.pathWithinApplication()).value();\n\t\tpathWithinMapping = UrlPathHelper.defaultInstance.removeSemicolonContent(pathWithinMapping);\n\t\treturn buildPathExposingHandler(handler, pattern.getPatternString(), pathWithinMapping, null);\n\t}"
+  },
+  "org.springframework.web.servlet.mvc.<unknown>#postHandle(request,response,handler,modelAndView)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * This implementation is empty.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "request",
+      "response",
+      "handler",
+      "modelAndView"
+    ],
+    "position": {
+      "column": 1,
+      "line": 318
+    },
+    "return": "void",
+    "signature": "public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,\n\t\t\t@Nullable ModelAndView modelAndView)",
+    "source_code": "\tpublic void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,\n\t\t\t@Nullable ModelAndView modelAndView) throws Exception {\n\t}"
+  },
+  "org.springframework.web.servlet.mvc.method.<unknown>#handleMatch(info,lookupPath,request)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Expose URI template variables, matrix variables, and producible media types in the request.\n\t * @see HandlerMapping#URI_TEMPLATE_VARIABLES_ATTRIBUTE\n\t * @see HandlerMapping#MATRIX_VARIABLES_ATTRIBUTE\n\t * @see HandlerMapping#PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "info",
+      "lookupPath",
+      "request"
+    ],
+    "position": {
+      "column": 1,
+      "line": 140
+    },
+    "return": "void",
+    "signature": "protected void handleMatch(RequestMappingInfo info, String lookupPath, HttpServletRequest request)",
+    "source_code": "\tprotected void handleMatch(RequestMappingInfo info, String lookupPath, HttpServletRequest request) {\n\t\tsuper.handleMatch(info, lookupPath, request);\n\n\t\tRequestCondition<?> condition = info.getActivePatternsCondition();\n\t\tif (condition instanceof PathPatternsRequestCondition pprc) {\n\t\t\textractMatchDetails(pprc, lookupPath, request);\n\t\t}\n\t\telse {\n\t\t\textractMatchDetails((PatternsRequestCondition) condition, lookupPath, request);\n\t\t}\n\n\t\tProducesRequestCondition producesCondition = info.getProducesCondition();\n\t\tif (!producesCondition.isEmpty()) {\n\t\t\tSet<MediaType> mediaTypes = producesCondition.getProducibleMediaTypes();\n\t\t\tif (!mediaTypes.isEmpty()) {\n\t\t\t\trequest.setAttribute(PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE, mediaTypes);\n\t\t\t}\n\t\t}\n\t}"
+  },
+  "org.springframework.web.servlet.mvc.method.annotation.<unknown>#handleHttpMediaTypeNotAcceptable(ex,headers,status,request)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Customize the handling of {@link HttpMediaTypeNotAcceptableException}.\n\t * <p>This method delegates to {@link #handleExceptionInternal}.\n\t * @param ex the exception to handle\n\t * @param headers the headers to use for the response\n\t * @param status the status code to use for the response\n\t * @param request the current request\n\t * @return a {@code ResponseEntity} for the response to use, possibly\n\t * {@code null} when the response is already committed\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "ex",
+      "headers",
+      "status",
+      "request"
+    ],
+    "position": {
+      "column": 1,
+      "line": 241
+    },
+    "return": "ResponseEntity<Object>",
+    "signature": "protected ResponseEntity<Object> handleHttpMediaTypeNotAcceptable(HttpMediaTypeNotAcceptableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request)",
+    "source_code": "\tprotected ResponseEntity<Object> handleHttpMediaTypeNotAcceptable(\n\t\t\tHttpMediaTypeNotAcceptableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {\n\n\t\treturn handleExceptionInternal(ex, null, headers, status, request);\n\t}"
+  },
+  "org.springframework.web.servlet.mvc.method.annotation.<unknown>#registerMapping(mapping,handler,method)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "mapping",
+      "handler",
+      "method"
+    ],
+    "position": {
+      "column": 1,
+      "line": 421
+    },
+    "return": "void",
+    "signature": "public void registerMapping(RequestMappingInfo mapping, Object handler, Method method)",
+    "source_code": "\tpublic void registerMapping(RequestMappingInfo mapping, Object handler, Method method) {\n\t\tsuper.registerMapping(mapping, handler, method);\n\t\tupdateConsumesCondition(mapping, method);\n\t}"
+  },
+  "org.springframework.web.servlet.mvc.method.annotation.<unknown>#supports(param,type,converterType)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "param",
+      "type",
+      "converterType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 77
+    },
+    "return": "boolean",
+    "signature": "public boolean supports(MethodParameter param, Type type, Class<? extends HttpMessageConverter<?>> converterType)",
+    "source_code": "\tpublic boolean supports(MethodParameter param, Type type, Class<? extends HttpMessageConverter<?>> converterType) {\n\t\tthrow new UnsupportedOperationException(\"Not implemented\");\n\t}"
+  },
+  "org.springframework.web.servlet.mvc.support.<unknown>#handleHttpMessageNotWritable(ex,request,response,handler)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Handle the case where a\n\t * {@linkplain org.springframework.http.converter.HttpMessageConverter message converter}\n\t * cannot write to an HTTP request.\n\t * <p>The default implementation sends an HTTP 500 error, and returns an empty {@code ModelAndView}.\n\t * Alternatively, a fallback view could be chosen, or the HttpMessageNotWritableException could\n\t * be rethrown as-is.\n\t * @param ex the HttpMessageNotWritableException to be handled\n\t * @param request current HTTP request\n\t * @param response current HTTP response\n\t * @param handler the executed handler\n\t * @return an empty {@code ModelAndView} indicating the exception was handled\n\t * @throws IOException potentially thrown from {@link HttpServletResponse#sendError}\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "ex",
+      "request",
+      "response",
+      "handler"
+    ],
+    "position": {
+      "column": 1,
+      "line": 545
+    },
+    "return": "ModelAndView",
+    "signature": "protected ModelAndView handleHttpMessageNotWritable(HttpMessageNotWritableException ex,\n\t\t\tHttpServletRequest request, HttpServletResponse response, @Nullable Object handler)",
+    "source_code": "\tprotected ModelAndView handleHttpMessageNotWritable(HttpMessageNotWritableException ex,\n\t\t\tHttpServletRequest request, HttpServletResponse response, @Nullable Object handler) throws IOException {\n\n\t\tsendServerError(ex, request, response);\n\t\treturn new ModelAndView();\n\t}"
+  },
+  "org.springframework.web.servlet.resource.<unknown>#registerExtension(coding,extension)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Java config friendly alternative to {@link #setExtensions(Map)}.\n\t * @param coding the content coding\n\t * @param extension the associated file extension\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "coding",
+      "extension"
+    ],
+    "position": {
+      "column": 1,
+      "line": 126
+    },
+    "return": "void",
+    "signature": "public void registerExtension(String coding, String extension)",
+    "source_code": "\tpublic void registerExtension(String coding, String extension) {\n\t\tthis.extensions.put(coding, (extension.startsWith(\".\") ? extension : \".\" + extension));\n\t}"
+  },
+  "org.springframework.web.servlet.resource.<unknown>#resolveUrlPathInternal(resourceUrlPath,locations,chain)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "resourceUrlPath",
+      "locations",
+      "chain"
+    ],
+    "position": {
+      "column": 1,
+      "line": 198
+    },
+    "return": "String",
+    "signature": "protected String resolveUrlPathInternal(String resourceUrlPath,\n\t\t\tList<? extends Resource> locations, ResourceResolverChain chain)",
+    "source_code": "\tprotected String resolveUrlPathInternal(String resourceUrlPath,\n\t\t\tList<? extends Resource> locations, ResourceResolverChain chain) {\n\n\t\tString baseUrl = chain.resolveUrlPath(resourceUrlPath, locations);\n\t\tif (StringUtils.hasText(baseUrl)) {\n\t\t\tVersionStrategy versionStrategy = getStrategyForPath(resourceUrlPath);\n\t\t\tif (versionStrategy == null) {\n\t\t\t\treturn baseUrl;\n\t\t\t}\n\t\t\tResource resource = chain.resolveResource(null, baseUrl, locations);\n\t\t\tAssert.state(resource != null, \"Unresolvable resource\");\n\t\t\tString version = versionStrategy.getResourceVersion(resource);\n\t\t\treturn versionStrategy.addVersion(baseUrl, version);\n\t\t}\n\t\treturn baseUrl;\n\t}"
+  },
+  "org.springframework.web.servlet.support.<unknown>#getMessage(code,args,htmlEscape)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Retrieve the message for the given code.\n\t * @param code the code of the message\n\t * @param args arguments for the message, or {@code null} if none\n\t * @param htmlEscape if the message should be HTML-escaped\n\t * @return the message\n\t * @throws org.springframework.context.NoSuchMessageException if not found\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "code",
+      "args",
+      "htmlEscape"
+    ],
+    "position": {
+      "column": 1,
+      "line": 711
+    },
+    "return": "String",
+    "signature": "public String getMessage(String code, @Nullable Object[] args, boolean htmlEscape)",
+    "source_code": "\tpublic String getMessage(String code, @Nullable Object[] args, boolean htmlEscape) throws NoSuchMessageException {\n\t\tString msg = this.webApplicationContext.getMessage(code, args, getLocale());\n\t\treturn (htmlEscape ? HtmlUtils.htmlEscape(msg) : msg);\n\t}"
+  },
+  "org.springframework.web.servlet.view.<unknown>#resolveViewName(viewName,locale)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "viewName",
+      "locale"
+    ],
+    "position": {
+      "column": 1,
+      "line": 224
+    },
+    "return": "View",
+    "signature": "public View resolveViewName(String viewName, Locale locale)",
+    "source_code": "\tpublic View resolveViewName(String viewName, Locale locale) throws Exception {\n\t\tRequestAttributes attrs = RequestContextHolder.getRequestAttributes();\n\t\tAssert.state(attrs instanceof ServletRequestAttributes, \"No current ServletRequestAttributes\");\n\t\tList<MediaType> requestedMediaTypes = getMediaTypes(((ServletRequestAttributes) attrs).getRequest());\n\t\tif (requestedMediaTypes != null) {\n\t\t\tList<View> candidateViews = getCandidateViews(viewName, locale, requestedMediaTypes);\n\t\t\tView bestView = getBestView(candidateViews, requestedMediaTypes, attrs);\n\t\t\tif (bestView != null) {\n\t\t\t\treturn bestView;\n\t\t\t}\n\t\t}\n\n\t\tString mediaTypeInfo = logger.isDebugEnabled() && requestedMediaTypes != null ?\n\t\t\t\t\" given \" + requestedMediaTypes.toString() : \"\";\n\n\t\tif (this.useNotAcceptableStatusCode) {\n\t\t\tif (logger.isDebugEnabled()) {\n\t\t\t\tlogger.debug(\"Using 406 NOT_ACCEPTABLE\" + mediaTypeInfo);\n\t\t\t}\n\t\t\treturn NOT_ACCEPTABLE_VIEW;\n\t\t}\n\t\telse {\n\t\t\tlogger.debug(\"View remains unresolved\" + mediaTypeInfo);\n\t\t\treturn null;\n\t\t}\n\t}"
+  },
+  "org.springframework.web.servlet.view.json.<unknown>#renderMergedOutputModel(Map<String,model,request,response)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "Map<String",
+      "model",
+      "request",
+      "response"
+    ],
+    "position": {
+      "column": 1,
+      "line": 154
+    },
+    "return": "void",
+    "signature": "protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request,\n\t\t\tHttpServletResponse response)",
+    "source_code": "\tprotected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request,\n\t\t\tHttpServletResponse response) throws Exception {\n\n\t\tByteArrayOutputStream temporaryStream = null;\n\t\tOutputStream stream;\n\n\t\tif (this.updateContentLength) {\n\t\t\ttemporaryStream = createTemporaryOutputStream();\n\t\t\tstream = temporaryStream;\n\t\t}\n\t\telse {\n\t\t\tstream = response.getOutputStream();\n\t\t}\n\n\t\tObject value = filterAndWrapModel(model, request);\n\t\twriteContent(stream, value);\n\n\t\tif (temporaryStream != null) {\n\t\t\twriteToResponse(response, temporaryStream);\n\t\t}\n\t}"
+  },
+  "org.springframework.web.socket.server.support.<unknown>#handleInvalidConnectHeader(request,response)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "request",
+      "response"
+    ],
+    "position": {
+      "column": 1,
+      "line": 273
+    },
+    "return": "void",
+    "signature": "protected void handleInvalidConnectHeader(ServerHttpRequest request, ServerHttpResponse response)",
+    "source_code": "\tprotected void handleInvalidConnectHeader(ServerHttpRequest request, ServerHttpResponse response) throws IOException {\n\t\tif (logger.isErrorEnabled()) {\n\t\t\tlogger.error(LogFormatUtils.formatValue(\n\t\t\t\t\t\"Handshake failed due to invalid Connection header\" + request.getHeaders().getConnection(), -1, true));\n\t\t}\n\t\tresponse.setStatusCode(HttpStatus.BAD_REQUEST);\n\t\tresponse.getBody().write(\"\\\"Connection\\\" must be \\\"upgrade\\\".\".getBytes(StandardCharsets.UTF_8));\n\t}"
+  },
+  "org.springframework.web.socket.sockjs.client.<unknown>#handleTextMessage(webSocketSession,message)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "webSocketSession",
+      "message"
+    ],
+    "position": {
+      "column": 1,
+      "line": 154
+    },
+    "return": "void",
+    "signature": "public void handleTextMessage(WebSocketSession webSocketSession, TextMessage message)",
+    "source_code": "\t\tpublic void handleTextMessage(WebSocketSession webSocketSession, TextMessage message) throws Exception {\n\t\t\tthis.sockJsSession.handleFrame(message.getPayload());\n\t\t}"
+  },
+  "org.springframework.web.socket.sockjs.support.<unknown>#sendMethodNotAllowed(response,httpMethods)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "response",
+      "httpMethods"
+    ],
+    "position": {
+      "column": 1,
+      "line": 559
+    },
+    "return": "void",
+    "signature": "protected void sendMethodNotAllowed(ServerHttpResponse response, HttpMethod... httpMethods)",
+    "source_code": "\tprotected void sendMethodNotAllowed(ServerHttpResponse response, HttpMethod... httpMethods) {\n\t\tlogger.warn(\"Sending Method Not Allowed (405)\");\n\t\tresponse.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);\n\t\tresponse.getHeaders().setAllow(new LinkedHashSet<>(Arrays.asList(httpMethods)));\n\t}"
+  },
+  "org.springframework.web.socket.sockjs.support.<unknown>#validateRequest(serverId,sessionId,transport)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "serverId",
+      "sessionId",
+      "transport"
+    ],
+    "position": {
+      "column": 1,
+      "line": 493
+    },
+    "return": "boolean",
+    "signature": "protected boolean validateRequest(String serverId, String sessionId, String transport)",
+    "source_code": "\tprotected boolean validateRequest(String serverId, String sessionId, String transport) {\n\t\tif (!StringUtils.hasText(serverId) || !StringUtils.hasText(sessionId) || !StringUtils.hasText(transport)) {\n\t\t\tlogger.warn(\"No server, session, or transport path segment in SockJS request.\");\n\t\t\treturn false;\n\t\t}\n\n\t\t// Server and session id's must not contain \".\"\n\t\tif (serverId.contains(\".\") || sessionId.contains(\".\")) {\n\t\t\tlogger.warn(\"Either server or session contains a \\\".\\\" which is not allowed by SockJS protocol.\");\n\t\t\treturn false;\n\t\t}\n\n\t\treturn true;\n\t}"
+  },
+  "org.springframework.web.util.<unknown>#build(Map<String,uriVariables)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "Map<String",
+      "uriVariables"
+    ],
+    "position": {
+      "column": 1,
+      "line": 522
+    },
+    "return": "URI",
+    "signature": "public URI build(Map<String, ?> uriVariables)",
+    "source_code": "\tpublic URI build(Map<String, ?> uriVariables) {\n\t\treturn buildInternal(EncodingHint.ENCODE_TEMPLATE).expand(uriVariables).toUri();\n\t}"
+  }
+}

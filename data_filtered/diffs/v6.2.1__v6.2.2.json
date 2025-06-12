@@ -1,0 +1,86 @@
+{
+  "org.springframework.test.context.bean.override.mockito.<unknown>#createHandlers(overrideAnnotation,testClass)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "overrideAnnotation",
+      "testClass"
+    ],
+    "position": {
+      "column": 1,
+      "line": 58
+    },
+    "return": "List<BeanOverrideHandler>",
+    "signature": "public List<BeanOverrideHandler> createHandlers(Annotation overrideAnnotation, Class<?> testClass)",
+    "source_code": "\tpublic List<BeanOverrideHandler> createHandlers(Annotation overrideAnnotation, Class<?> testClass) {\n\t\tif (!(overrideAnnotation instanceof MockitoBean mockitoBean)) {\n\t\t\tthrow new IllegalStateException(\"\"\"\n\t\t\t\t\tInvalid annotation passed to MockitoBeanOverrideProcessor: \\\n\t\t\t\t\texpected @MockitoBean on test class \"\"\" + testClass.getName());\n\t\t}\n\t\tClass<?>[] types = mockitoBean.types();\n\t\tAssert.state(types.length > 0,\n\t\t\t\t\"The @MockitoBean 'types' attribute must not be empty when declared on a class\");\n\t\tAssert.state(mockitoBean.name().isEmpty() || types.length == 1,\n\t\t\t\t\"The @MockitoBean 'name' attribute cannot be used when mocking multiple types\");\n\t\tList<BeanOverrideHandler> handlers = new ArrayList<>();\n\t\tfor (Class<?> type : types) {\n\t\t\thandlers.add(new MockitoBeanOverrideHandler(ResolvableType.forClass(type), mockitoBean));\n\t\t}\n\t\treturn handlers;\n\t}"
+  },
+  "org.springframework.web.client.<unknown>#handleError(response,statusCode,url,method)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Handle the error based on the resolved status code.\n\t * <p>The default implementation delegates to\n\t * {@link HttpClientErrorException#create} for errors in the 4xx range, to\n\t * {@link HttpServerErrorException#create} for errors in the 5xx range,\n\t * or otherwise raises {@link UnknownHttpStatusCodeException}.\n\t * @since 6.2\n\t * @see HttpClientErrorException#create\n\t * @see HttpServerErrorException#create\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "response",
+      "statusCode",
+      "url",
+      "method"
+    ],
+    "position": {
+      "column": 1,
+      "line": 174
+    },
+    "return": "void",
+    "signature": "protected void handleError(ClientHttpResponse response, HttpStatusCode statusCode,\n\t\t\t@Nullable URI url, @Nullable HttpMethod method)",
+    "source_code": "\tprotected void handleError(\n\t\t\tClientHttpResponse response, HttpStatusCode statusCode,\n\t\t\t@Nullable URI url, @Nullable HttpMethod method) throws IOException {\n\n\t\tString statusText = response.getStatusText();\n\t\tHttpHeaders headers = response.getHeaders();\n\t\tbyte[] body = getResponseBody(response);\n\t\tCharset charset = getCharset(response);\n\t\tString message = getErrorMessage(statusCode.value(), statusText, body, charset, url, method);\n\n\t\tRestClientResponseException ex;\n\t\tif (statusCode.is4xxClientError()) {\n\t\t\tex = HttpClientErrorException.create(message, statusCode, statusText, headers, body, charset);\n\t\t}\n\t\telse if (statusCode.is5xxServerError()) {\n\t\t\tex = HttpServerErrorException.create(message, statusCode, statusText, headers, body, charset);\n\t\t}\n\t\telse {\n\t\t\tex = new UnknownHttpStatusCodeException(message, statusCode.value(), statusText, headers, body, charset);\n\t\t}\n\n\t\tif (!CollectionUtils.isEmpty(this.messageConverters)) {\n\t\t\tex.setBodyConvertFunction(initBodyConvertFunction(response, body));\n\t\t}\n\n\t\tthrow ex;\n\t}"
+  },
+  "org.springframework.web.client.<unknown>#handleError(url,method,response)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Handle the error in the given response with the given resolved status code\n\t * and extra information providing access to the request URL and HTTP method.\n\t * <p>The default implementation throws:\n\t * <ul>\n\t * <li>{@link HttpClientErrorException} if the status code is in the 4xx\n\t * series, or one of its sub-classes such as\n\t * {@link HttpClientErrorException.BadRequest} and others.\n\t * <li>{@link HttpServerErrorException} if the status code is in the 5xx\n\t * series, or one of its sub-classes such as\n\t * {@link HttpServerErrorException.InternalServerError} and others.\n\t * <li>{@link UnknownHttpStatusCodeException} for error status codes not in the\n\t * {@link HttpStatus} enum range.\n\t * </ul>\n\t * @throws UnknownHttpStatusCodeException in case of an unresolvable status code\n\t * @since 6.2\n\t * @see #handleError(ClientHttpResponse, HttpStatusCode, URI, HttpMethod)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "url",
+      "method",
+      "response"
+    ],
+    "position": {
+      "column": 1,
+      "line": 138
+    },
+    "return": "void",
+    "signature": "public void handleError(URI url, HttpMethod method, ClientHttpResponse response)",
+    "source_code": "\tpublic void handleError(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {\n\n\t\t// For backwards compatibility try handle(response) first\n\t\tHandleErrorResponseDecorator decorator = new HandleErrorResponseDecorator(response);\n\t\thandleError(decorator);\n\t\tif (decorator.isHandled()) {\n\t\t\treturn;\n\t\t}\n\n\t\thandleError(response, response.getStatusCode(), url, method);\n\t}"
+  },
+  "org.springframework.web.servlet.config.<unknown>#registerPatternParser(patternParserRef,context,source)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Adds an alias to an existing well-known name or registers a new instance of a {@link PathPatternParser}\n\t * under that well-known name, unless already registered.\n\t * @return a RuntimeBeanReference to this {@link PathPatternParser} instance\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "patternParserRef",
+      "context",
+      "source"
+    ],
+    "position": {
+      "column": 1,
+      "line": 170
+    },
+    "return": "RuntimeBeanReference",
+    "signature": "public RuntimeBeanReference registerPatternParser(@Nullable RuntimeBeanReference patternParserRef,\n\t\t\tParserContext context, @Nullable Object source)",
+    "source_code": "\tpublic static RuntimeBeanReference registerPatternParser(@Nullable RuntimeBeanReference patternParserRef,\n\t\t\tParserContext context, @Nullable Object source) {\n\t\tif (patternParserRef != null) {\n\t\t\tif (context.getRegistry().isAlias(PATTERN_PARSER_BEAN_NAME)) {\n\t\t\t\tcontext.getRegistry().removeAlias(PATTERN_PARSER_BEAN_NAME);\n\t\t\t}\n\t\t\tcontext.getRegistry().registerAlias(patternParserRef.getBeanName(), PATTERN_PARSER_BEAN_NAME);\n\t\t}\n\t\telse if (!context.getRegistry().isAlias(PATTERN_PARSER_BEAN_NAME) &&\n\t\t\t\t!context.getRegistry().containsBeanDefinition(PATTERN_PARSER_BEAN_NAME)) {\n\t\t\tRootBeanDefinition pathMatcherDef = new RootBeanDefinition(PathPatternParser.class);\n\t\t\tpathMatcherDef.setSource(source);\n\t\t\tpathMatcherDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);\n\t\t\tcontext.getRegistry().registerBeanDefinition(PATTERN_PARSER_BEAN_NAME, pathMatcherDef);\n\t\t\tcontext.registerComponent(new BeanComponentDefinition(pathMatcherDef, PATTERN_PARSER_BEAN_NAME));\n\t\t}\n\t\treturn new RuntimeBeanReference(PATTERN_PARSER_BEAN_NAME);\n\t}"
+  }
+}

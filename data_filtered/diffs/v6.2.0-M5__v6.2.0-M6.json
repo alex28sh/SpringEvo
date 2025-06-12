@@ -1,0 +1,126 @@
+{
+  "org.springframework.expression.spel.support.<unknown>#convertAllArguments(converter,arguments,method)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Convert the supplied set of arguments into the parameter types of the supplied\n\t * {@link Method}.\n\t * <p>If the supplied method is a varargs method, the final parameter type must be an\n\t * array whose component type should be used as the conversion target for extraneous\n\t * arguments. For example, if the parameter types are <code>{Integer, String[]}</code>\n\t * and the input arguments are <code>{Integer, boolean, float}</code>, then both the\n\t * {@code boolean} and the {@code float} must be converted to strings.\n\t * <p>This method does <strong>not</strong> repackage the arguments into a form suitable\n\t * for the varargs invocation: a subsequent call to\n\t * {@link #setupArgumentsForVarargsInvocation(Class[], Object...)} is required for that.\n\t * @param converter the converter to use for type conversions\n\t * @param arguments the arguments to convert to the required parameter types\n\t * @param method the target {@code Method}\n\t * @return {@code true} if some kind of conversion occurred on an argument\n\t * @throws SpelEvaluationException if a problem occurs during conversion\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "converter",
+      "arguments",
+      "method"
+    ],
+    "position": {
+      "column": 1,
+      "line": 254
+    },
+    "return": "boolean",
+    "signature": "public boolean convertAllArguments(TypeConverter converter, Object[] arguments, Method method)",
+    "source_code": "\tpublic static boolean convertAllArguments(TypeConverter converter, Object[] arguments, Method method)\n\t\t\tthrows SpelEvaluationException {\n\n\t\tInteger varargsPosition = (method.isVarArgs() ? method.getParameterCount() - 1 : null);\n\t\treturn convertArguments(converter, arguments, method, varargsPosition);\n\t}"
+  },
+  "org.springframework.expression.spel.support.<unknown>#convertAllMethodHandleArguments(converter,arguments,methodHandle,varargsPosition)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Convert the supplied set of arguments into the parameter types of the supplied\n\t * {@link MethodHandle}, taking the varargs position into account.\n\t * <p>The arguments are converted 'in-place' in the input array.\n\t * @param converter the converter to use for type conversions\n\t * @param arguments the arguments to convert to the required parameter types\n\t * @param methodHandle the target {@code MethodHandle}\n\t * @param varargsPosition the known position of the varargs argument, if any\n\t * ({@code null} if not varargs)\n\t * @return {@code true} if some kind of conversion occurred on an argument\n\t * @throws EvaluationException if a problem occurs during conversion\n\t * @since 6.1\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "converter",
+      "arguments",
+      "methodHandle",
+      "varargsPosition"
+    ],
+    "position": {
+      "column": 1,
+      "line": 354
+    },
+    "return": "boolean",
+    "signature": "public boolean convertAllMethodHandleArguments(TypeConverter converter, Object[] arguments,\n\t\t\tMethodHandle methodHandle, @Nullable Integer varargsPosition)",
+    "source_code": "\tpublic static boolean convertAllMethodHandleArguments(TypeConverter converter, Object[] arguments,\n\t\t\tMethodHandle methodHandle, @Nullable Integer varargsPosition) throws EvaluationException {\n\n\t\tboolean conversionOccurred = false;\n\t\tMethodType methodHandleType = methodHandle.type();\n\t\tif (varargsPosition == null) {\n\t\t\tfor (int i = 0; i < arguments.length; i++) {\n\t\t\t\tClass<?> argumentClass = methodHandleType.parameterType(i);\n\t\t\t\tResolvableType resolvableType = ResolvableType.forClass(argumentClass);\n\t\t\t\tTypeDescriptor targetType = new TypeDescriptor(resolvableType, argumentClass, null);\n\n\t\t\t\tObject argument = arguments[i];\n\t\t\t\targuments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);\n\t\t\t\tconversionOccurred |= (argument != arguments[i]);\n\t\t\t}\n\t\t}\n\t\telse {\n\t\t\t// Convert everything up to the varargs position\n\t\t\tfor (int i = 0; i < varargsPosition; i++) {\n\t\t\t\tClass<?> argumentClass = methodHandleType.parameterType(i);\n\t\t\t\tResolvableType resolvableType = ResolvableType.forClass(argumentClass);\n\t\t\t\tTypeDescriptor targetType = new TypeDescriptor(resolvableType, argumentClass, null);\n\n\t\t\t\tObject argument = arguments[i];\n\t\t\t\targuments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), targetType);\n\t\t\t\tconversionOccurred |= (argument != arguments[i]);\n\t\t\t}\n\n\t\t\tClass<?> varArgClass = methodHandleType.lastParameterType();\n\t\t\tResolvableType varArgResolvableType = ResolvableType.forClass(varArgClass);\n\t\t\tTypeDescriptor targetType = new TypeDescriptor(varArgResolvableType, varArgClass.componentType(), null);\n\t\t\tTypeDescriptor componentTypeDesc = targetType.getElementTypeDescriptor();\n\t\t\tAssert.state(componentTypeDesc != null, \"Component type must not be null for a varargs array\");\n\n\t\t\t// If the target is varargs and there is just one more argument, then convert it here.\n\t\t\tif (varargsPosition == arguments.length - 1) {\n\t\t\t\tObject argument = arguments[varargsPosition];\n\t\t\t\tTypeDescriptor sourceType = TypeDescriptor.forObject(argument);\n\t\t\t\tif (argument == null) {\n\t\t\t\t\t// Perform the equivalent of GenericConversionService.convertNullSource() for a single argument.\n\t\t\t\t\tif (componentTypeDesc.getObjectType() == Optional.class) {\n\t\t\t\t\t\targuments[varargsPosition] = Optional.empty();\n\t\t\t\t\t\tconversionOccurred = true;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t// If the argument type is assignable to the varargs component type, there is no need to\n\t\t\t\t// convert it or wrap it in an array. For example, using StringToArrayConverter to\n\t\t\t\t// convert a String containing a comma would result in the String being split and\n\t\t\t\t// repackaged in an array when it should be used as-is.\n\t\t\t\telse if (!sourceType.isAssignableTo(componentTypeDesc)) {\n\t\t\t\t\targuments[varargsPosition] = converter.convertValue(argument, sourceType, targetType);\n\t\t\t\t}\n\t\t\t\t// Possible outcomes of the above if-else block:\n\t\t\t\t// 1) the input argument was null, and nothing was done.\n\t\t\t\t// 2) the input argument was null; the varargs component type is Optional; and the argument was converted to Optional.empty().\n\t\t\t\t// 3) the input argument was correct type but not wrapped in an array, and nothing was done.\n\t\t\t\t// 4) the input argument was already compatible (i.e., array of valid type), and nothing was done.\n\t\t\t\t// 5) the input argument was the wrong type and got converted and wrapped in an array.\n\t\t\t\tif (argument != arguments[varargsPosition] &&\n\t\t\t\t\t\t!isFirstEntryInArray(argument, arguments[varargsPosition])) {\n\t\t\t\t\tconversionOccurred = true; // case 5\n\t\t\t\t}\n\t\t\t}\n\t\t\t// Otherwise, convert remaining arguments to the varargs component type.\n\t\t\telse {\n\t\t\t\tfor (int i = varargsPosition; i < arguments.length; i++) {\n\t\t\t\t\tObject argument = arguments[i];\n\t\t\t\t\targuments[i] = converter.convertValue(argument, TypeDescriptor.forObject(argument), componentTypeDesc);\n\t\t\t\t\tconversionOccurred |= (argument != arguments[i]);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn conversionOccurred;\n\t}"
+  },
+  "org.springframework.expression.spel.support.<unknown>#getTypeDifferenceWeight(paramTypes,argTypes)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Based on {@link MethodInvoker#getTypeDifferenceWeight(Class[], Object[])} but operates on TypeDescriptors.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "paramTypes",
+      "argTypes"
+    ],
+    "position": {
+      "column": 1,
+      "line": 97
+    },
+    "return": "int",
+    "signature": "public int getTypeDifferenceWeight(List<TypeDescriptor> paramTypes, List<TypeDescriptor> argTypes)",
+    "source_code": "\tpublic static int getTypeDifferenceWeight(List<TypeDescriptor> paramTypes, List<TypeDescriptor> argTypes) {\n\t\tint result = 0;\n\t\tfor (int i = 0; i < paramTypes.size(); i++) {\n\t\t\tTypeDescriptor paramType = paramTypes.get(i);\n\t\t\tTypeDescriptor argType = (i < argTypes.size() ? argTypes.get(i) : null);\n\t\t\tif (argType == null) {\n\t\t\t\tif (paramType.isPrimitive()) {\n\t\t\t\t\treturn Integer.MAX_VALUE;\n\t\t\t\t}\n\t\t\t}\n\t\t\telse {\n\t\t\t\tClass<?> paramTypeClazz = paramType.getType();\n\t\t\t\tif (!ClassUtils.isAssignable(paramTypeClazz, argType.getType())) {\n\t\t\t\t\treturn Integer.MAX_VALUE;\n\t\t\t\t}\n\t\t\t\tif (paramTypeClazz.isPrimitive()) {\n\t\t\t\t\tparamTypeClazz = Object.class;\n\t\t\t\t}\n\t\t\t\tClass<?> superClass = argType.getType().getSuperclass();\n\t\t\t\twhile (superClass != null) {\n\t\t\t\t\tif (paramTypeClazz.equals(superClass)) {\n\t\t\t\t\t\tresult = result + 2;\n\t\t\t\t\t\tsuperClass = null;\n\t\t\t\t\t}\n\t\t\t\t\telse if (ClassUtils.isAssignable(paramTypeClazz, superClass)) {\n\t\t\t\t\t\tresult = result + 2;\n\t\t\t\t\t\tsuperClass = superClass.getSuperclass();\n\t\t\t\t\t}\n\t\t\t\t\telse {\n\t\t\t\t\t\tsuperClass = null;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tif (paramTypeClazz.isInterface()) {\n\t\t\t\t\tresult = result + 1;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\treturn result;\n\t}"
+  },
+  "org.springframework.expression.spel.support.<unknown>#setupArgumentsForVarargsInvocation(requiredParameterTypes,args)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Package up the supplied {@code args} so that they correctly match what is\n\t * expected in {@code requiredParameterTypes}.\n\t * <p>For example, if {@code requiredParameterTypes} is {@code (int, String[])}\n\t * because the second parameter was declared as {@code String...}, then if\n\t * {@code args} is {@code [1, \"a\", \"b\"]} it must be repackaged as\n\t * {@code [1, new String[] {\"a\", \"b\"}]} in order to match the expected types.\n\t * @param requiredParameterTypes the types of the parameters for the invocation\n\t * @param args the arguments to be set up for the invocation\n\t * @return a repackaged array of arguments where any varargs setup has been performed\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "requiredParameterTypes",
+      "args"
+    ],
+    "position": {
+      "column": 1,
+      "line": 459
+    },
+    "return": "Object[]",
+    "signature": "public Object[] setupArgumentsForVarargsInvocation(Class<?>[] requiredParameterTypes, Object... args)",
+    "source_code": "\tpublic static Object[] setupArgumentsForVarargsInvocation(Class<?>[] requiredParameterTypes, Object... args) {\n\t\tAssert.notEmpty(requiredParameterTypes, \"Required parameter types array must not be empty\");\n\n\t\tint parameterCount = requiredParameterTypes.length;\n\t\tClass<?> lastRequiredParameterType = requiredParameterTypes[parameterCount - 1];\n\t\tAssert.isTrue(lastRequiredParameterType.isArray(),\n\t\t\t\t\"The last required parameter type must be an array to support varargs invocation\");\n\n\t\tint argumentCount = args.length;\n\t\tObject lastArgument = (argumentCount > 0 ? args[argumentCount - 1] : null);\n\n\t\t// Check if repackaging is needed...\n\t\tif (parameterCount != argumentCount || !lastRequiredParameterType.isInstance(lastArgument)) {\n\t\t\t// Create an array for the leading arguments plus the varargs array argument.\n\t\t\tObject[] newArgs = new Object[parameterCount];\n\t\t\t// Copy all leading arguments to the new array, omitting the varargs array argument.\n\t\t\tSystem.arraycopy(args, 0, newArgs, 0, newArgs.length - 1);\n\n\t\t\t// Now sort out the final argument, which is the varargs one. Before entering this method,\n\t\t\t// the arguments should have been converted to the box form of the required type.\n\t\t\tint varargsArraySize = 0;  // zero size array if nothing to pass as the varargs parameter\n\t\t\tif (argumentCount >= parameterCount) {\n\t\t\t\tvarargsArraySize = argumentCount - (parameterCount - 1);\n\t\t\t}\n\t\t\tClass<?> componentType = lastRequiredParameterType.componentType();\n\t\t\tObject varargsArray = Array.newInstance(componentType, varargsArraySize);\n\t\t\tfor (int i = 0; i < varargsArraySize; i++) {\n\t\t\t\tArray.set(varargsArray, i, args[parameterCount - 1 + i]);\n\t\t\t}\n\t\t\t// Finally, add the varargs array to the new arguments array.\n\t\t\tnewArgs[newArgs.length - 1] = varargsArray;\n\t\t\treturn newArgs;\n\t\t}\n\n\t\treturn args;\n\t}"
+  },
+  "org.springframework.http.client.<unknown>#map(b,off,len)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "b",
+      "off",
+      "len"
+    ],
+    "position": {
+      "column": 1,
+      "line": 207
+    },
+    "return": "ByteBuffer",
+    "signature": "public ByteBuffer map(byte[] b, int off, int len)",
+    "source_code": "\t\tpublic ByteBuffer map(byte[] b, int off, int len) {\n\t\t\tByteBuffer byteBuffer = ByteBuffer.allocate(len);\n\t\t\tbyteBuffer.put(b, off, len);\n\t\t\tbyteBuffer.flip();\n\t\t\treturn byteBuffer;\n\t\t}"
+  },
+  "org.springframework.validation.method.<unknown>#unwrap(error,sourceType)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Unwrap the source behind the given error. For Jakarta Bean validation the\n\t * source is a {@link jakarta.validation.ConstraintViolation}.\n\t * @param sourceType the expected source type\n\t * @return the source object of the given type\n\t * @since 6.2\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "error",
+      "sourceType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 197
+    },
+    "return": "T",
+    "signature": "public T unwrap(MessageSourceResolvable error, Class<T> sourceType)",
+    "source_code": "\tpublic <T> T unwrap(MessageSourceResolvable error, Class<T> sourceType) {\n\t\treturn (T) this.sourceLookup.apply(error, sourceType);\n\t}"
+  }
+}

@@ -1,0 +1,246 @@
+{
+  "org.springframework.context.annotation.<unknown>#configureScanner(parserContext,element)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "parserContext",
+      "element"
+    ],
+    "position": {
+      "column": 1,
+      "line": 96
+    },
+    "return": "ClassPathBeanDefinitionScanner",
+    "signature": "protected ClassPathBeanDefinitionScanner configureScanner(ParserContext parserContext, Element element)",
+    "source_code": "\tprotected ClassPathBeanDefinitionScanner configureScanner(ParserContext parserContext, Element element) {\n\t\tboolean useDefaultFilters = true;\n\t\tif (element.hasAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE)) {\n\t\t\tuseDefaultFilters = Boolean.parseBoolean(element.getAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE));\n\t\t}\n\n\t\t// Delegate bean definition registration to scanner class.\n\t\tClassPathBeanDefinitionScanner scanner = createScanner(parserContext.getReaderContext(), useDefaultFilters);\n\t\tscanner.setBeanDefinitionDefaults(parserContext.getDelegate().getBeanDefinitionDefaults());\n\t\tscanner.setAutowireCandidatePatterns(parserContext.getDelegate().getAutowireCandidatePatterns());\n\n\t\tif (element.hasAttribute(RESOURCE_PATTERN_ATTRIBUTE)) {\n\t\t\tscanner.setResourcePattern(element.getAttribute(RESOURCE_PATTERN_ATTRIBUTE));\n\t\t}\n\n\t\ttry {\n\t\t\tparseBeanNameGenerator(element, scanner);\n\t\t}\n\t\tcatch (Exception ex) {\n\t\t\tparserContext.getReaderContext().error(ex.getMessage(), parserContext.extractSource(element), ex.getCause());\n\t\t}\n\n\t\ttry {\n\t\t\tparseScope(element, scanner);\n\t\t}\n\t\tcatch (Exception ex) {\n\t\t\tparserContext.getReaderContext().error(ex.getMessage(), parserContext.extractSource(element), ex.getCause());\n\t\t}\n\n\t\tparseTypeFilters(element, scanner, parserContext);\n\n\t\treturn scanner;\n\t}"
+  },
+  "org.springframework.context.annotation.<unknown>#createScanner(readerContext,useDefaultFilters)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "readerContext",
+      "useDefaultFilters"
+    ],
+    "position": {
+      "column": 1,
+      "line": 130
+    },
+    "return": "ClassPathBeanDefinitionScanner",
+    "signature": "protected ClassPathBeanDefinitionScanner createScanner(XmlReaderContext readerContext, boolean useDefaultFilters)",
+    "source_code": "\tprotected ClassPathBeanDefinitionScanner createScanner(XmlReaderContext readerContext, boolean useDefaultFilters) {\n\t\treturn new ClassPathBeanDefinitionScanner(readerContext.getRegistry(), useDefaultFilters,\n\t\t\t\treaderContext.getEnvironment(), readerContext.getResourceLoader());\n\t}"
+  },
+  "org.springframework.context.annotation.<unknown>#parse(element,parserContext)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "element",
+      "parserContext"
+    ],
+    "position": {
+      "column": 1,
+      "line": 82
+    },
+    "return": "BeanDefinition",
+    "signature": "public BeanDefinition parse(Element element, ParserContext parserContext)",
+    "source_code": "\tpublic BeanDefinition parse(Element element, ParserContext parserContext) {\n\t\tString basePackage = element.getAttribute(BASE_PACKAGE_ATTRIBUTE);\n\t\tbasePackage = parserContext.getReaderContext().getEnvironment().resolvePlaceholders(basePackage);\n\t\tString[] basePackages = StringUtils.tokenizeToStringArray(basePackage,\n\t\t\t\tConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);\n\n\t\t// Actually scan for bean definitions and register them.\n\t\tClassPathBeanDefinitionScanner scanner = configureScanner(parserContext, element);\n\t\tSet<BeanDefinitionHolder> beanDefinitions = scanner.doScan(basePackages);\n\t\tregisterComponents(parserContext.getReaderContext(), beanDefinitions, element);\n\n\t\treturn null;\n\t}"
+  },
+  "org.springframework.context.annotation.<unknown>#registerComponents(readerContext,beanDefinitions,element)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "readerContext",
+      "beanDefinitions",
+      "element"
+    ],
+    "position": {
+      "column": 1,
+      "line": 135
+    },
+    "return": "void",
+    "signature": "protected void registerComponents(XmlReaderContext readerContext, Set<BeanDefinitionHolder> beanDefinitions, Element element)",
+    "source_code": "\tprotected void registerComponents(\n\t\t\tXmlReaderContext readerContext, Set<BeanDefinitionHolder> beanDefinitions, Element element) {\n\n\t\tObject source = readerContext.extractSource(element);\n\t\tCompositeComponentDefinition compositeDef = new CompositeComponentDefinition(element.getTagName(), source);\n\n\t\tfor (BeanDefinitionHolder beanDefHolder : beanDefinitions) {\n\t\t\tcompositeDef.addNestedComponent(new BeanComponentDefinition(beanDefHolder));\n\t\t}\n\n\t\t// Register annotation config processors, if necessary.\n\t\tboolean annotationConfig = true;\n\t\tif (element.hasAttribute(ANNOTATION_CONFIG_ATTRIBUTE)) {\n\t\t\tannotationConfig = Boolean.parseBoolean(element.getAttribute(ANNOTATION_CONFIG_ATTRIBUTE));\n\t\t}\n\t\tif (annotationConfig) {\n\t\t\tSet<BeanDefinitionHolder> processorDefinitions =\n\t\t\t\t\tAnnotationConfigUtils.registerAnnotationConfigProcessors(readerContext.getRegistry(), source);\n\t\t\tfor (BeanDefinitionHolder processorDefinition : processorDefinitions) {\n\t\t\t\tcompositeDef.addNestedComponent(new BeanComponentDefinition(processorDefinition));\n\t\t\t}\n\t\t}\n\n\t\treaderContext.fireComponentRegistered(compositeDef);\n\t}"
+  },
+  "org.springframework.scheduling.config.<unknown>#doParse(element,parserContext,builder)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "element",
+      "parserContext",
+      "builder"
+    ],
+    "position": {
+      "column": 1,
+      "line": 42
+    },
+    "return": "void",
+    "signature": "protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder)",
+    "source_code": "\tprotected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {\n\t\tString keepAliveSeconds = element.getAttribute(\"keep-alive\");\n\t\tif (StringUtils.hasText(keepAliveSeconds)) {\n\t\t\tbuilder.addPropertyValue(\"keepAliveSeconds\", keepAliveSeconds);\n\t\t}\n\t\tString queueCapacity = element.getAttribute(\"queue-capacity\");\n\t\tif (StringUtils.hasText(queueCapacity)) {\n\t\t\tbuilder.addPropertyValue(\"queueCapacity\", queueCapacity);\n\t\t}\n\t\tconfigureRejectionPolicy(element, builder);\n\t\tString poolSize = element.getAttribute(\"pool-size\");\n\t\tif (StringUtils.hasText(poolSize)) {\n\t\t\tbuilder.addPropertyValue(\"poolSize\", poolSize);\n\t\t}\n\t}"
+  },
+  "org.springframework.scheduling.support.<unknown>#resumeFixedExecution(expression,resumptionTimestamp)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Create a {@link CronTrigger} for fixed execution, to be rescheduled\n\t * after every task based on the last scheduled time.\n\t * <p>This variant makes up for missed trigger firings if the associated task\n\t * has taken too long, scheduling a task for every original trigger firing.\n\t * Such follow-up tasks may execute late but will never be skipped.\n\t * @param expression a space-separated list of time fields, following cron\n\t * expression conventions\n\t * @param resumptionTimestamp the timestamp to resume from (the last-known\n\t * scheduled timestamp), with every trigger in-between immediately firing\n\t * to make up for every execution that would have happened in the meantime\n\t * @since 6.1.3\n\t * @see #forFixedExecution\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "expression",
+      "resumptionTimestamp"
+    ],
+    "position": {
+      "column": 1,
+      "line": 236
+    },
+    "return": "CronTrigger",
+    "signature": "public CronTrigger resumeFixedExecution(String expression, Instant resumptionTimestamp)",
+    "source_code": "\tpublic static CronTrigger resumeFixedExecution(String expression, Instant resumptionTimestamp) {\n\t\treturn new CronTrigger(expression) {\n\t\t\t@Override\n\t\t\tprotected Instant determineLatestTimestamp(TriggerContext triggerContext) {\n\t\t\t\tInstant scheduled = triggerContext.lastScheduledExecution();\n\t\t\t\treturn (scheduled != null ? scheduled : super.determineLatestTimestamp(triggerContext));\n\t\t\t}\n\t\t\t@Override\n\t\t\tInstant determineInitialTimestamp(TriggerContext triggerContext) {\n\t\t\t\treturn resumptionTimestamp;\n\t\t\t}\n\t\t};\n\t}"
+  },
+  "org.springframework.scheduling.support.<unknown>#resumeLenientExecution(expression,resumptionTimestamp)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Create a {@link CronTrigger} for lenient execution, to be rescheduled\n\t * after every task based on the completion time.\n\t * <p>This variant does not make up for missed trigger firings if the\n\t * associated task has taken too long. As a consequence, original trigger\n\t * firings may be skipped if the previous task is still running.\n\t * @param expression a space-separated list of time fields, following cron\n\t * expression conventions\n\t * @param resumptionTimestamp the timestamp to resume from (the last-known\n\t * completion timestamp), with the new trigger calculated from there and\n\t * possibly immediately firing (but only once, every subsequent calculation\n\t * will start from the completion time of that first resumed trigger)\n\t * @since 6.1.3\n\t * @see #forLenientExecution\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "expression",
+      "resumptionTimestamp"
+    ],
+    "position": {
+      "column": 1,
+      "line": 190
+    },
+    "return": "CronTrigger",
+    "signature": "public CronTrigger resumeLenientExecution(String expression, Instant resumptionTimestamp)",
+    "source_code": "\tpublic static CronTrigger resumeLenientExecution(String expression, Instant resumptionTimestamp) {\n\t\treturn new CronTrigger(expression) {\n\t\t\t@Override\n\t\t\tInstant determineInitialTimestamp(TriggerContext triggerContext) {\n\t\t\t\treturn resumptionTimestamp;\n\t\t\t}\n\t\t};\n\t}"
+  },
+  "org.springframework.web.context.request.<unknown>#getAttribute(name,scope)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "name",
+      "scope"
+    ],
+    "position": {
+      "column": 1,
+      "line": 105
+    },
+    "return": "Object",
+    "signature": "public Object getAttribute(String name, int scope)",
+    "source_code": "\tpublic Object getAttribute(String name, int scope) {\n\t\treturn getAttributeMap(scope).get(name);\n\t}"
+  },
+  "org.springframework.web.context.request.<unknown>#registerDestructionCallback(name,callback,scope)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "name",
+      "callback",
+      "scope"
+    ],
+    "position": {
+      "column": 1,
+      "line": 125
+    },
+    "return": "void",
+    "signature": "public void registerDestructionCallback(String name, Runnable callback, int scope)",
+    "source_code": "\tpublic void registerDestructionCallback(String name, Runnable callback, int scope) {\n\t\tif (logger.isWarnEnabled()) {\n\t\t\tlogger.warn(\"Could not register destruction callback [\" + callback + \"] for attribute '\" + name +\n\t\t\t\t\t\"' because FacesRequestAttributes does not support such callbacks\");\n\t\t}\n\t}"
+  },
+  "org.springframework.web.context.request.<unknown>#removeAttribute(name,scope)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "name",
+      "scope"
+    ],
+    "position": {
+      "column": 1,
+      "line": 115
+    },
+    "return": "void",
+    "signature": "public void removeAttribute(String name, int scope)",
+    "source_code": "\tpublic void removeAttribute(String name, int scope) {\n\t\tgetAttributeMap(scope).remove(name);\n\t}"
+  },
+  "org.springframework.web.context.request.<unknown>#setAttribute(name,value,scope)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "name",
+      "value",
+      "scope"
+    ],
+    "position": {
+      "column": 1,
+      "line": 110
+    },
+    "return": "void",
+    "signature": "public void setAttribute(String name, Object value, int scope)",
+    "source_code": "\tpublic void setAttribute(String name, Object value, int scope) {\n\t\tgetAttributeMap(scope).put(name, value);\n\t}"
+  },
+  "org.springframework.web.util.<unknown>#hasAncestorOfType(tag,ancestorTagClass)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Determine whether the supplied {@link Tag} has any ancestor tag\n\t * of the supplied type.\n\t * @param tag the tag whose ancestors are to be checked\n\t * @param ancestorTagClass the ancestor {@link Class} being searched for\n\t * @return {@code true} if the supplied {@link Tag} has any ancestor tag\n\t * of the supplied type\n\t * @throws IllegalArgumentException if either of the supplied arguments is {@code null};\n\t * or if the supplied {@code ancestorTagClass} is not type-assignable to\n\t * the {@link Tag} class\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "tag",
+      "ancestorTagClass"
+    ],
+    "position": {
+      "column": 1,
+      "line": 89
+    },
+    "return": "boolean",
+    "signature": "public boolean hasAncestorOfType(Tag tag, Class<?> ancestorTagClass)",
+    "source_code": "\tpublic static boolean hasAncestorOfType(Tag tag, Class<?> ancestorTagClass) {\n\t\tAssert.notNull(tag, \"Tag cannot be null\");\n\t\tAssert.notNull(ancestorTagClass, \"Ancestor tag class cannot be null\");\n\t\tif (!Tag.class.isAssignableFrom(ancestorTagClass)) {\n\t\t\tthrow new IllegalArgumentException(\n\t\t\t\t\t\"Class '\" + ancestorTagClass.getName() + \"' is not a valid Tag type\");\n\t\t}\n\t\tTag ancestor = tag.getParent();\n\t\twhile (ancestor != null) {\n\t\t\tif (ancestorTagClass.isAssignableFrom(ancestor.getClass())) {\n\t\t\t\treturn true;\n\t\t\t}\n\t\t\tancestor = ancestor.getParent();\n\t\t}\n\t\treturn false;\n\t}"
+  }
+}

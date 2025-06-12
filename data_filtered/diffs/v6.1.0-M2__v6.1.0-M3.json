@@ -1,0 +1,148 @@
+{
+  "org.springframework.aop.interceptor.<unknown>#invokeUnderTrace(invocation,logger)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Writes a log message before the invocation based on the value of {@code enterMessage}.\n\t * If the invocation succeeds, then a log message is written on exit based on the value\n\t * {@code exitMessage}. If an exception occurs during invocation, then a message is\n\t * written based on the value of {@code exceptionMessage}.\n\t * @see #setEnterMessage\n\t * @see #setExitMessage\n\t * @see #setExceptionMessage\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "invocation",
+      "logger"
+    ],
+    "position": {
+      "column": 1,
+      "line": 254
+    },
+    "return": "Object",
+    "signature": "protected Object invokeUnderTrace(MethodInvocation invocation, Log logger)",
+    "source_code": "\tprotected Object invokeUnderTrace(MethodInvocation invocation, Log logger) throws Throwable {\n\t\tString name = ClassUtils.getQualifiedMethodName(invocation.getMethod());\n\t\tStopWatch stopWatch = new StopWatch(name);\n\t\tObject returnValue = null;\n\t\tboolean exitThroughException = false;\n\t\ttry {\n\t\t\tstopWatch.start(name);\n\t\t\twriteToLog(logger,\n\t\t\t\t\treplacePlaceholders(this.enterMessage, invocation, null, null, -1));\n\t\t\treturnValue = invocation.proceed();\n\t\t\treturn returnValue;\n\t\t}\n\t\tcatch (Throwable ex) {\n\t\t\tif (stopWatch.isRunning()) {\n\t\t\t\tstopWatch.stop();\n\t\t\t}\n\t\t\texitThroughException = true;\n\t\t\twriteToLog(logger, replacePlaceholders(\n\t\t\t\t\tthis.exceptionMessage, invocation, null, ex, stopWatch.getTotalTimeMillis()), ex);\n\t\t\tthrow ex;\n\t\t}\n\t\tfinally {\n\t\t\tif (!exitThroughException) {\n\t\t\t\tif (stopWatch.isRunning()) {\n\t\t\t\t\tstopWatch.stop();\n\t\t\t\t}\n\t\t\t\twriteToLog(logger, replacePlaceholders(\n\t\t\t\t\t\tthis.exitMessage, invocation, returnValue, null, stopWatch.getTotalTimeMillis()));\n\t\t\t}\n\t\t}\n\t}"
+  },
+  "org.springframework.aop.interceptor.<unknown>#replacePlaceholders(message,methodInvocation,returnValue,throwable,invocationTime)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Replace the placeholders in the given message with the supplied values,\n\t * or values derived from those supplied.\n\t * @param message the message template containing the placeholders to be replaced\n\t * @param methodInvocation the {@code MethodInvocation} being logged.\n\t * Used to derive values for all placeholders except {@code $[exception]}\n\t * and {@code $[returnValue]}.\n\t * @param returnValue any value returned by the invocation.\n\t * Used to replace the {@code $[returnValue]} placeholder. May be {@code null}.\n\t * @param throwable any {@code Throwable} raised during the invocation.\n\t * The value of {@code Throwable.toString()} is replaced for the\n\t * {@code $[exception]} placeholder. May be {@code null}.\n\t * @param invocationTime the value to write in place of the\n\t * {@code $[invocationTime]} placeholder\n\t * @return the formatted output to write to the log\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "message",
+      "methodInvocation",
+      "returnValue",
+      "throwable",
+      "invocationTime"
+    ],
+    "position": {
+      "column": 1,
+      "line": 302
+    },
+    "return": "String",
+    "signature": "protected String replacePlaceholders(String message, MethodInvocation methodInvocation,\n\t\t\t@Nullable Object returnValue, @Nullable Throwable throwable, long invocationTime)",
+    "source_code": "\tprotected String replacePlaceholders(String message, MethodInvocation methodInvocation,\n\t\t\t@Nullable Object returnValue, @Nullable Throwable throwable, long invocationTime) {\n\n\t\tObject target = methodInvocation.getThis();\n\t\tAssert.state(target != null, \"Target must not be null\");\n\n\t\tStringBuilder output = new StringBuilder();\n\t\tMatcher matcher = PATTERN.matcher(message);\n\t\twhile (matcher.find()) {\n\t\t\tString match = matcher.group();\n\t\t\tswitch (match) {\n\t\t\t\tcase PLACEHOLDER_METHOD_NAME -> matcher.appendReplacement(output,\n\t\t\t\t\t\tMatcher.quoteReplacement(methodInvocation.getMethod().getName()));\n\t\t\t\tcase PLACEHOLDER_TARGET_CLASS_NAME -> {\n\t\t\t\t\tString className = getClassForLogging(target).getName();\n\t\t\t\t\tmatcher.appendReplacement(output, Matcher.quoteReplacement(className));\n\t\t\t\t}\n\t\t\t\tcase PLACEHOLDER_TARGET_CLASS_SHORT_NAME -> {\n\t\t\t\t\tString shortName = ClassUtils.getShortName(getClassForLogging(target));\n\t\t\t\t\tmatcher.appendReplacement(output, Matcher.quoteReplacement(shortName));\n\t\t\t\t}\n\t\t\t\tcase PLACEHOLDER_ARGUMENTS -> matcher.appendReplacement(output,\n\t\t\t\t\t\tMatcher.quoteReplacement(StringUtils.arrayToCommaDelimitedString(methodInvocation.getArguments())));\n\t\t\t\tcase PLACEHOLDER_ARGUMENT_TYPES -> appendArgumentTypes(methodInvocation, matcher, output);\n\t\t\t\tcase PLACEHOLDER_RETURN_VALUE -> appendReturnValue(methodInvocation, matcher, output, returnValue);\n\t\t\t\tcase PLACEHOLDER_EXCEPTION -> {\n\t\t\t\t\tif (throwable != null) {\n\t\t\t\t\t\tmatcher.appendReplacement(output, Matcher.quoteReplacement(throwable.toString()));\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tcase PLACEHOLDER_INVOCATION_TIME -> matcher.appendReplacement(output, Long.toString(invocationTime));\n\t\t\t\tdefault -> {\n\t\t\t\t\t// Should not happen since placeholders are checked earlier.\n\t\t\t\t\tthrow new IllegalArgumentException(\"Unknown placeholder [\" + match + \"]\");\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tmatcher.appendTail(output);\n\n\t\treturn output.toString();\n\t}"
+  },
+  "org.springframework.beans.factory.support.<unknown>#resolveAutowiredArgument(descriptor,beanName,autowiredBeanNames,typeConverter,fallback)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Template method for resolving the specified argument which is supposed to be autowired.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "descriptor",
+      "beanName",
+      "autowiredBeanNames",
+      "typeConverter",
+      "fallback"
+    ],
+    "position": {
+      "column": 1,
+      "line": 876
+    },
+    "return": "Object",
+    "signature": "protected Object resolveAutowiredArgument(DependencyDescriptor descriptor, String beanName,\n\t\t\t@Nullable Set<String> autowiredBeanNames, TypeConverter typeConverter, boolean fallback)",
+    "source_code": "\tprotected Object resolveAutowiredArgument(DependencyDescriptor descriptor, String beanName,\n\t\t\t@Nullable Set<String> autowiredBeanNames, TypeConverter typeConverter, boolean fallback) {\n\n\t\tClass<?> paramType = descriptor.getMethodParameter().getParameterType();\n\t\tif (InjectionPoint.class.isAssignableFrom(paramType)) {\n\t\t\tInjectionPoint injectionPoint = currentInjectionPoint.get();\n\t\t\tif (injectionPoint == null) {\n\t\t\t\tthrow new IllegalStateException(\"No current InjectionPoint available for \" + descriptor);\n\t\t\t}\n\t\t\treturn injectionPoint;\n\t\t}\n\t\ttry {\n\t\t\treturn this.beanFactory.resolveDependency(\n\t\t\t\t\tdescriptor, beanName, autowiredBeanNames, typeConverter);\n\t\t}\n\t\tcatch (NoUniqueBeanDefinitionException ex) {\n\t\t\tthrow ex;\n\t\t}\n\t\tcatch (NoSuchBeanDefinitionException ex) {\n\t\t\tif (fallback) {\n\t\t\t\t// Single constructor or factory method -> let's return an empty array/collection\n\t\t\t\t// for e.g. a vararg or a non-null List/Set/Map parameter.\n\t\t\t\tif (paramType.isArray()) {\n\t\t\t\t\treturn Array.newInstance(paramType.getComponentType(), 0);\n\t\t\t\t}\n\t\t\t\telse if (CollectionFactory.isApproximableCollectionType(paramType)) {\n\t\t\t\t\treturn CollectionFactory.createCollection(paramType, 0);\n\t\t\t\t}\n\t\t\t\telse if (CollectionFactory.isApproximableMapType(paramType)) {\n\t\t\t\t\treturn CollectionFactory.createMap(paramType, 0);\n\t\t\t\t}\n\t\t\t}\n\t\t\tthrow ex;\n\t\t}\n\t}"
+  },
+  "org.springframework.cache.interceptor.<unknown>#getBean(beanName,expectedType)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return a bean with the specified name and type. Used to resolve services that\n\t * are referenced by name in a {@link CacheOperation}.\n\t * @param beanName the name of the bean, as defined by the operation\n\t * @param expectedType type for the bean\n\t * @return the bean matching that name\n\t * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException if such bean does not exist\n\t * @see CacheOperation#getKeyGenerator()\n\t * @see CacheOperation#getCacheManager()\n\t * @see CacheOperation#getCacheResolver()\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "beanName",
+      "expectedType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 320
+    },
+    "return": "T",
+    "signature": "protected T getBean(String beanName, Class<T> expectedType)",
+    "source_code": "\tprotected <T> T getBean(String beanName, Class<T> expectedType) {\n\t\tif (this.beanFactory == null) {\n\t\t\tthrow new IllegalStateException(\n\t\t\t\t\t\"BeanFactory must be set on cache aspect for \" + expectedType.getSimpleName() + \" retrieval\");\n\t\t}\n\t\treturn BeanFactoryAnnotationUtils.qualifiedBeanOfType(this.beanFactory, expectedType, beanName);\n\t}"
+  },
+  "org.springframework.cache.interceptor.<unknown>#getBean(name,serviceType)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Retrieve a bean with the specified name and type.\n\t * Used to resolve services that are referenced by name in a {@link CacheOperation}.\n\t * @param name the name of the bean, as defined by the cache operation\n\t * @param serviceType the type expected by the operation's service reference\n\t * @return the bean matching the expected type, qualified by the given name\n\t * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException if such bean does not exist\n\t * @see CacheOperation#getKeyGenerator()\n\t * @see CacheOperation#getCacheManager()\n\t * @see CacheOperation#getCacheResolver()\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "name",
+      "serviceType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 320
+    },
+    "return": "T",
+    "signature": "protected T getBean(String name, Class<T> serviceType)",
+    "source_code": "\tprotected <T> T getBean(String name, Class<T> serviceType) {\n\t\tif (this.beanFactory == null) {\n\t\t\tthrow new IllegalStateException(\n\t\t\t\t\t\"BeanFactory must be set on cache aspect for \" + serviceType.getSimpleName() + \" retrieval\");\n\t\t}\n\t\treturn BeanFactoryAnnotationUtils.qualifiedBeanOfType(this.beanFactory, serviceType, name);\n\t}"
+  },
+  "org.springframework.core.convert.support.<unknown>#convert(source,targetType)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "source",
+      "targetType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 164
+    },
+    "return": "T",
+    "signature": "public T convert(@Nullable Object source, Class<T> targetType)",
+    "source_code": "\tpublic <T> T convert(@Nullable Object source, Class<T> targetType) {\n\t\tAssert.notNull(targetType, \"Target type to convert to cannot be null\");\n\t\treturn (T) convert(source, TypeDescriptor.forObject(source), TypeDescriptor.valueOf(targetType));\n\t}"
+  },
+  "org.springframework.web.servlet.mvc.support.<unknown>#logException(ex,request)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "ex",
+      "request"
+    ],
+    "position": {
+      "column": 1,
+      "line": 666
+    },
+    "return": "void",
+    "signature": "protected void logException(Exception ex, HttpServletRequest request)",
+    "source_code": "\tprotected void logException(Exception ex, HttpServletRequest request) {\n\t\tif (ex instanceof NoHandlerFoundException || ex instanceof NoResourceFoundException) {\n\t\t\tif (logger.isDebugEnabled()) {\n\t\t\t\tlogger.debug(buildLogMessage(ex, request));\n\t\t\t}\n\t\t\treturn;\n\t\t}\n\t\tsuper.logException(ex, request);\n\t}"
+  }
+}

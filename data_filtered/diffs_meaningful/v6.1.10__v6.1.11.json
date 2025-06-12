@@ -1,0 +1,47 @@
+{
+  "org.springframework.messaging.converter.<unknown>#merge(message,charset,contentType,extensionRegistry,builder)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "message",
+      "charset",
+      "contentType",
+      "extensionRegistry",
+      "builder"
+    ],
+    "position": {
+      "column": 1,
+      "line": 263
+    },
+    "return": "void",
+    "signature": "public void merge(org.springframework.messaging.Message<?> message, Charset charset,\n\t\t\t\tMimeType contentType, ExtensionRegistry extensionRegistry, Message.Builder builder)",
+    "source_code": "\t\tpublic void merge(org.springframework.messaging.Message<?> message, Charset charset,\n\t\t\t\tMimeType contentType, ExtensionRegistry extensionRegistry, Message.Builder builder)\n\t\t\t\tthrows IOException, MessageConversionException {\n\n\t\t\tif (contentType.isCompatibleWith(APPLICATION_JSON)) {\n\t\t\t\tif (message.getPayload() instanceof byte[] bytes) {\n\t\t\t\t\tthis.parser.merge(new String(bytes, charset), builder);\n\t\t\t\t}\n\t\t\t\telse {\n\t\t\t\t\tthis.parser.merge(message.getPayload().toString(), builder);\n\t\t\t\t}\n\t\t\t}\n\t\t\telse {\n\t\t\t\tthrow new MessageConversionException(\n\t\t\t\t\t\t\"protobuf-java-util does not support parsing \" + contentType);\n\t\t\t}\n\t\t}"
+  },
+  "org.springframework.messaging.converter.<unknown>#print(message,output,contentType,charset)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "message",
+      "output",
+      "contentType",
+      "charset"
+    ],
+    "position": {
+      "column": 1,
+      "line": 282
+    },
+    "return": "void",
+    "signature": "public void print(Message message, OutputStream output, MimeType contentType, Charset charset)",
+    "source_code": "\t\tpublic void print(Message message, OutputStream output, MimeType contentType, Charset charset)\n\t\t\t\tthrows IOException, MessageConversionException {\n\n\t\t\tif (contentType.isCompatibleWith(APPLICATION_JSON)) {\n\t\t\t\tOutputStreamWriter writer = new OutputStreamWriter(output, charset);\n\t\t\t\tthis.printer.appendTo(message, writer);\n\t\t\t\twriter.flush();\n\t\t\t}\n\t\t\telse {\n\t\t\t\tthrow new MessageConversionException(\n\t\t\t\t\t\t\"protobuf-java-util does not support printing \" + contentType);\n\t\t\t}\n\t\t}"
+  }
+}

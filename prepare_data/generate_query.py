@@ -19,8 +19,8 @@ model = os.getenv("OPENAI_API_MODEL", "o1-mini")
 max_entries = 10
 
 # Directories & files
-DIFF_DIR = Path(__file__).resolve().parent.parent / "data" / "diffs"
-OUTPUT_DIR = Path(__file__).resolve().parent.parent / "data" / "queries"
+DIFF_DIR = Path(__file__).resolve().parent.parent / "data_filtered" / "diffs_meaningful"
+OUTPUT_DIR = Path(__file__).resolve().parent.parent / "data_filtered" / "queries"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_FILE = OUTPUT_DIR / "queries_spring_mini.json"
 
@@ -220,7 +220,7 @@ def process_and_generate():
         batch = api_changes[idx : idx + batch_size]
         batch_results = [None] * len(batch)
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
             future_to_idx = {executor.submit(generate_task, entry): i for i, entry in enumerate(batch)}
             for future in concurrent.futures.as_completed(future_to_idx):
                 original_idx = future_to_idx[future]

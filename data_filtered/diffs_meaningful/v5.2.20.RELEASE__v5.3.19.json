@@ -1,0 +1,168 @@
+{
+  "org.springframework.messaging.simp.broker.<unknown>#find(serverState,request)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "serverState",
+      "request"
+    ],
+    "position": {
+      "column": 1,
+      "line": 173
+    },
+    "return": "String>",
+    "signature": "public String> find(ServerState serverState, FindRequest request)",
+    "source_code": "\tpublic MultiValueMap<String, String> find(ServerState serverState, FindRequest request) {\n\t\treturn serverState.registry.findSubscriptionsInternal(request.destination, serverState.findMessage);\n\t}"
+  },
+  "org.springframework.messaging.simp.broker.<unknown>#registerSubscriptions(sessionId,destination)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "sessionId",
+      "destination"
+    ],
+    "position": {
+      "column": 1,
+      "line": 89
+    },
+    "return": "void",
+    "signature": "public void registerSubscriptions(String sessionId, String destination)",
+    "source_code": "\t\tpublic void registerSubscriptions(String sessionId, String destination) {\n\t\t\tif (\"patternSubscriptions\".equals(this.specialization)) {\n\t\t\t\tdestination = \"/**/\" + destination;\n\t\t\t}\n\t\t\tString subscriptionId = \"subscription_\" + this.uniqueIdGenerator.incrementAndGet();\n\t\t\tthis.registry.registerSubscription(subscribeMessage(sessionId, subscriptionId, destination));\n\t\t}"
+  },
+  "org.springframework.messaging.simp.broker.<unknown>#registerUnregister(serverState,request,blackhole)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "serverState",
+      "request",
+      "blackhole"
+    ],
+    "position": {
+      "column": 1,
+      "line": 165
+    },
+    "return": "void",
+    "signature": "public void registerUnregister(ServerState serverState, Requests request, Blackhole blackhole)",
+    "source_code": "\tpublic void registerUnregister(ServerState serverState, Requests request, Blackhole blackhole) {\n\t\tserverState.registry.registerSubscription(request.subscribe);\n\t\tblackhole.consume(serverState.registry.findSubscriptionsInternal(request.findDestination, serverState.findMessage));\n\t\tserverState.registry.unregisterSubscription(request.unsubscribe);\n\t\tblackhole.consume(serverState.registry.findSubscriptionsInternal(request.findDestination, serverState.findMessage));\n\t}"
+  },
+  "org.springframework.web.servlet.handler.<unknown>#afterCompletion(request,response,handler,ex)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "request",
+      "response",
+      "handler",
+      "ex"
+    ],
+    "position": {
+      "column": 1,
+      "line": 256
+    },
+    "return": "void",
+    "signature": "public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,\n\t\t\t@Nullable Exception ex)",
+    "source_code": "\tpublic void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,\n\t\t\t@Nullable Exception ex) throws Exception {\n\n\t\tthis.interceptor.afterCompletion(request, response, handler, ex);\n\t}"
+  },
+  "org.springframework.web.servlet.handler.<unknown>#initPatterns(patterns,parser)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "patterns",
+      "parser"
+    ],
+    "position": {
+      "column": 1,
+      "line": 310
+    },
+    "return": "PatternAdapter[]",
+    "signature": "public PatternAdapter[] initPatterns(@Nullable String[] patterns, @Nullable PathPatternParser parser)",
+    "source_code": "\t\tpublic static PatternAdapter[] initPatterns(\n\t\t\t\t@Nullable String[] patterns, @Nullable PathPatternParser parser) {\n\n\t\t\tif (ObjectUtils.isEmpty(patterns)) {\n\t\t\t\treturn null;\n\t\t\t}\n\t\t\treturn Arrays.stream(patterns)\n\t\t\t\t\t.map(pattern -> new PatternAdapter(pattern, parser))\n\t\t\t\t\t.toArray(PatternAdapter[]::new);\n\t\t}"
+  },
+  "org.springframework.web.servlet.handler.<unknown>#match(path,isPathContainer,pathMatcher)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "path",
+      "isPathContainer",
+      "pathMatcher"
+    ],
+    "position": {
+      "column": 1,
+      "line": 297
+    },
+    "return": "boolean",
+    "signature": "public boolean match(Object path, boolean isPathContainer, PathMatcher pathMatcher)",
+    "source_code": "\t\tpublic boolean match(Object path, boolean isPathContainer, PathMatcher pathMatcher) {\n\t\t\tif (isPathContainer) {\n\t\t\t\tPathContainer pathContainer = (PathContainer) path;\n\t\t\t\tif (this.pathPattern != null) {\n\t\t\t\t\treturn this.pathPattern.matches(pathContainer);\n\t\t\t\t}\n\t\t\t\tString lookupPath = pathContainer.value();\n\t\t\t\tpath = UrlPathHelper.defaultInstance.removeSemicolonContent(lookupPath);\n\t\t\t}\n\t\t\treturn pathMatcher.match(this.patternString, (String) path);\n\t\t}"
+  },
+  "org.springframework.web.servlet.handler.<unknown>#matches(lookupPath,pathMatcher)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Determine a match for the given lookup path.\n\t * @param lookupPath the current request path\n\t * @param pathMatcher a path matcher for path pattern matching\n\t * @return {@code true} if the interceptor applies to the given request path\n\t * @deprecated as of 5.3 in favor of {@link #matches(HttpServletRequest)}\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "lookupPath",
+      "pathMatcher"
+    ],
+    "position": {
+      "column": 1,
+      "line": 218
+    },
+    "return": "boolean",
+    "signature": "public boolean matches(String lookupPath, PathMatcher pathMatcher)",
+    "source_code": "\tpublic boolean matches(String lookupPath, PathMatcher pathMatcher) {\n\t\tpathMatcher = (this.pathMatcher != defaultPathMatcher ? this.pathMatcher : pathMatcher);\n\t\tif (!ObjectUtils.isEmpty(this.excludePatterns)) {\n\t\t\tfor (PatternAdapter adapter : this.excludePatterns) {\n\t\t\t\tif (pathMatcher.match(adapter.getPatternString(), lookupPath)) {\n\t\t\t\t\treturn false;\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tif (ObjectUtils.isEmpty(this.includePatterns)) {\n\t\t\treturn true;\n\t\t}\n\t\tfor (PatternAdapter adapter : this.includePatterns) {\n\t\t\tif (pathMatcher.match(adapter.getPatternString(), lookupPath)) {\n\t\t\t\treturn true;\n\t\t\t}\n\t\t}\n\t\treturn false;\n\t}"
+  },
+  "org.springframework.web.servlet.handler.<unknown>#postHandle(request,response,handler,modelAndView)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "request",
+      "response",
+      "handler",
+      "modelAndView"
+    ],
+    "position": {
+      "column": 1,
+      "line": 249
+    },
+    "return": "void",
+    "signature": "public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,\n\t\t\t@Nullable ModelAndView modelAndView)",
+    "source_code": "\tpublic void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,\n\t\t\t@Nullable ModelAndView modelAndView) throws Exception {\n\n\t\tthis.interceptor.postHandle(request, response, handler, modelAndView);\n\t}"
+  }
+}

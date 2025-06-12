@@ -69,15 +69,15 @@ def parse_java_file(path: Path) -> Dict[str, Dict[str, Any]]:
         fqcn = f"{package_name}.{node.name}" if package_name else node.name
         javadoc = _get_node_doc(_node_position(node), code)
         deprecated = "Deprecated" in node.annotations or _extract_javadoc_deprecated(javadoc)
-        api_items[fqcn] = {
-            "kind": node.__class__.__name__.replace("Declaration", "").lower(),
-            "deprecated": deprecated,
-            "modifiers": sorted(node.modifiers),
-            "signature": _class_signature(node),
-            "position": _node_position(node),
-            "doc": javadoc or "",
-            "source_code": _snippet(_node_position(node)),
-        }
+        # api_items[fqcn] = {
+        #     "kind": node.__class__.__name__.replace("Declaration", "").lower(),
+        #     "deprecated": deprecated,
+        #     "modifiers": sorted(node.modifiers),
+        #     "signature": _class_signature(node),
+        #     "position": _node_position(node),
+        #     "doc": javadoc or "",
+        #     "source_code": _snippet(_node_position(node)),
+        # }
 
         # Members ----------------------------------------------------------------
         for member in node.body:
@@ -86,6 +86,9 @@ def parse_java_file(path: Path) -> Dict[str, Dict[str, Any]]:
                     continue
                 sig_id = _method_stable_id(fqcn, member)
                 docstr = _get_node_doc(_node_position(member), code)
+                source_code = _snippet(_node_position(member))
+                if len(source_code) < 10 or len(member.parameters) < 2:
+                    continue
                 api_items[sig_id] = {
                     "kind": "method",
                     "return": _type_to_str(member.return_type),
@@ -98,45 +101,45 @@ def parse_java_file(path: Path) -> Dict[str, Dict[str, Any]]:
                     "signature": _method_signature(member),
                     "position": _node_position(member),
                     "doc": docstr or "",
-                    "source_code": _snippet(_node_position(member)),
+                    "source_code": source_code,
                 }
-            elif isinstance(member, javalang.tree.ConstructorDeclaration):
-                if not (set(member.modifiers) & PUBLIC_LIKE):
-                    continue
-                sig_id = _ctor_stable_id(fqcn, member)
-                docstr = _get_node_doc(_node_position(member), code)
-                api_items[sig_id] = {
-                    "kind": "constructor",
-                    "params": [_type_to_str(p.type) for p in member.parameters],
-                    "deprecated": (
-                        _has_deprecated_annotation(member.annotations)
-                        or _extract_javadoc_deprecated(docstr)
-                    ),
-                    "modifiers": sorted(member.modifiers),
-                    "signature": _ctor_signature(member, fqcn.split(".")[-1]),
-                    "position": _node_position(member),
-                    "doc": docstr or "",
-                    "source_code": _snippet(_node_position(member)),
-                }
-            elif isinstance(member, javalang.tree.FieldDeclaration):
-                if not (set(member.modifiers) & PUBLIC_LIKE):
-                    continue
-                for declarator in member.declarators:
-                    field_id = f"{fqcn}.{declarator.name}"
-                    docstr = _get_node_doc(_node_position(member), code)
-                    api_items[field_id] = {
-                        "kind": "field",
-                        "type": _type_to_str(member.type),
-                        "deprecated": (
-                            _has_deprecated_annotation(member.annotations)
-                            or _extract_javadoc_deprecated(docstr)
-                        ),
-                        "modifiers": sorted(member.modifiers),
-                        "signature": _field_signature(member, declarator.name),
-                        "position": _node_position(member),
-                        "doc": docstr or "",
-                        "source_code": _snippet(_node_position(member)),
-                    }
+            # elif isinstance(member, javalang.tree.ConstructorDeclaration):
+            #     if not (set(member.modifiers) & PUBLIC_LIKE):
+            #         continue
+            #     sig_id = _ctor_stable_id(fqcn, member)
+            #     docstr = _get_node_doc(_node_position(member), code)
+            #     api_items[sig_id] = {
+            #         "kind": "constructor",
+            #         "params": [_type_to_str(p.type) for p in member.parameters],
+            #         "deprecated": (
+            #             _has_deprecated_annotation(member.annotations)
+            #             or _extract_javadoc_deprecated(docstr)
+            #         ),
+            #         "modifiers": sorted(member.modifiers),
+            #         "signature": _ctor_signature(member, fqcn.split(".")[-1]),
+            #         "position": _node_position(member),
+            #         "doc": docstr or "",
+            #         "source_code": _snippet(_node_position(member)),
+            #     }
+            # elif isinstance(member, javalang.tree.FieldDeclaration):
+            #     if not (set(member.modifiers) & PUBLIC_LIKE):
+            #         continue
+            #     for declarator in member.declarators:
+            #         field_id = f"{fqcn}.{declarator.name}"
+            #         docstr = _get_node_doc(_node_position(member), code)
+            #         api_items[field_id] = {
+            #             "kind": "field",
+            #             "type": _type_to_str(member.type),
+            #             "deprecated": (
+            #                 _has_deprecated_annotation(member.annotations)
+            #                 or _extract_javadoc_deprecated(docstr)
+            #             ),
+            #             "modifiers": sorted(member.modifiers),
+            #             "signature": _field_signature(member, declarator.name),
+            #             "position": _node_position(member),
+            #             "doc": docstr or "",
+            #             "source_code": _snippet(_node_position(member)),
+            #         }
     return api_items
 
 # ---------------------------------------------------------------------------
@@ -255,36 +258,36 @@ def _regex_fallback_parse(code: str, path: Path) -> Dict[str, Dict[str, Any]]:
 
     # First, collect declared type simple names so we can later detect ctors
     declared_types: list[str] = []
-    for m in _CLASS_RE.finditer(code):
-        kind = m.group(2)
-        name = m.group(3)
-        declared_types.append(name)
-        fqcn = f"{package_name}.{name}" if package_name else name
-        api[fqcn] = {
-            "kind": kind.lower(),
-            "deprecated": False,
-            "modifiers": [m.group(1)],
-            "signature": f"{m.group(1)} {kind} {name}",
-            "position": _index_position(code, m.start()),
-            "doc": _get_node_doc(_index_position(code, m.start()), code),
-            "source_code": _capture_block(code.splitlines(), _index_position(code, m.start())["line"]),
-        }
+    # for m in _CLASS_RE.finditer(code):
+    #     kind = m.group(2)
+    #     name = m.group(3)
+    #     declared_types.append(name)
+    #     fqcn = f"{package_name}.{name}" if package_name else name
+    #     api[fqcn] = {
+    #         "kind": kind.lower(),
+    #         "deprecated": False,
+    #         "modifiers": [m.group(1)],
+    #         "signature": f"{m.group(1)} {kind} {name}",
+    #         "position": _index_position(code, m.start()),
+    #         "doc": _get_node_doc(_index_position(code, m.start()), code),
+    #         "source_code": _capture_block(code.splitlines(), _index_position(code, m.start())["line"]),
+    #     }
 
-    # Fields
-    for m in _FIELD_RE.finditer(code):
-        type_str = m.group(2)
-        name = m.group(3)
-        fq_field = f"{package_name}.{name}" if package_name else name
-        api[fq_field] = {
-            "kind": "field",
-            "type": type_str,
-            "deprecated": False,
-            "modifiers": [m.group(1)],
-            "signature": f"{m.group(1)} {type_str} {name}",
-            "position": _index_position(code, m.start()),
-            "doc": _get_node_doc(_index_position(code, m.start()), code),
-            "source_code": _capture_block(code.splitlines(), _index_position(code, m.start())["line"]),
-        }
+    # # Fields
+    # for m in _FIELD_RE.finditer(code):
+    #     type_str = m.group(2)
+    #     name = m.group(3)
+    #     fq_field = f"{package_name}.{name}" if package_name else name
+    #     api[fq_field] = {
+    #         "kind": "field",
+    #         "type": type_str,
+    #         "deprecated": False,
+    #         "modifiers": [m.group(1)],
+    #         "signature": f"{m.group(1)} {type_str} {name}",
+    #         "position": _index_position(code, m.start()),
+    #         "doc": _get_node_doc(_index_position(code, m.start()), code),
+    #         "source_code": _capture_block(code.splitlines(), _index_position(code, m.start())["line"]),
+    #     }
 
     # Methods / constructors
     for m in _METHOD_RE.finditer(code):
@@ -298,23 +301,26 @@ def _regex_fallback_parse(code: str, path: Path) -> Dict[str, Dict[str, Any]]:
 
         fqcn_prefix = package_name + "." if package_name else ""
 
-        if method_name in declared_types:  # constructor
-            sig_id = f"{fqcn_prefix}{method_name}#<init>({','.join(params)})"
-            api[sig_id] = {
-                "kind": "constructor",
-                "params": params,
-                "deprecated": False,
-                "modifiers": [m.group(1)],
-                "signature": f"{m.group(1)} {method_name}({params_raw})",
-                "position": _index_position(code, m.start()),
-                "doc": _get_node_doc(_index_position(code, m.start()), code),
-                "source_code": _capture_block(code.splitlines(), _index_position(code, m.start())["line"]),
-            }
-        else:
+        if method_name not in declared_types:  # constructor
+        #     sig_id = f"{fqcn_prefix}{method_name}#<init>({','.join(params)})"
+        #     api[sig_id] = {
+        #         "kind": "constructor",
+        #         "params": params,
+        #         "deprecated": False,
+        #         "modifiers": [m.group(1)],
+        #         "signature": f"{m.group(1)} {method_name}({params_raw})",
+        #         "position": _index_position(code, m.start()),
+        #         "doc": _get_node_doc(_index_position(code, m.start()), code),
+        #         "source_code": _capture_block(code.splitlines(), _index_position(code, m.start())["line"]),
+        #     }
+        # else:
             # method
             # Need class context to generate id; we approximate by using first declared type in file for now
             owner = declared_types[0] if declared_types else "<unknown>"
             fqcn = f"{fqcn_prefix}{owner}#{method_name}({','.join(params)})"
+            source_code = _capture_block(code.splitlines(), _index_position(code, m.start())["line"])
+            if len(code.splitlines()) < 10 or len(params) < 2:
+                continue
             api[fqcn] = {
                 "kind": "method",
                 "return": ret_type,
@@ -325,7 +331,7 @@ def _regex_fallback_parse(code: str, path: Path) -> Dict[str, Dict[str, Any]]:
                 "signature": f"{m.group(1)} {ret_type} {method_name}({params_raw})",
                 "position": _index_position(code, m.start()),
                 "doc": _get_node_doc(_index_position(code, m.start()), code),
-                "source_code": _capture_block(code.splitlines(), _index_position(code, m.start())["line"]),
+                "source_code": source_code,
             }
 
     return api 
@@ -413,11 +419,13 @@ def _capture_block(lines: List[str], start_line: int) -> str:
 
     # Initialize brace depth based on first line (account for inline opening brace)
     brace_depth += first.count("{") - first.count("}")
+    overall_brace = first.count("{")
 
     i += 1
-    while i < len(lines) and brace_depth > 0:
+    while i < len(lines) and (brace_depth > 0 or overall_brace == 0):
         snippet_lines.append(lines[i])
         brace_depth += lines[i].count("{") - lines[i].count("}")
+        overall_brace += lines[i].count("{")
         i += 1
 
     return "\n".join(snippet_lines)

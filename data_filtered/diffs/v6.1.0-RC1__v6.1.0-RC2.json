@@ -1,0 +1,294 @@
+{
+  "org.springframework.aop.support.<unknown>#isMatch(methodName,mappedName)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Return if the given method name matches the mapped name.\n\t * <p>The default implementation checks for \"xxx*\", \"*xxx\" and \"*xxx*\" matches,\n\t * as well as direct equality. Can be overridden in subclasses.\n\t * @param methodName the method name of the class\n\t * @param mappedName the name in the descriptor\n\t * @return if the names match\n\t * @see org.springframework.util.PatternMatchUtils#simpleMatch(String, String)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "methodName",
+      "mappedName"
+    ],
+    "position": {
+      "column": 1,
+      "line": 97
+    },
+    "return": "boolean",
+    "signature": "protected boolean isMatch(String methodName, String mappedName)",
+    "source_code": "\tprotected boolean isMatch(String methodName, String mappedName) {\n\t\treturn PatternMatchUtils.simpleMatch(mappedName, methodName);\n\t}"
+  },
+  "org.springframework.aop.support.<unknown>#isMatch(methodName,mappedNamePattern)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Determine if the given method name matches the mapped name pattern.\n\t * <p>The default implementation checks for {@code xxx*}, {@code *xxx},\n\t * {@code *xxx*}, and {@code xxx*yyy} matches, as well as direct equality.\n\t * <p>Can be overridden in subclasses.\n\t * @param methodName the method name to check\n\t * @param mappedNamePattern the method name pattern\n\t * @return {@code true} if the method name matches the pattern\n\t * @see PatternMatchUtils#simpleMatch(String, String)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "methodName",
+      "mappedNamePattern"
+    ],
+    "position": {
+      "column": 1,
+      "line": 107
+    },
+    "return": "boolean",
+    "signature": "protected boolean isMatch(String methodName, String mappedNamePattern)",
+    "source_code": "\tprotected boolean isMatch(String methodName, String mappedNamePattern) {\n\t\treturn PatternMatchUtils.simpleMatch(mappedNamePattern, methodName);\n\t}"
+  },
+  "org.springframework.beans.<unknown>#convertForProperty(value,propertyName)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Convert the given value for the specified property to the latter's type.\n\t * <p>This method is only intended for optimizations in a BeanFactory.\n\t * Use the {@code convertIfNecessary} methods for programmatic conversion.\n\t * @param value the value to convert\n\t * @param propertyName the target property\n\t * (note that nested or indexed properties are not supported here)\n\t * @return the new value, possibly the result of type conversion\n\t * @throws TypeMismatchException if type conversion failed\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "value",
+      "propertyName"
+    ],
+    "position": {
+      "column": 1,
+      "line": 179
+    },
+    "return": "Object",
+    "signature": "public Object convertForProperty(@Nullable Object value, String propertyName)",
+    "source_code": "\tpublic Object convertForProperty(@Nullable Object value, String propertyName) throws TypeMismatchException {\n\t\tCachedIntrospectionResults cachedIntrospectionResults = getCachedIntrospectionResults();\n\t\tPropertyDescriptor pd = cachedIntrospectionResults.getPropertyDescriptor(propertyName);\n\t\tif (pd == null) {\n\t\t\tthrow new InvalidPropertyException(getRootClass(), getNestedPath() + propertyName,\n\t\t\t\t\t\"No property '\" + propertyName + \"' found\");\n\t\t}\n\t\tTypeDescriptor td = cachedIntrospectionResults.getTypeDescriptor(pd);\n\t\tif (td == null) {\n\t\t\ttd = cachedIntrospectionResults.addTypeDescriptor(pd, new TypeDescriptor(property(pd)));\n\t\t}\n\t\treturn convertForProperty(propertyName, null, value, td);\n\t}"
+  },
+  "org.springframework.core.io.buffer.<unknown>#read(destination,offset,length)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "destination",
+      "offset",
+      "length"
+    ],
+    "position": {
+      "column": 1,
+      "line": 168
+    },
+    "return": "Netty5DataBuffer",
+    "signature": "public Netty5DataBuffer read(byte[] destination, int offset, int length)",
+    "source_code": "\tpublic Netty5DataBuffer read(byte[] destination, int offset, int length) {\n\t\tthis.buffer.readBytes(destination, offset, length);\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.core.io.buffer.<unknown>#slice(index,length)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": "\t/**\n\t * {@inheritDoc}\n\t * <p><strong>Note</strong> that due to the lack of a {@code slice} method\n\t * in Netty 5's {@link Buffer}, this implementation returns a copy that\n\t * does <strong>not</strong> share its contents with this buffer.\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "index",
+      "length"
+    ],
+    "position": {
+      "column": 1,
+      "line": 264
+    },
+    "return": "DataBuffer",
+    "signature": "public DataBuffer slice(int index, int length)",
+    "source_code": "\tpublic DataBuffer slice(int index, int length) {\n\t\tBuffer copy = this.buffer.copy(index, length);\n\t\treturn new Netty5DataBuffer(copy, this.dataBufferFactory);\n\t}"
+  },
+  "org.springframework.core.io.buffer.<unknown>#write(source,offset,length)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "source",
+      "offset",
+      "length"
+    ],
+    "position": {
+      "column": 1,
+      "line": 186
+    },
+    "return": "Netty5DataBuffer",
+    "signature": "public Netty5DataBuffer write(byte[] source, int offset, int length)",
+    "source_code": "\tpublic Netty5DataBuffer write(byte[] source, int offset, int length) {\n\t\tthis.buffer.writeBytes(source, offset, length);\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.http.<unknown>#setProperties(Map<String,properties)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Setter for the {@link #getProperties() properties map}.\n\t * <p>By default, this is not set.\n\t * <p>When Jackson JSON is present on the classpath, any properties set here\n\t * are rendered as top level key-value pairs in the output JSON. Otherwise,\n\t * they are rendered as a {@code \"properties\"} sub-map.\n\t * @param properties the properties map\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "Map<String",
+      "properties"
+    ],
+    "position": {
+      "column": 1,
+      "line": 228
+    },
+    "return": "void",
+    "signature": "public void setProperties(@Nullable Map<String, Object> properties)",
+    "source_code": "\tpublic void setProperties(@Nullable Map<String, Object> properties) {\n\t\tthis.properties = properties;\n\t}"
+  },
+  "org.springframework.messaging.rsocket.<unknown>#metadata(metadata,mimeType)": {
+    "change": "signature_changed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "metadata",
+      "mimeType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 151
+    },
+    "return": "RequestSpec",
+    "signature": "public RequestSpec metadata(Object metadata, MimeType mimeType)",
+    "source_code": "\t\tpublic RequestSpec metadata(Object metadata, MimeType mimeType) {\n\t\t\tthis.metadataEncoder.metadata(metadata, mimeType);\n\t\t\treturn this;\n\t\t}"
+  },
+  "org.springframework.test.context.aot.<unknown>#registerHints(runtimeHints,mergedConfig,classLoader)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "runtimeHints",
+      "mergedConfig",
+      "classLoader"
+    ],
+    "position": {
+      "column": 1,
+      "line": 68
+    },
+    "return": "void",
+    "signature": "public void registerHints(RuntimeHints runtimeHints, MergedContextConfiguration mergedConfig, ClassLoader classLoader)",
+    "source_code": "\tpublic void registerHints(RuntimeHints runtimeHints, MergedContextConfiguration mergedConfig, ClassLoader classLoader) {\n\t\t// @ContextConfiguration(loader = ...)\n\t\tContextLoader contextLoader = mergedConfig.getContextLoader();\n\t\tif (contextLoader != null) {\n\t\t\tregisterDeclaredConstructors(contextLoader.getClass(), runtimeHints);\n\t\t}\n\n\t\t// @ContextConfiguration(initializers = ...)\n\t\tmergedConfig.getContextInitializerClasses()\n\t\t\t\t.forEach(clazz -> registerDeclaredConstructors(clazz, runtimeHints));\n\n\t\t// @ContextConfiguration(locations = ...)\n\t\tregisterClasspathResources(\"@ContextConfiguration\", mergedConfig.getLocations(), runtimeHints, classLoader);\n\n\t\tfor (PropertySourceDescriptor descriptor : mergedConfig.getPropertySourceDescriptors()) {\n\t\t\t// @TestPropertySource(locations = ...)\n\t\t\tregisterClasspathResources(\"@TestPropertySource\", descriptor.locations(), runtimeHints, classLoader);\n\n\t\t\t// @TestPropertySource(factory = ...)\n\t\t\tClass<?> factoryClass = descriptor.propertySourceFactory();\n\t\t\tif (factoryClass != null) {\n\t\t\t\tregisterDeclaredConstructors(factoryClass, runtimeHints);\n\t\t\t}\n\t\t}\n\n\t\t// @WebAppConfiguration(value = ...)\n\t\tif (webMergedContextConfigurationClass.isInstance(mergedConfig)) {\n\t\t\tString resourceBasePath = null;\n\t\t\ttry {\n\t\t\t\tresourceBasePath = (String) getResourceBasePathMethod.invoke(mergedConfig);\n\t\t\t}\n\t\t\tcatch (Exception ex) {\n\t\t\t\tthrow new IllegalStateException(\n\t\t\t\t\t\t\"Failed to invoke WebMergedContextConfiguration#getResourceBasePath()\", ex);\n\t\t\t}\n\t\t\tregisterClasspathResourceDirectoryStructure(resourceBasePath, runtimeHints);\n\t\t}\n\t}"
+  },
+  "org.springframework.test.web.servlet.setup.<unknown>#addFilter(filter,Map<String,initParams,dispatcherTypes,urlPatterns)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "filter",
+      "Map<String",
+      "initParams",
+      "dispatcherTypes",
+      "urlPatterns"
+    ],
+    "position": {
+      "column": 1,
+      "line": 102
+    },
+    "return": "T",
+    "signature": "public T addFilter(Filter filter, Map<String, String> initParams,\n\t\t\tEnumSet<DispatcherType> dispatcherTypes, String... urlPatterns)",
+    "source_code": "\tpublic <T extends B> T addFilter(\n\t\t\tFilter filter, Map<String, String> initParams,\n\t\t\tEnumSet<DispatcherType> dispatcherTypes, String... urlPatterns) {\n\n\t\tfilter = new MockMvcFilterDecorator(filter, initParams, dispatcherTypes, urlPatterns);\n\t\tthis.filters.add(filter);\n\t\treturn self();\n\t}"
+  },
+  "org.springframework.test.web.servlet.setup.<unknown>#addFilter(filter,filterName,Map<String,initParams,dispatcherTypes,urlPatterns)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "filter",
+      "filterName",
+      "Map<String",
+      "initParams",
+      "dispatcherTypes",
+      "urlPatterns"
+    ],
+    "position": {
+      "column": 1,
+      "line": 102
+    },
+    "return": "T",
+    "signature": "public T addFilter(Filter filter, @Nullable String filterName, Map<String, String> initParams,\n\t\t\tEnumSet<DispatcherType> dispatcherTypes, String... urlPatterns)",
+    "source_code": "\tpublic <T extends B> T addFilter(\n\t\t\tFilter filter, @Nullable String filterName, Map<String, String> initParams,\n\t\t\tEnumSet<DispatcherType> dispatcherTypes, String... urlPatterns) {\n\n\t\tfilter = new MockMvcFilterDecorator(filter, filterName, initParams, dispatcherTypes, urlPatterns);\n\t\tthis.filters.add(filter);\n\t\treturn self();\n\t}"
+  },
+  "org.springframework.web.reactive.resource.<unknown>#setEtagGenerator(Function<Resource,etagGenerator)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Configure a generator function that will be used to create the ETag information,\n\t * given a {@link Resource} that is about to be written to the response.\n\t * <p>This function should return a String that will be used as an argument in\n\t * {@link ServerWebExchange#checkNotModified(String)}, or {@code null} if no value\n\t * can be generated for the given resource.\n\t * @param etagGenerator the HTTP ETag generator function to use.\n\t * @since 6.1\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "Function<Resource",
+      "etagGenerator"
+    ],
+    "position": {
+      "column": 1,
+      "line": 291
+    },
+    "return": "void",
+    "signature": "public void setEtagGenerator(@Nullable Function<Resource, String> etagGenerator)",
+    "source_code": "\tpublic void setEtagGenerator(@Nullable Function<Resource, String> etagGenerator) {\n\t\tthis.etagGenerator = etagGenerator;\n\t}"
+  },
+  "org.springframework.web.servlet.mvc.method.annotation.<unknown>#handleMaxUploadSizeExceededException(ex,headers,status,request)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Customize the handling of any {@link MaxUploadSizeExceededException}.\n\t * <p>This method delegates to {@link #handleExceptionInternal}.\n\t * @param ex the exception to handle\n\t * @param headers the headers to use for the response\n\t * @param status the status code to use for the response\n\t * @param request the current request\n\t * @return a {@code ResponseEntity} for the response to use, possibly\n\t * {@code null} when the response is already committed\n\t * @since 6.1\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "ex",
+      "headers",
+      "status",
+      "request"
+    ],
+    "position": {
+      "column": 1,
+      "line": 455
+    },
+    "return": "ResponseEntity<Object>",
+    "signature": "protected ResponseEntity<Object> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request)",
+    "source_code": "\tprotected ResponseEntity<Object> handleMaxUploadSizeExceededException(\n\t\t\tMaxUploadSizeExceededException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {\n\n\t\treturn handleExceptionInternal(ex, null, headers, status, request);\n\t}"
+  },
+  "org.springframework.web.servlet.resource.<unknown>#setEtagGenerator(Function<Resource,etagGenerator)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Configure a generator function that will be used to create the ETag information,\n\t * given a {@link Resource} that is about to be written to the response.\n\t * <p>This function should return a String that will be used as an argument in\n\t * {@link ServletWebRequest#checkNotModified(String)}, or {@code null} if no value\n\t * can be generated for the given resource.\n\t * @param etagGenerator the HTTP ETag generator function to use.\n\t * @since 6.1\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "Function<Resource",
+      "etagGenerator"
+    ],
+    "position": {
+      "column": 1,
+      "line": 399
+    },
+    "return": "void",
+    "signature": "public void setEtagGenerator(@Nullable Function<Resource, String> etagGenerator)",
+    "source_code": "\tpublic void setEtagGenerator(@Nullable Function<Resource, String> etagGenerator) {\n\t\tthis.etagGenerator = etagGenerator;\n\t}"
+  }
+}

@@ -1,0 +1,273 @@
+{
+  "org.springframework.core.io.buffer.<unknown>#asByteBuffer(index,length)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "index",
+      "length"
+    ],
+    "position": {
+      "column": 1,
+      "line": 356
+    },
+    "return": "ByteBuffer",
+    "signature": "public ByteBuffer asByteBuffer(int index, int length)",
+    "source_code": "\tpublic ByteBuffer asByteBuffer(int index, int length) {\n\t\tcheckIndex(index, length);\n\n\t\tByteBuffer duplicate = this.byteBuffer.duplicate();\n\t\t// Explicit access via Buffer base type for compatibility\n\t\t// with covariant return type on JDK 9's ByteBuffer...\n\t\tBuffer buffer = duplicate;\n\t\tbuffer.position(index);\n\t\tbuffer.limit(index + length);\n\t\treturn duplicate.slice();\n\t}"
+  },
+  "org.springframework.core.io.buffer.<unknown>#indexOf(predicate,fromIndex)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "predicate",
+      "fromIndex"
+    ],
+    "position": {
+      "column": 1,
+      "line": 107
+    },
+    "return": "int",
+    "signature": "public int indexOf(IntPredicate predicate, int fromIndex)",
+    "source_code": "\tpublic int indexOf(IntPredicate predicate, int fromIndex) {\n\t\tAssert.notNull(predicate, \"IntPredicate must not be null\");\n\t\tif (fromIndex < 0) {\n\t\t\tfromIndex = 0;\n\t\t}\n\t\telse if (fromIndex >= this.writePosition) {\n\t\t\treturn -1;\n\t\t}\n\t\tfor (int i = fromIndex; i < this.writePosition; i++) {\n\t\t\tbyte b = this.byteBuffer.get(i);\n\t\t\tif (predicate.test(b)) {\n\t\t\t\treturn i;\n\t\t\t}\n\t\t}\n\t\treturn -1;\n\t}"
+  },
+  "org.springframework.core.io.buffer.<unknown>#lastIndexOf(predicate,fromIndex)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "predicate",
+      "fromIndex"
+    ],
+    "position": {
+      "column": 1,
+      "line": 125
+    },
+    "return": "int",
+    "signature": "public int lastIndexOf(IntPredicate predicate, int fromIndex)",
+    "source_code": "\tpublic int lastIndexOf(IntPredicate predicate, int fromIndex) {\n\t\tAssert.notNull(predicate, \"IntPredicate must not be null\");\n\t\tint i = Math.min(fromIndex, this.writePosition - 1);\n\t\tfor (; i >= 0; i--) {\n\t\t\tbyte b = this.byteBuffer.get(i);\n\t\t\tif (predicate.test(b)) {\n\t\t\t\treturn i;\n\t\t\t}\n\t\t}\n\t\treturn -1;\n\t}"
+  },
+  "org.springframework.core.io.buffer.<unknown>#read(bytes,off,len)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "bytes",
+      "off",
+      "len"
+    ],
+    "position": {
+      "column": 1,
+      "line": 468
+    },
+    "return": "int",
+    "signature": "public int read(byte[] bytes, int off, int len)",
+    "source_code": "\t\tpublic int read(byte[] bytes, int off, int len) throws IOException {\n\t\t\tint available = available();\n\t\t\tif (available > 0) {\n\t\t\t\tlen = Math.min(len, available);\n\t\t\t\tDefaultDataBuffer.this.read(bytes, off, len);\n\t\t\t\treturn len;\n\t\t\t}\n\t\t\telse {\n\t\t\t\treturn -1;\n\t\t\t}\n\t\t}"
+  },
+  "org.springframework.core.io.buffer.<unknown>#read(destination,offset,length)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "destination",
+      "offset",
+      "length"
+    ],
+    "position": {
+      "column": 1,
+      "line": 259
+    },
+    "return": "DefaultDataBuffer",
+    "signature": "public DefaultDataBuffer read(byte[] destination, int offset, int length)",
+    "source_code": "\tpublic DefaultDataBuffer read(byte[] destination, int offset, int length) {\n\t\tAssert.notNull(destination, \"Byte array must not be null\");\n\t\tassertIndex(this.readPosition <= this.writePosition - length,\n\t\t\t\t\"readPosition %d and length %d should be smaller than writePosition %d\",\n\t\t\t\tthis.readPosition, length, this.writePosition);\n\n\t\tByteBuffer tmp = this.byteBuffer.duplicate();\n\t\tint limit = this.readPosition + length;\n\t\t((Buffer) tmp).clear().position(this.readPosition).limit(limit);\n\t\ttmp.get(destination, offset, length);\n\n\t\tthis.readPosition += length;\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.core.io.buffer.<unknown>#slice(index,length)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "index",
+      "length"
+    ],
+    "position": {
+      "column": 1,
+      "line": 332
+    },
+    "return": "DefaultDataBuffer",
+    "signature": "public DefaultDataBuffer slice(int index, int length)",
+    "source_code": "\tpublic DefaultDataBuffer slice(int index, int length) {\n\t\tcheckIndex(index, length);\n\t\tint oldPosition = this.byteBuffer.position();\n\t\t// Explicit access via Buffer base type for compatibility\n\t\t// with covariant return type on JDK 9's ByteBuffer...\n\t\tBuffer buffer = this.byteBuffer;\n\t\ttry {\n\t\t\tbuffer.position(index);\n\t\t\tByteBuffer slice = this.byteBuffer.slice();\n\t\t\t// Explicit cast for compatibility with covariant return type on JDK 9's ByteBuffer\n\t\t\t((Buffer) slice).limit(length);\n\t\t\treturn new SlicedDefaultDataBuffer(slice, this.dataBufferFactory, length);\n\t\t}\n\t\tfinally {\n\t\t\tbuffer.position(oldPosition);\n\t\t}\n\t}"
+  },
+  "org.springframework.core.io.buffer.<unknown>#write(bytes,off,len)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "bytes",
+      "off",
+      "len"
+    ],
+    "position": {
+      "column": 1,
+      "line": 490
+    },
+    "return": "void",
+    "signature": "public void write(byte[] bytes, int off, int len)",
+    "source_code": "\t\tpublic void write(byte[] bytes, int off, int len) throws IOException {\n\t\t\tDefaultDataBuffer.this.write(bytes, off, len);\n\t\t}"
+  },
+  "org.springframework.core.io.buffer.<unknown>#write(source,offset,length)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "source",
+      "offset",
+      "length"
+    ],
+    "position": {
+      "column": 1,
+      "line": 291
+    },
+    "return": "DefaultDataBuffer",
+    "signature": "public DefaultDataBuffer write(byte[] source, int offset, int length)",
+    "source_code": "\tpublic DefaultDataBuffer write(byte[] source, int offset, int length) {\n\t\tAssert.notNull(source, \"Byte array must not be null\");\n\t\tensureCapacity(length);\n\n\t\tByteBuffer tmp = this.byteBuffer.duplicate();\n\t\tint limit = this.writePosition + length;\n\t\t((Buffer) tmp).clear().position(this.writePosition).limit(limit);\n\t\ttmp.put(source, offset, length);\n\n\t\tthis.writePosition += length;\n\t\treturn this;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.<unknown>#getMappingForMethod(method,handlerType)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "method",
+      "handlerType"
+    ],
+    "position": {
+      "column": 1,
+      "line": 274
+    },
+    "return": "CompositeMessageCondition",
+    "signature": "protected CompositeMessageCondition getMappingForMethod(Method method, Class<?> handlerType)",
+    "source_code": "\tprotected CompositeMessageCondition getMappingForMethod(Method method, Class<?> handlerType) {\n\t\tCompositeMessageCondition methodCondition = getCondition(method);\n\t\tif (methodCondition != null) {\n\t\t\tCompositeMessageCondition typeCondition = getCondition(handlerType);\n\t\t\tif (typeCondition != null) {\n\t\t\t\treturn typeCondition.combine(methodCondition);\n\t\t\t}\n\t\t}\n\t\treturn methodCondition;\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.<unknown>#getMatchingMapping(mapping,message)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "mapping",
+      "message"
+    ],
+    "position": {
+      "column": 1,
+      "line": 319
+    },
+    "return": "CompositeMessageCondition",
+    "signature": "protected CompositeMessageCondition getMatchingMapping(CompositeMessageCondition mapping, Message<?> message)",
+    "source_code": "\tprotected CompositeMessageCondition getMatchingMapping(CompositeMessageCondition mapping, Message<?> message) {\n\t\treturn mapping.getMatchingCondition(message);\n\t}"
+  },
+  "org.springframework.messaging.handler.annotation.reactive.<unknown>#handleMatch(mapping,handlerMethod,message)": {
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "protected"
+    ],
+    "params": [
+      "mapping",
+      "handlerMethod",
+      "message"
+    ],
+    "position": {
+      "column": 1,
+      "line": 334
+    },
+    "return": "Mono<Void>",
+    "signature": "protected Mono<Void> handleMatch(CompositeMessageCondition mapping, HandlerMethod handlerMethod, Message<?> message)",
+    "source_code": "\tprotected Mono<Void> handleMatch(\n\t\t\tCompositeMessageCondition mapping, HandlerMethod handlerMethod, Message<?> message) {\n\n\t\tSet<String> patterns = mapping.getCondition(DestinationPatternsMessageCondition.class).getPatterns();\n\t\tif (!CollectionUtils.isEmpty(patterns)) {\n\t\t\tString pattern = patterns.iterator().next();\n\t\t\tRouteMatcher.Route destination = getDestination(message);\n\t\t\tAssert.state(destination != null, \"Missing destination header\");\n\t\t\tMap<String, String> vars = getRouteMatcher().matchAndExtract(pattern, destination);\n\t\t\tif (!CollectionUtils.isEmpty(vars)) {\n\t\t\t\tMessageHeaderAccessor mha = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);\n\t\t\t\tAssert.state(mha != null && mha.isMutable(), \"Mutable MessageHeaderAccessor required\");\n\t\t\t\tmha.setHeader(DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER, vars);\n\t\t\t}\n\t\t}\n\t\treturn super.handleMatch(mapping, handlerMethod, message);\n\t}"
+  },
+  "org.springframework.test.context.util.<unknown>#convertToClasspathResourcePaths(clazz,paths)": {
+    "deprecated": false,
+    "doc": "\t/**\n\t * Convert the supplied paths to classpath resource paths.\n\t *\n\t * <p>For each of the supplied paths:\n\t * <ul>\n\t * <li>A plain path &mdash; for example, {@code \"context.xml\"} &mdash; will\n\t * be treated as a classpath resource that is relative to the package in\n\t * which the specified class is defined.\n\t * <li>A path starting with a slash will be treated as an absolute path\n\t * within the classpath, for example: {@code \"/org/example/schema.sql\"}.\n\t * <li>A path which is prefixed with a URL protocol (e.g.,\n\t * {@link ResourceUtils#CLASSPATH_URL_PREFIX classpath:},\n\t * {@link ResourceUtils#FILE_URL_PREFIX file:}, {@code http:}, etc.) will be\n\t * {@link StringUtils#cleanPath cleaned} but otherwise unmodified.\n\t * </ul>\n\t * @param clazz the class with which the paths are associated\n\t * @param paths the paths to be converted\n\t * @return a new array of converted resource paths\n\t * @see #convertToResources\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "clazz",
+      "paths"
+    ],
+    "position": {
+      "column": 1,
+      "line": 70
+    },
+    "return": "String[]",
+    "signature": "public String[] convertToClasspathResourcePaths(Class<?> clazz, String... paths)",
+    "source_code": "\tpublic static String[] convertToClasspathResourcePaths(Class<?> clazz, String... paths) {\n\t\tString[] convertedPaths = new String[paths.length];\n\t\tfor (int i = 0; i < paths.length; i++) {\n\t\t\tString path = paths[i];\n\t\t\tif (path.startsWith(SLASH)) {\n\t\t\t\tconvertedPaths[i] = ResourceUtils.CLASSPATH_URL_PREFIX + path;\n\t\t\t}\n\t\t\telse if (!ResourcePatternUtils.isUrl(path)) {\n\t\t\t\tconvertedPaths[i] = ResourceUtils.CLASSPATH_URL_PREFIX + SLASH +\n\t\t\t\t\t\tStringUtils.cleanPath(ClassUtils.classPackageAsResourcePath(clazz) + SLASH + path);\n\t\t\t}\n\t\t\telse {\n\t\t\t\tconvertedPaths[i] = StringUtils.cleanPath(path);\n\t\t\t}\n\t\t}\n\t\treturn convertedPaths;\n\t}"
+  },
+  "org.springframework.test.context.util.<unknown>#convertToResourceList(resourceLoader,paths)": {
+    "deprecated": false,
+    "doc": "\t/**\n\t * Convert the supplied paths to a list of {@link Resource} handles using\n\t * the given {@link ResourceLoader}.\n\t * @param resourceLoader the {@code ResourceLoader} to use to convert the paths\n\t * @param paths the paths to be converted\n\t * @return a new list of resources\n\t * @since 4.2\n\t * @see #convertToResources(ResourceLoader, String...)\n\t * @see #convertToClasspathResourcePaths\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "resourceLoader",
+      "paths"
+    ],
+    "position": {
+      "column": 1,
+      "line": 111
+    },
+    "return": "List<Resource>",
+    "signature": "public List<Resource> convertToResourceList(ResourceLoader resourceLoader, String... paths)",
+    "source_code": "\tpublic static List<Resource> convertToResourceList(ResourceLoader resourceLoader, String... paths) {\n\t\treturn stream(resourceLoader, paths).collect(Collectors.toList());\n\t}"
+  },
+  "org.springframework.test.context.util.<unknown>#convertToResources(resourceLoader,paths)": {
+    "deprecated": false,
+    "doc": "\t/**\n\t * Convert the supplied paths to an array of {@link Resource} handles using\n\t * the given {@link ResourceLoader}.\n\t * @param resourceLoader the {@code ResourceLoader} to use to convert the paths\n\t * @param paths the paths to be converted\n\t * @return a new array of resources\n\t * @see #convertToResourceList(ResourceLoader, String...)\n\t * @see #convertToClasspathResourcePaths\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "resourceLoader",
+      "paths"
+    ],
+    "position": {
+      "column": 1,
+      "line": 97
+    },
+    "return": "Resource[]",
+    "signature": "public Resource[] convertToResources(ResourceLoader resourceLoader, String... paths)",
+    "source_code": "\tpublic static Resource[] convertToResources(ResourceLoader resourceLoader, String... paths) {\n\t\treturn stream(resourceLoader, paths).toArray(Resource[]::new);\n\t}"
+  }
+}

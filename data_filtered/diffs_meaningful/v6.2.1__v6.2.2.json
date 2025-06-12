@@ -1,0 +1,43 @@
+{
+  "org.springframework.test.context.bean.override.mockito.<unknown>#createHandlers(overrideAnnotation,testClass)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "overrideAnnotation",
+      "testClass"
+    ],
+    "position": {
+      "column": 1,
+      "line": 58
+    },
+    "return": "List<BeanOverrideHandler>",
+    "signature": "public List<BeanOverrideHandler> createHandlers(Annotation overrideAnnotation, Class<?> testClass)",
+    "source_code": "\tpublic List<BeanOverrideHandler> createHandlers(Annotation overrideAnnotation, Class<?> testClass) {\n\t\tif (!(overrideAnnotation instanceof MockitoBean mockitoBean)) {\n\t\t\tthrow new IllegalStateException(\"\"\"\n\t\t\t\t\tInvalid annotation passed to MockitoBeanOverrideProcessor: \\\n\t\t\t\t\texpected @MockitoBean on test class \"\"\" + testClass.getName());\n\t\t}\n\t\tClass<?>[] types = mockitoBean.types();\n\t\tAssert.state(types.length > 0,\n\t\t\t\t\"The @MockitoBean 'types' attribute must not be empty when declared on a class\");\n\t\tAssert.state(mockitoBean.name().isEmpty() || types.length == 1,\n\t\t\t\t\"The @MockitoBean 'name' attribute cannot be used when mocking multiple types\");\n\t\tList<BeanOverrideHandler> handlers = new ArrayList<>();\n\t\tfor (Class<?> type : types) {\n\t\t\thandlers.add(new MockitoBeanOverrideHandler(ResolvableType.forClass(type), mockitoBean));\n\t\t}\n\t\treturn handlers;\n\t}"
+  },
+  "org.springframework.web.client.<unknown>#handleError(url,method,response)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": "\t/**\n\t * Handle the error in the given response with the given resolved status code\n\t * and extra information providing access to the request URL and HTTP method.\n\t * <p>The default implementation throws:\n\t * <ul>\n\t * <li>{@link HttpClientErrorException} if the status code is in the 4xx\n\t * series, or one of its sub-classes such as\n\t * {@link HttpClientErrorException.BadRequest} and others.\n\t * <li>{@link HttpServerErrorException} if the status code is in the 5xx\n\t * series, or one of its sub-classes such as\n\t * {@link HttpServerErrorException.InternalServerError} and others.\n\t * <li>{@link UnknownHttpStatusCodeException} for error status codes not in the\n\t * {@link HttpStatus} enum range.\n\t * </ul>\n\t * @throws UnknownHttpStatusCodeException in case of an unresolvable status code\n\t * @since 6.2\n\t * @see #handleError(ClientHttpResponse, HttpStatusCode, URI, HttpMethod)\n\t */",
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "url",
+      "method",
+      "response"
+    ],
+    "position": {
+      "column": 1,
+      "line": 138
+    },
+    "return": "void",
+    "signature": "public void handleError(URI url, HttpMethod method, ClientHttpResponse response)",
+    "source_code": "\tpublic void handleError(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {\n\n\t\t// For backwards compatibility try handle(response) first\n\t\tHandleErrorResponseDecorator decorator = new HandleErrorResponseDecorator(response);\n\t\thandleError(decorator);\n\t\tif (decorator.isHandled()) {\n\t\t\treturn;\n\t\t}\n\n\t\thandleError(response, response.getStatusCode(), url, method);\n\t}"
+  }
+}

@@ -15,8 +15,8 @@ def filter_success(records: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
 def main():
     parser = argparse.ArgumentParser(description="Filter successful Spring validation records.")
-    default_input = os.path.join(os.path.dirname(__file__), "..", "data", "codes", "codes_spring_mini.json")
-    default_output = os.path.join(os.path.dirname(__file__), "..", "data", "codes", "codes_spring_success_mini.json")
+    default_input = os.path.join(os.path.dirname(__file__), "..", "data_filtered", "codes", "codes_spring_mini.json")
+    default_output = os.path.join(os.path.dirname(__file__), "..", "data_filtered", "codes", "codes_spring_success_mini.json")
 
     parser.add_argument("--input", "-i", default=default_input, help="Path to input JSON file.")
     parser.add_argument("--output", "-o", default=default_output, help="Path to output JSON file.")

@@ -1,0 +1,87 @@
+{
+  "org.springframework.cache.interceptor.<unknown>#findInCaches(context,cache,key)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "context",
+      "cache",
+      "key"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1046
+    },
+    "return": "Object",
+    "signature": "public Object findInCaches(CacheOperationContext context, Cache cache, Object key)",
+    "source_code": "\t\tpublic Object findInCaches(CacheOperationContext context, Cache cache, Object key) {\n\t\t\tReactiveAdapter adapter = this.registry.getAdapter(context.getMethod().getReturnType());\n\t\t\tif (adapter != null) {\n\t\t\t\tCompletableFuture<?> cachedFuture = cache.retrieve(key);\n\t\t\t\tif (cachedFuture == null) {\n\t\t\t\t\treturn null;\n\t\t\t\t}\n\t\t\t\tif (adapter.isMultiValue()) {\n\t\t\t\t\treturn adapter.fromPublisher(Flux.from(Mono.fromFuture(cachedFuture))\n\t\t\t\t\t\t\t.flatMap(v -> (v instanceof Iterable<?> iv ? Flux.fromIterable(iv) : Flux.just(v))));\n\t\t\t\t}\n\t\t\t\telse {\n\t\t\t\t\treturn adapter.fromPublisher(Mono.fromFuture(cachedFuture));\n\t\t\t\t}\n\t\t\t}\n\t\t\treturn NOT_HANDLED;\n\t\t}"
+  },
+  "org.springframework.cache.interceptor.<unknown>#findInCaches(context,cache,key,invoker,method,contexts)": {
+    "change": "added",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "context",
+      "cache",
+      "key",
+      "invoker",
+      "method",
+      "contexts"
+    ],
+    "position": {
+      "column": 1,
+      "line": 1059
+    },
+    "return": "Object",
+    "signature": "public Object findInCaches(CacheOperationContext context, Cache cache, Object key,\n\t\t\t\tCacheOperationInvoker invoker, Method method, CacheOperationContexts contexts)",
+    "source_code": "\t\tpublic Object findInCaches(CacheOperationContext context, Cache cache, Object key,\n\t\t\t\tCacheOperationInvoker invoker, Method method, CacheOperationContexts contexts) {\n\n\t\t\tReactiveAdapter adapter = this.registry.getAdapter(context.getMethod().getReturnType());\n\t\t\tif (adapter != null) {\n\t\t\t\tCompletableFuture<?> cachedFuture = cache.retrieve(key);\n\t\t\t\tif (cachedFuture == null) {\n\t\t\t\t\treturn null;\n\t\t\t\t}\n\t\t\t\tif (adapter.isMultiValue()) {\n\t\t\t\t\treturn adapter.fromPublisher(Flux.from(\n\t\t\t\t\t\t\tMono.fromFuture(cachedFuture)\n\t\t\t\t\t\t\t\t\t.flatMap(value -> (Mono<?>) evaluate(Mono.just(unwrapCacheValue(value)), invoker, method, contexts)))\n\t\t\t\t\t\t\t.flatMap(v -> (v instanceof Iterable<?> iv ? Flux.fromIterable(iv) : Flux.just(v)))\n\t\t\t\t\t\t\t.switchIfEmpty(Flux.defer(() -> (Flux<?>) evaluate(null, invoker, method, contexts))));\n\t\t\t\t}\n\t\t\t\telse {\n\t\t\t\t\treturn adapter.fromPublisher(Mono.fromFuture(cachedFuture)\n\t\t\t\t\t\t\t.flatMap(value -> (Mono<?>) evaluate(Mono.just(unwrapCacheValue(value)), invoker, method, contexts))\n\t\t\t\t\t\t\t.switchIfEmpty(Mono.defer(() -> (Mono) evaluate(null, invoker, method, contexts))));\n\t\t\t\t}\n\t\t\t}\n\t\t\treturn NOT_HANDLED;\n\t\t}"
+  },
+  "org.springframework.web.client.<unknown>#attribute(name,value)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "name",
+      "value"
+    ],
+    "position": {
+      "column": 1,
+      "line": 355
+    },
+    "return": "RequestBodySpec",
+    "signature": "public RequestBodySpec attribute(String name, Object value)",
+    "source_code": "\t\tpublic RequestBodySpec attribute(String name, Object value) {\n\t\t\tthis.attributes.put(name, value);\n\t\t\treturn this;\n\t\t}"
+  },
+  "org.springframework.web.client.<unknown>#attributes(Consumer<Map<String,attributesConsumer)": {
+    "change": "removed",
+    "deprecated": false,
+    "doc": null,
+    "kind": "method",
+    "modifiers": [
+      "public"
+    ],
+    "params": [
+      "Consumer<Map<String",
+      "attributesConsumer"
+    ],
+    "position": {
+      "column": 1,
+      "line": 361
+    },
+    "return": "RequestBodySpec",
+    "signature": "public RequestBodySpec attributes(Consumer<Map<String, Object>> attributesConsumer)",
+    "source_code": "\t\tpublic RequestBodySpec attributes(Consumer<Map<String, Object>> attributesConsumer) {\n\t\t\tattributesConsumer.accept(this.attributes);\n\t\t\treturn this;\n\t\t}"
+  }
+}
