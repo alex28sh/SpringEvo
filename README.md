@@ -22,6 +22,10 @@ python -m prepare_data.generate_tests
 By default runs model `o1-mini` - set up environment variable `OPENAI_API_MODEL` to run other model
 
 
+### Data filtering 
+I added filtering of changes by only methods with >= 2 input arguments and 10 lines of source code. 
+filter_meaningful_API_changes.py - perform filtering of `meaningful` API changes (by asking LLM to detect them)
+
 ### Data
 All API changes (between subsequent versions of Spring) are collected in `data/diffs` (`data/snapshots` describe the overall functionality by the version). `extractor` module is responsible for obtaining these changes.
 
